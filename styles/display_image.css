@@ -1,0 +1,22 @@
+body {
+  margin:0;
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: column;
+    height:100vh;
+}
+
+.top-fix {
+    background-color: #f1d1b4;
+    padding:0.5em;
+    flex:0 0 auto;
+}
+
+.image-div {
+    background-color: #CDC0B0;
+    text-align: center;
+    overflow:auto;
+    flex:1 1 100vh;
+}

@@ -16,10 +16,12 @@ function slim_header($title="", $extra_args=array())
 {
     global $code_url;
 
-    // Include the slim_header stylesheet
+    // Include the slim_header stylesheet first so others can override it
     if(!isset($extra_args['css_files']))
+    {
         $extra_args['css_files'] = array();
-    $extra_args['css_files'][] = "$code_url/styles/slim_header.css";
+    }
+    array_unshift($extra_args['css_files'], "$code_url/styles/slim_header.css");
 
     output_html_header($title, $extra_args, False);
 
