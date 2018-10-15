@@ -2,6 +2,7 @@
 include_once($relPath.'pg.inc'); // get_pg_catalog_url_for_etext
 include_once($relPath.'maybe_mail.inc');
 include_once($relPath.'forum_interface.inc'); // get_forum_email_address()
+include_once($relPath.'../api/errors.inc'); // throw_sql_error()
 
 function upi_set_t_latest_home_visit( $username, $projectid, $timestamp )
 {
@@ -18,7 +19,7 @@ function upi_set_t_latest_home_visit( $username, $projectid, $timestamp )
 
 function upi_set_t_latest_page_event( $username, $projectid, $timestamp )
 {
-    mysqli_query(DPDatabase::get_connection(), "
+    $sql = "
         INSERT INTO user_project_info
         SET
             username            = '$username',
@@ -26,7 +27,11 @@ function upi_set_t_latest_page_event( $username, $projectid, $timestamp )
             t_latest_page_event = $timestamp
         ON DUPLICATE KEY UPDATE
             t_latest_page_event = $timestamp
-    ") or die(mysqli_error(DPDatabase::get_connection()));
+    ";
+    if(!mysqli_query(DPDatabase::get_connection(), $sql))
+    {
+        throw_sql_error($sql);
+    }
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

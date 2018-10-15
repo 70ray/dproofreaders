@@ -9,8 +9,53 @@ require_login();
 // (User clicked on "Start Proofreading" link or
 // one of the links in "Done" or "In Progress" trays.)
 
-$projectid      = validate_projectID('projectid', @$_GET['projectid']);
-$expected_state = @$_GET['proj_state'];
+/* $_GET from IN PROGRESS/DONE and from 'Edit' links on Images,Diffs screen
+url_for_pi_do_particular_page()
+$projectid, $proj_state, $imagefile, $page_state
+*/
+
+/* $_GET from "Start Proofreading" etc.
+url_for_pi_do_whichever_page()
+$projectid, $proj_state
+*/
+
+$projectid = array_get($_GET, 'projectid', null); // will get validated in AJAX call
+$proj_state = array_get($_GET, 'proj_state', null);
+$page_state = array_get($_GET, 'page_state', null);
+$imagefile  = array_get($_GET, 'imagefile', null);
+
+$header_args = [
+    "css_files" => [
+        "$code_url/styles/proof.css",
+    ],
+    "js_files" => [
+        "$code_url/scripts/api.js",
+        "$code_url/scripts/messages.php",
+        "$code_url/scripts/proof.js",
+    ],
+    "js_data" =>
+        "var projectsUrl = '$projects_url/';
+        var codeUrl = '$code_url/';
+        var apiUrl = '$code_url/api/';
+        var projectID = '$projectid';
+        var projState = '$proj_state';
+        var imageID = '$imagefile';
+        var pageState = '$page_state';"
+];
+
+slim_header(_("Proofreading Interface"), $header_args);
+
+echo "<div class='flex-container'>";
+echo "<div class='image-div'><img id='scanimage' class='middle-align' src='' alt=''></div>";
+echo "<div class='text-div'><textarea id='text_area'></textarea></div>";
+echo "<div class='control-div'>";
+echo "<button type='button' onClick='proofControl.stop();'>Stop Proofreading</button>";
+echo "<button type='button' onClick='proofControl.returnToRound();'>Return Page to round</button>";
+echo "</div>";
+echo "</div>";
+
+
+/*
 
 if (empty($expected_state)) die( "parameter 'proj_state' is empty" );
 
@@ -89,3 +134,4 @@ $frameGet="?" . $_SERVER['QUERY_STRING'];
 <noframes>
 <?php echo _("Your browser currently does not display frames!"); ?>
 </noframes>
+*/

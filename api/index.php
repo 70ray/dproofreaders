@@ -3,7 +3,7 @@ $relPath="../pinc/";
 include_once($relPath.'base.inc');
 include_once('v1.inc');
 header('Content-Type: application/json');
-$path = $_GET["q"];
+$path = $_REQUEST["q"];
 $returnObject = null;
 echo json_encode(api_router($path));
 # ---------------------------------------------------------------------------

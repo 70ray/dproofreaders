@@ -1,0 +1,34 @@
+body {
+  margin:0;
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: column;
+    height:100vh;
+}
+
+.image-div {
+    background-color: #CDC0B0;
+    text-align: center;
+    overflow:auto;
+    flex:1 1 100vh;
+}
+
+.text-div {
+    background-color: #CDC0B0;
+    text-align: center;
+    overflow:auto;
+    flex:1 1 100vh;
+}
+
+#text_area {
+    width: 100%;
+    height: 100%;
+}
+
+.control_div {
+    background-color: #f1d1b4;
+    padding:0.5em;
+    flex:0 0 auto;
+}

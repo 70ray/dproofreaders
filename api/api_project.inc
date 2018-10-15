@@ -1,9 +1,13 @@
 <?php
 $relPath="../pinc/";
 include_once($relPath.'base.inc');
-include_once($relPath.'misc.inc'); // get_enumerated_param html_safe()
+include_once($relPath.'misc.inc'); // html_safe()
+include_once($relPath.'Project.inc');
+include_once($relPath.'project_states.inc'); // project_states_text()
+include_once($relPath.'LPage.inc');
+include_once('errors.inc'); // throw_sql_error
 
-function get_project($projectid)
+function get_project_data($projectid)
 {
     if(!$projectid)
     {
@@ -24,22 +28,22 @@ function get_project($projectid)
         }
     }
     // See if the projectID exists in the projects table
-    $res = mysqli_query(DPDatabase::get_connection(), "
+    $sql = "
         SELECT *
         FROM projects
-        WHERE projectid = '$projectid'");
+        WHERE projectid = '$projectid'";
+    $res = mysqli_query(DPDatabase::get_connection(), $sql);
     if(!$res)
     {
-        $error = _("Database error1:") ." ". mysqli_error(DPDatabase::get_connection());
-        throw new Exception($error);
+        throw_sql_error($sql);
     }
-    $project = mysqli_fetch_assoc($res);
-    if(!$project)
+    $project_data = mysqli_fetch_assoc($res);
+    if(!$project_data)
     {
         $error = sprintf(_("There is no project with projectid '%s'"), $projectid);
         throw new Exception($error);
     }
-    return $project;
+    return $project_data;
 }
 
 function get_project_pages($projectid, $fields)
@@ -50,13 +54,66 @@ function get_project_pages($projectid, $fields)
     }
 
     $query_fields = implode(', ', $fields);
-    $res = mysqli_query(DPDatabase::get_connection(), "SELECT $query_fields FROM $projectid");
+    $sql = "SELECT $query_fields FROM $projectid";
+    $res = mysqli_query(DPDatabase::get_connection(), $sql);
     if(!$res)
     {
-        $error = _("Database error:") ." ". mysqli_error(DPDatabase::get_connection());
-        throw new Exception($error);
+        throw_sql_error($sql);
     }
     return mysqli_fetch_all($res, MYSQLI_ASSOC);
 }
 
+function project_checkoutnextpage($projectid, $proj_state)
+{
+    global $pguser;
+
+    // returns page index (image file name) and changes page state to out
+    // could be a stale link so validate
+//throw new Exception("psc");
+//    $project = new Project(get_project_data($projectid));
+//    validate_state($project, $state);
+    $lpage = get_available_page($projectid, $proj_state, $pguser, $err);
+    if($err)
+    {
+        throw new Exception($error);
+    }
+    return $lpage->imagefile;
+//    return $lpage;
+}
+
+function project_checkoutpage($projectid, $proj_state, $imagefile, $page_state)
+{
+    global $pguser;
+
+    $lpage = get_indicated_LPage($projectid, $proj_state, $imagefile, $page_state, false);
+    $lpage->resume_saved_page($pguser);
+    return array('imageID' => $lpage->imagefile, 'text' => $lpage->get_text());
+}
+
+function project_returnpage($projectid, $proj_state, $imagefile, $page_state)
+{
+    global $pguser;
+
+    $lpage = get_indicated_LPage($projectid, $proj_state, $imagefile, $page_state, false);
+    $lpage->returnToRound($pguser);
+}
+
+/*
+function validate_state($project, $expected_state)
+{
+//throw new Exception("vs");
+    $expected_state_text = project_states_text($expected_state);
+    if (empty($expected_state_text))
+    {
+        throw new Exception("parameter 'proj_state' has a bad value: '$expected_state'");
+    }
+
+    if ($expected_state != $project->state)
+    {
+        $error = sprintf(_('Warning: Project "%1$s" is no longer in state "%2$s"; it is now in state "%3$s".'),
+            $project->nameofwork, $expected_state_text, project_states_text($project->state));
+        throw new Exception($error);
+    }
+}
+*/
 // vim: sw=4 ts=4 expandtab
