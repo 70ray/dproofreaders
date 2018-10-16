@@ -5,6 +5,21 @@ include_once('v1.inc');
 header('Content-Type: application/json');
 $path = $_REQUEST["q"];
 $returnObject = null;
+
+function exception_error_handler( $severity, $message, $file, $line ) 
+{
+    if ( !( error_reporting() & $severity ) ) {
+        // This error code is not included in error_reporting
+        return;
+    }
+    
+    http_response_code(500);
+    return array(
+    "error" => $severity . $message . $file . $line,
+    );
+}
+set_error_handler( "exception_error_handler" );
+
 echo json_encode(api_router($path));
 # ---------------------------------------------------------------------------
 function api_router($path)

@@ -64,11 +64,21 @@ function initProofControl() {
             showImage();
         }*/
 
-        function setup1 (data) {
+        function loadState(data) {
+            pageState = data.pageState;
+        }
+
+        function loadText(data) {
             console.log(data);
+            pageState = data.pageState;
+            textArea.value = data.text;
+        }
+
+        function setup1 (data) {
+            imageID = data.imageID;
             scanImage.src = imageUrl + data.imageID;
             scanImage.alt = data.imageID;
-            textArea.value = data.text;
+            loadText(data);
         }
 
         function toProjectPage () {
@@ -78,10 +88,10 @@ function initProofControl() {
 
 
 //        function setup1(project) {
-        if(!projState) {
+/*        if(!projState) {
             alert("The parameter 'proj_state' is empty");
             return;
-        }
+        }*/
         imageUrl = projectsUrl + projectID + "/";
         if(imageID) {
             // check out a done or inprogress page
@@ -93,12 +103,27 @@ function initProofControl() {
         }
 
         return {
-            returnToRound: function () {
-                $.get(apiUrl, {'q': 'v1/project/' + projectID + "/returnpage/" + imageID, 'proj-state': projState, 'page-state': pageState}, toProjectPage);
+            revertToOriginal: function () {
+                if (confirm(messages.confirmRevertOrig))
+                {
+                    $.post(apiUrl, {'q': 'v1/project/' + projectID + "/reverttoorig/" + imageID, 'proj-state': projState, 'page-state': pageState, 'text-data': textArea.value}, loadText);
+                }
             },
 
-            stop: function () {
-                toProjectPage();
+            saveAsInProgress: function () {
+                    $.post(apiUrl, {'q': 'v1/project/' + projectID + "/saveasinprogress/" + imageID, 'proj-state': projState, 'page-state': pageState, 'text-data': textArea.value}, loadState);
+            },
+
+            returnPage: function () {
+                if (confirm(messages.confirmReturn)) {
+                    $.get(apiUrl, {'q': 'v1/project/' + projectID + "/returnpage/" + imageID, 'proj-state': projState, 'page-state': pageState}, toProjectPage);
+                }
+            },
+
+            stopProof: function () {
+                if (confirm(messages.confirmStop)) {
+                    toProjectPage();
+                }
             }
 
 //        }

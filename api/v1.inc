@@ -39,3 +39,23 @@ function v1_project_returnpage_GET($params)
     $page_state = array_get($_GET, 'page-state', null);
     return project_returnpage($projectID, $proj_state, $imageID, $page_state);
 }
+
+function v1_project_reverttoorig_POST($params)
+{
+    $projectID = $params[0];
+    $imageID = $params[1];
+    $proj_state = array_get($_POST, 'proj-state', null);
+    $page_state = array_get($_POST, 'page-state', null);
+    $text_data = array_get($_POST, 'text-data', null);
+    return project_revert_to_orig($projectID, $proj_state, $imageID, $page_state, $text_data);
+}
+
+function v1_project_saveasinprogress_POST($params)
+{
+    $projectID = $params[0];
+    $imageID = $params[1];
+    $proj_state = array_get($_REQUEST, 'proj-state', null);
+    $page_state = array_get($_REQUEST, 'page-state', null);
+    $text_data = array_get($_REQUEST, 'text-data', null);
+    return project_save_as_in_progress($projectID, $proj_state, $imageID, $page_state, $text_data);
+}

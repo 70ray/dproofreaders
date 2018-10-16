@@ -3,6 +3,7 @@ $relPath="./../../pinc/";
 include_once($relPath.'base.inc');
 include_once($relPath.'Project.inc');
 include_once($relPath.'slim_header.inc');
+include_once($relPath.'proof_components.inc');
 
 require_login();
 
@@ -45,12 +46,14 @@ $header_args = [
 
 slim_header(_("Proofreading Interface"), $header_args);
 
+
 echo "<div class='flex-container'>";
 echo "<div class='image-div'><img id='scanimage' class='middle-align' src='' alt=''></div>";
 echo "<div class='text-div'><textarea id='text_area'></textarea></div>";
 echo "<div class='control-div'>";
-echo "<button type='button' onClick='proofControl.stop();'>Stop Proofreading</button>";
-echo "<button type='button' onClick='proofControl.returnToRound();'>Return Page to round</button>";
+echo_controls();
+//echo "<button type='button' onClick='proofControl.stop();'>Stop Proofreading</button>";
+//echo "<button type='button' onClick='proofControl.returnToRound();'>Return Page to round</button>";
 echo "</div>";
 echo "</div>";
 
