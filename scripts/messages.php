@@ -9,7 +9,7 @@ $messages = [
     'confirmReturn' => _("This will discard all changes you have made on this page. Are you sure you want to return this page to the current round?"),
     'confirmStop' => _('Are you sure you want to stop proofreading?'),
     'confirmRevertOrig' => _("Are you sure you want to revert to the original text for this round?"),
-    'confirmRevertLast' => _("Are you sure you want to revert to your last save?"),
+    'confirmRevertToLastSave' => _("Are you sure you want to revert to your last save?"),
 
 ];
 function make_safe(&$item)

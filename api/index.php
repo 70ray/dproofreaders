@@ -13,7 +13,7 @@ function exception_error_handler( $severity, $message, $file, $line )
         return;
     }
     
-    http_response_code(500);
+    http_response_code(512);
     return array(
     "error" => $severity . $message . $file . $line,
     );
@@ -44,7 +44,10 @@ function api_router($path)
             array_push($params, $element);
         $index += 1;
     }
-    array_push($function_path, $_SERVER['REQUEST_METHOD']);
+    // let path define the resource but last element define the action
+    $action = array_pop($function_path);
+    array_push($params, $action);
+//    array_push($function_path, $_SERVER['REQUEST_METHOD']);
     $function = implode('_', $function_path);
     if(!function_exists($function))
     {

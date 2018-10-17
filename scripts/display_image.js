@@ -75,10 +75,10 @@ function initImageControl() {
             // set the image url
             imageUrl = projectsUrl + project.projectid + "/";
             // get the images
-            $.get(apiUrl, {"q": "v1/project/" + project.projectid + "/pages", "fields": ["image"]}, setup2);
+            $.get(apiUrl, {"q": "v1/project/" + project.projectid + "/listpages", "fields": ["image"]}, setup2);
         }
 
-        $.get(apiUrl, {'q': 'v1/project/' + projectID}, setup1);
+        $.get(apiUrl, {'q': 'v1/project/' + projectID + '/listdata'}, setup1);
 
         return {
             setSize: function () {

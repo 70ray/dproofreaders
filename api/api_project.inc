@@ -8,21 +8,22 @@ include_once($relPath.'LPage.inc');
 include_once('errors.inc'); // throw_sql_error
 include_once('api_page.inc');
 
-function get_project_pages($projectid, $fields)
+function project($project_id, $action)
 {
-    if(!$fields)
+    switch($action)
     {
-        $fields = ['fileid', 'image'];
+    case 'listdata':
+        return get_project_data($project_id);
+    case 'listpages':
+        $fields = array_get($_GET, 'fields', null);
+        if(!$fields)
+        {
+            $fields = ['fileid', 'image'];
+        }
+        return get_project_pages($project_id, $fields);
+    default:
+        break;
     }
-
-    $query_fields = implode(', ', $fields);
-    $sql = "SELECT $query_fields FROM $projectid";
-    $res = mysqli_query(DPDatabase::get_connection(), $sql);
-    if(!$res)
-    {
-        throw_sql_error($sql);
-    }
-    return mysqli_fetch_all($res, MYSQLI_ASSOC);
 }
 
 function page_data($lpage)
@@ -30,55 +31,55 @@ function page_data($lpage)
     return array('imageID' => $lpage->imagefile, 'pageState' => $lpage->page_state, 'text' => $lpage->get_text());
 }
 
-function project_checkoutnextpage($projectid, $proj_state)
+function project_state_action($project_id, $proj_state, $action)
 {
     global $pguser;
 
-    // returns page index (image file name) and changes page state to out
-    // could be a stale link so validate
-    $lpage = get_available_page1($projectid, $proj_state, $pguser, $err);
-    if($err)
+    if('checkoutnextpage' == $action)
     {
-        throw new Exception($error);
+        // returns page index (image file name) and changes page state to out
+        // could be a stale link so validate
+        $lpage = get_available_page1($project_id, $proj_state, $pguser, $err);
+        if($err)
+        {
+            throw new Exception($error);
+        }
+        return page_data($lpage);
     }
-    return page_data($lpage);
 }
 
-function project_checkoutpage($projectid, $proj_state, $imageID, $page_state)
+function project_page_action($project_id, $proj_state, $image_id, $page_state, $action)
 {
     global $pguser;
 
-    $lpage = get_indicated_LPage1($projectid, $proj_state, $imageID, $page_state, false);
-    $lpage->resume_saved_page($pguser);
-    return page_data($lpage);
-}
-
-function project_returnpage($projectid, $proj_state, $imageID, $page_state)
-{
-    global $pguser;
-
-    $lpage = get_indicated_LPage1($projectid, $proj_state, $imageID, $page_state, false);
-    $lpage->returnToRound($pguser);
-}
-
-function project_revert_to_orig($projectid, $proj_state, $imageID, $page_state, $text_data)
-{
-    global $pguser;
-
-    $lpage = get_indicated_LPage1($projectid, $proj_state, $imageID, $page_state, false);
-    $lpage->saveAsInProgress($text_data, $pguser);
-    $lpage->revertToOriginal();
-    return page_data($lpage);
-}
-
-function project_save_as_in_progress($projectid, $proj_state, $imageID, $page_state, $text_data)
-{
-    global $pguser;
-
-    $lpage = get_indicated_LPage1($projectid, $proj_state, $imageID, $page_state, false);
-//throw new Exception("psaip2");
-    $lpage->saveAsInProgress($text_data, $pguser);
-    return array('pageState' => $lpage->page_state);
+    $lpage = get_indicated_LPage1($project_id, $proj_state, $image_id, $page_state, false);
+    switch($action) {
+    case 'checkoutpage':
+        $lpage->resume_saved_page($pguser);
+        return page_data($lpage);
+        break;
+    case 'returnpage':
+        $lpage->returnToRound($pguser);
+        break;
+    case 'reverttoorig':
+        $text_data = array_get($_POST, 'text-data', '');
+        $lpage->saveAsInProgress($text_data, $pguser);
+        $lpage->revertToOriginal();
+        return page_data($lpage);
+    case 'reverttolastsave':
+        $lpage->revertToSaved();
+        return page_data($lpage);
+    case 'saveasinprogress':
+        $text_data = array_get($_POST, 'text-data', '');
+        $lpage->saveAsInProgress($text_data, $pguser);
+        return array('pageState' => $lpage->page_state);
+    case 'saveasdone':
+        $text_data = array_get($_POST, 'text-data', '');
+        $lpage->saveAsDone($text_data, $pguser);
+        break;
+    default:
+        break;
+    }
 }
 
 // vim: sw=4 ts=4 expandtab

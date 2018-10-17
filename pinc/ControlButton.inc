@@ -4,8 +4,7 @@ class ControlButton
 {
     function __construct($handler, $label, $image, $class_name = '', $title = '')
     {
-        $this->type_string = "type='button'";
-        $this->handler_string = "onclick='$handler' ";
+        $this->handler = $handler;
         if($title == '')
         {
             $title = $label;
@@ -33,7 +32,7 @@ class ControlButton
         {
             $class_string = "class='$this->class_names' ";
         }
-        echo "<button type='button' $this->handler_string{$class_string}title='$this->attr_title'>$caption</button>";
+        echo "<button type='button' onclick='$this->handler' {$class_string}title='$this->attr_title'>$caption</button>";
     }
 }
 

@@ -53,6 +53,18 @@ function get_project_data($projectid)
     return $project_data;
 }
 
+function get_project_pages($projectid, $fields)
+{
+    $query_fields = implode(', ', $fields);
+    $sql = "SELECT $query_fields FROM $projectid";
+    $res = mysqli_query(DPDatabase::get_connection(), $sql);
+    if(!$res)
+    {
+        throw_sql_error($sql);
+    }
+    return mysqli_fetch_all($res, MYSQLI_ASSOC);
+}
+
 function validate_state($project, $expected_state)
 {
     if(!$expected_state)
@@ -74,6 +86,18 @@ function validate_state($project, $expected_state)
     }
 }
 
+/* The page logic:
+Pages in a round start out as 'available'.
+'available' -> 'out' when first checked out. (This means it has not yet been saved in the current round).
+'out' -> 'temp' on 'Save as in progress' or 'Revert to original'.
+'out' and 'temp' are not changed by 'resume'(from project page), or 'stop proofreading'.
+'revert to last save' is not available for 'out' state.
+'temp' persists for 'revert to last save' and 'Revert to original'.
+'Revert to original' does a save before reverting.
+for 'save as done', 'out' and 'temp' -> 'saved'.
+for 'return to round', 'out' and 'temp' -> 'available'.
+for 'resume'(from project page) 'saved' -> 'temp'
+*/
 function get_available_page1( $projectid, $proj_state, $pguser, &$err )
 // Returns an LPage, unless no page is available,
 // in which case returns NULL and sets $err.
@@ -210,6 +234,7 @@ function get_available_page1( $projectid, $proj_state, $pguser, &$err )
     {
         throw_sql_error($sql);
     }
+//throw new Exception(print_r(mysqli_fetch_row($res), TRUE));
     $imagefile = mysqli_fetch_row($res)[0];
     if(!$imagefile)
     {

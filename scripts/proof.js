@@ -1,5 +1,5 @@
 /*global document window Image projectsUrl alert codeUrl imageFile messages
- $ apiUrl projectID */
+ $ apiUrl projectID projState imageID pageState confirm */
 
 var proofControl;
 function initProofControl() {
@@ -8,6 +8,21 @@ function initProofControl() {
         var scanImage = document.getElementById("scanimage");
         var textArea = document.getElementById("text_area");
         var imageUrl;
+
+/*        function setRevertButton() {
+            // the page state can only be out or temp
+            // there is a text button and an icon button
+            var revertButtons = document.querySelectorAll(".revert_button");
+            var canRevert = document.getElementById('proofdiv').getAttribute('data-can_revert');
+            var disableButton = ('0' === canRevert)
+                ? true
+                : false;
+            var i = 0;
+            while (i < revertButtons.length) {
+                revertButtons[i].disabled = disableButton;
+                i += 1;
+            }
+        }*/
 /*        var imageArray;
         var currentIndex;
         var maxIndex;
@@ -64,59 +79,79 @@ function initProofControl() {
             showImage();
         }*/
 
-        function loadState(data) {
+        function setPageState(data) {
             pageState = data.pageState;
+            // there is a text button and an icon button
+            var revertButtons = document.querySelectorAll(".revert_button");
+            // must end with 'temp' or 'out'
+            var disableButton = pageState.endsWith("out");
+            var i = 0;
+            while (i < revertButtons.length) {
+                revertButtons[i].disabled = disableButton;
+                i += 1;
+            }
+        }
+
+        function loadState(data) {
+            setPageState(data);
         }
 
         function loadText(data) {
             console.log(data);
-            pageState = data.pageState;
+            setPageState(data);
             textArea.value = data.text;
         }
 
-        function setup1 (data) {
+        function setup1(data) {
+            console.log(data);
             imageID = data.imageID;
             scanImage.src = imageUrl + data.imageID;
             scanImage.alt = data.imageID;
-            loadText(data);
+            setPageState(data);
+            textArea.value = data.text;
         }
 
-        function toProjectPage () {
+        function toProjectPage() {
             window.location.replace(codeUrl + "project.php?id=" + projectID + "&expected_state=" + projState);
         }
 
-
-
-//        function setup1(project) {
-/*        if(!projState) {
-            alert("The parameter 'proj_state' is empty");
-            return;
-        }*/
-        imageUrl = projectsUrl + projectID + "/";
-        if(imageID) {
-            // check out a done or inprogress page
-            $.get(apiUrl, {'q': 'v1/project/' + projectID + "/checkoutpage/" + imageID, 'proj-state': projState, 'page-state': pageState}, setup1);
+        function projectPagePath() {
+            return 'v1/project/' + projectID + "/state/" + projState + "/page/" + imageID + "/state/" + pageState;
         }
-        else {
+
+        imageUrl = projectsUrl + projectID + "/";
+        if (imageID) {
+            // check out a done or inprogress page
+            $.get(apiUrl, {'q': projectPagePath() + "/checkoutpage"}, setup1);
+        } else {
             // checkout a new page
-            $.post(apiUrl, {'q': 'v1/project/' + projectID + "/checkoutnextpage/" + projState}, setup1);
+            $.post(apiUrl, {'q': 'v1/project/' + projectID + "/state/" + projState + "/checkoutnextpage"}, setup1);
         }
 
         return {
             revertToOriginal: function () {
-                if (confirm(messages.confirmRevertOrig))
-                {
-                    $.post(apiUrl, {'q': 'v1/project/' + projectID + "/reverttoorig/" + imageID, 'proj-state': projState, 'page-state': pageState, 'text-data': textArea.value}, loadText);
+                if (confirm(messages.confirmRevertOrig)) {
+                    $.post(apiUrl, {'q': projectPagePath() + "/reverttoorig", 'text-data': textArea.value}, loadText);
+                }
+            },
+
+            revertToLastSave: function () {
+                if (confirm(messages.confirmRevertToLastSave)) {
+                    $.get(apiUrl, {'q': projectPagePath() + "/reverttolastsave"}, loadText);
                 }
             },
 
             saveAsInProgress: function () {
-                    $.post(apiUrl, {'q': 'v1/project/' + projectID + "/saveasinprogress/" + imageID, 'proj-state': projState, 'page-state': pageState, 'text-data': textArea.value}, loadState);
+                $.post(apiUrl, {'q': projectPagePath() + "/saveasinprogress", 'text-data': textArea.value}, loadState);
+            },
+
+            saveAsDone: function () {
+                $.post(apiUrl, {'q': projectPagePath() + "/saveasdone", 'text-data': textArea.value}, toProjectPage);
             },
 
             returnPage: function () {
                 if (confirm(messages.confirmReturn)) {
-                    $.get(apiUrl, {'q': 'v1/project/' + projectID + "/returnpage/" + imageID, 'proj-state': projState, 'page-state': pageState}, toProjectPage);
+                    $.get(apiUrl, {'q': projectPagePath() + "/returnpage"}, toProjectPage);
                 }
             },
 

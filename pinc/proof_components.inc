@@ -7,10 +7,10 @@ function echo_controls()
 
     $proof_buttons = [
         new ControlButton('proofControl.revertToOriginal();', _("Revert to Original Document"), 'bt8.png'),
-/*        new ControlButton('proofControl.revertToLastSave();', _("Revert to Last Save"), 'bt7.png', 'revert_button'),*/
+        new ControlButton('proofControl.revertToLastSave();', _("Revert to Last Save"), 'bt7.png', 'revert_button'),
         new ControlButton('proofControl.saveAsInProgress();', _("Save as 'In Progress'"), 'bt3.png'),
-/*        new SubmitButton('save_and_do_next', '', _("Save as 'Done' & Proofread Next Page"), 'bt2.png'),
-        new SubmitButton('save_as_done', '', _("Save as 'Done'"), 'bt13.png'),*/
+/*        new SubmitButton('save_and_do_next', '', _("Save as 'Done' & Proofread Next Page"), 'bt2.png'),*/
+        new ControlButton('proofControl.saveAsDone();', _("Save as 'Done'"), 'bt13.png'),
         new ControlButton('proofControl.stopProof();', _("Stop Proofreading"), 'bt1.png'),
         new ControlButton('proofControl.returnPage();', _("Return Page to Round"), 'bt15.png'),
 /*        new ControlButton('proofControl.wordCheck();', _("WordCheck"), 'bt16.png'),
