@@ -5,6 +5,7 @@ include_once($relPath.'project_trans.inc');
 include_once($relPath.'site_vars.php');
 include_once($relPath.'stages.inc');
 include_once($relPath.'user_is.inc');
+include_once($relPath.'errors.inc'); // try_query()
 include_once($relPath.'DPage.inc');
 include_once($relPath.'Project.inc');
 include_once($relPath.'page_tally.inc');
@@ -14,14 +15,90 @@ include_once($relPath.'maybe_mail.inc');
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-function get_available_page( $projectid, $proj_state, $pguser, &$err )
+function get_project_data($projectid)
+{
+    if(!$projectid)
+    {
+        throw new Exception(_("No project is specified"));
+    }
+    // Check if $projectid has the form of a valid project ID, either in its
+    // long form (projectID####) or just the project number (####).
+    if (1 != preg_match('/^projectID[0-9a-f]{13}$/', $projectid))
+    {
+        if (1 == preg_match('/^[0-9a-f]{13}$/', $projectid))
+        {
+            $projectid = "projectID$projectid";
+        }
+        else
+        {
+            $error = sprintf(_("'%s' is not a valid projectID."), html_safe($projectid));
+            throw new Exception($error);
+        }
+    }
+    // See if the projectID exists in the projects table
+    $sql = "
+        SELECT *
+        FROM projects
+        WHERE projectid = '$projectid'";
+    $res = try_query($sql);
+    $project_data = mysqli_fetch_assoc($res);
+    if(!$project_data)
+    {
+        $error = sprintf(_("There is no project with projectid '%s'"), $projectid);
+        throw new Exception($error);
+    }
+    return $project_data;
+}
+
+function get_project_pages($projectid, $fields)
+{
+    $query_fields = implode(', ', $fields);
+    $sql = "SELECT $query_fields FROM $projectid";
+    $res = try_query($sql);
+    return mysqli_fetch_all($res, MYSQLI_ASSOC);
+}
+
+function validate_state($project, $expected_state)
+{
+    if(!$expected_state)
+    {
+        throw new Exception(_("No project state is specified"));
+    }
+
+    $expected_state_text = project_states_text($expected_state);
+    if (empty($expected_state_text))
+    {
+        throw new Exception("parameter 'proj_state' has a bad value: '$expected_state'");
+    }
+    $project_state = $project->state;
+    if ($expected_state != $project_state)
+    {
+        $error = sprintf(_('Warning: Project "%1$s" is not in state "%2$s"; it is now in state "%3$s".'),
+            $project->nameofwork, $expected_state_text, project_states_text($project->state));
+        throw new Exception($error);
+    }
+}
+
+// The page logic:
+//Pages in a round start out as 'available'.
+//'available' -> 'out' when first checked out. (This means it has not yet been saved in the current round).
+//'out' -> 'temp' on 'Save as in progress' or 'Revert to original'.
+//'out' and 'temp' are not changed by 'resume'(from project page), or 'stop proofreading'.
+//'revert to last save' is not available for 'out' state.
+//'temp' persists for 'revert to last save' and 'Revert to original'.
+//'Revert to original' does a save before reverting.
+//for 'save as done', 'out' and 'temp' -> 'saved'.
+//for 'return to round', 'out' and 'temp' -> 'available'.
+//for 'resume'(from project page) 'saved' -> 'temp'
+
+function get_available_page( $projectid, $proj_state, $pguser)
 // Returns an LPage, unless no page is available,
-// in which case returns NULL and sets $err.
+// in which case throws an exception.
 {
     global $preceding_proofer_restriction;
     // Make sure project is still in same state.
-    $err = project_continuity_test($projectid, $proj_state, TRUE);
-    if ( $err ) return NULL;
+    $project = new Project(get_project_data($projectid));
+    validate_state($project, $proj_state);
 
     $round = get_Round_for_project_state($proj_state);
 
@@ -30,11 +107,11 @@ function get_available_page( $projectid, $proj_state, $pguser, &$err )
     $order = 'image ASC';
     // but this can be overridden below.
 
-    $project = new Project($projectid);
-
     $err = can_user_get_pages_in_project( $pguser, $project, $round );
-    if ( $err ) return NULL;
-
+    if ($err)
+    {
+        throw new Exception($err);
+    }
     if ( $project->difficulty == 'beginner' and $round->is_a_mentor_round() )
     {
             // For beginner projects in a mentor round,
@@ -123,34 +200,31 @@ function get_available_page( $projectid, $proj_state, $pguser, &$err )
     else
     {
         // The empty/null (i.e., no restriction) case has already been dealt with.
-        die("Bad value for 'preceding_proofer_restriction': '$preceding_proofer_restriction'.");
+        throw new Exception("Bad value for 'preceding_proofer_restriction': '$preceding_proofer_restriction'.");
     }
 
-    // Find page to be proofread.
-    // (It appears that a simultaneous query from someone else would return the same page.)
-    $dbQuery = "
-        SELECT image, state
-        FROM $projectid AS p
-        WHERE $restrictions
-        ORDER BY $order
-        LIMIT 1
-    ";
-    $result = mysqli_query(DPDatabase::get_connection(), $dbQuery);
-    if ($result === FALSE) die(mysqli_error(DPDatabase::get_connection()));
-    $npage = mysqli_fetch_assoc($result);
-    if(!$npage)
+    // Find page to be proofread and update to avoid two people getting the same page
+    $new_state = $round->page_out_state;
+    $timestamp = time();
+    $settings = " state= '$new_state', {$round->time_column_name}=$timestamp, {$round->user_column_name}='$pguser' ";
+    $sql = "
+    UPDATE $projectid
+    SET image = (@imageid := image), $settings
+    WHERE $restrictions
+    ORDER BY $order
+    LIMIT 1";
+
+    $res = try_query($sql);
+    $res = try_query("SELECT @imageid");
+    $imagefile = mysqli_fetch_row($res)[0];
+    if(!$imagefile)
     {
-        $err = _("No more files available for proofreading for this round of the project.");
-        return NULL;
+        throw new Exception(_("No more files are available for proofreading in this round of the project."));
     }
 
-    $imagefile = $npage['image'];
-
-    $lpage = new LPage( $projectid, $imagefile, $npage['state'], 0 );
-
-    $lpage->checkout( $pguser );
-
-    $err = NULL;
+    _log_page_event( $projectid, $imagefile, 'checkout', $pguser, $round, TRUE );
+    _project_adjust_n_available_pages( $projectid, -1 );
+    $lpage = new LPage( $projectid, $imagefile, $new_state, 0 );
     return $lpage;
 }
 
@@ -163,25 +237,24 @@ function get_indicated_LPage(
     $page_state,
     $reverting_to_orig )
 // Returns an LPage, unless the parameters do not correctly identify a page,
-// in which case it aborts.
+// in which case throws exception
 {
     // Make sure project is still in same state.
-    $err = project_continuity_test($projectid, $proj_state, FALSE);
-    if ( $err ) abort($err);
+    $project = new Project(get_project_data($projectid));
+    validate_state($project, $proj_state);
 
-    $res = mysqli_query(DPDatabase::get_connection(), "
+    $sql = "
         SELECT state
         FROM $projectid
         WHERE image='$imagefile'
-    ") or die(mysqli_error(DPDatabase::get_connection()));
-
+    ";
+    $res = try_query($sql);
     $row = mysqli_fetch_row($res);
     if (!$row)
     {
         // This should only happen if they've been tweaking URLs.
         // Or if the page has actually been deleted.
-        $err = _('No such page.');
-        abort($err);
+        throw new Exception(_("No such page '$imagefile'"));
     }
 
     list($current_page_state) = $row;
@@ -191,7 +264,7 @@ function get_indicated_LPage(
         $err = sprintf(
             _('Page %1$s has changed state from %2$s to %3$s, so your request is invalid.'),
             $imagefile, $page_state, $current_page_state );
-        abort($err);
+        throw new Exception($err);
     }
 
     return new LPage($projectid, $imagefile, $page_state, $reverting_to_orig);

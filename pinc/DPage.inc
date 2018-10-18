@@ -3,6 +3,7 @@ include_once($relPath.'site_vars.php');
 include_once($relPath.'stages.inc');
 include_once($relPath.'abort.inc');
 include_once($relPath.'user_project_info.inc');
+include_once($relPath.'errors.inc'); // try_query()
 
 // This file brings together code that accesses the projectID* tables.
 
@@ -544,7 +545,7 @@ function _log_page_event( $projectid, $image, $event_type, $username, $round, $i
 
     $round_id_setting = ( is_null($round) ? 'NULL' : "'$round->id'" );
 
-    mysqli_query(DPDatabase::get_connection(), "
+    try_query("
         INSERT INTO page_events
         SET
             timestamp    = UNIX_TIMESTAMP(),
@@ -553,7 +554,7 @@ function _log_page_event( $projectid, $image, $event_type, $username, $round, $i
             event_type   = '$event_type',
             username     = '$username',
             round_id     = $round_id_setting
-    ") or die(mysqli_error(DPDatabase::get_connection()));
+    ");
 
     if ( $is_prooferly ) // as opposed to a PM-ish or Auto event
     {
@@ -618,11 +619,11 @@ function _project_adjust_n_available_pages( $projectid, $adjustment )
         }
     }
 
-    mysqli_query(DPDatabase::get_connection(), "
+    try_query("
         UPDATE projects
         SET n_available_pages = $expr
         WHERE projectid='$projectid'
-    ") or die(mysqli_error(DPDatabase::get_connection()));
+    ");
 }
 
 function project_recalculate_page_counts( $projectid )

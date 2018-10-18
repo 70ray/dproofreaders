@@ -4,16 +4,16 @@ include_once($relPath.'Project.inc');
 include_once($relPath.'stages.inc'); // can_user_get_pages_in_project()
 include_once($relPath.'RoundDescriptor.inc'); // get_Round_for_project_state() is_a_mentor_round()
 include_once($relPath.'project_states.inc'); // project_states_text()
-include_once('errors.inc'); // throw_sql_error
+include_once($relPath.'errors.inc'); // try_query()
 include_once($relPath.'DPage.inc');
 include_once($relPath.'LPage.inc');
 include_once($relPath.'project_trans.inc');
 include_once($relPath.'site_vars.php');
 include_once($relPath.'user_is.inc');
 include_once($relPath.'page_tally.inc');
-include_once($relPath.'abort.inc');
+//include_once($relPath.'abort.inc');
 include_once($relPath.'maybe_mail.inc');
-
+/*
 function get_project_data($projectid)
 {
     if(!$projectid)
@@ -39,11 +39,7 @@ function get_project_data($projectid)
         SELECT *
         FROM projects
         WHERE projectid = '$projectid'";
-    $res = mysqli_query(DPDatabase::get_connection(), $sql);
-    if(!$res)
-    {
-        throw_sql_error($sql);
-    }
+    $res = try_query($sql);
     $project_data = mysqli_fetch_assoc($res);
     if(!$project_data)
     {
@@ -57,11 +53,7 @@ function get_project_pages($projectid, $fields)
 {
     $query_fields = implode(', ', $fields);
     $sql = "SELECT $query_fields FROM $projectid";
-    $res = mysqli_query(DPDatabase::get_connection(), $sql);
-    if(!$res)
-    {
-        throw_sql_error($sql);
-    }
+    $res = try_query($sql);
     return mysqli_fetch_all($res, MYSQLI_ASSOC);
 }
 
@@ -85,7 +77,7 @@ function validate_state($project, $expected_state)
         throw new Exception($error);
     }
 }
-
+*/
 /* The page logic:
 Pages in a round start out as 'available'.
 'available' -> 'out' when first checked out. (This means it has not yet been saved in the current round).
@@ -98,14 +90,12 @@ for 'save as done', 'out' and 'temp' -> 'saved'.
 for 'return to round', 'out' and 'temp' -> 'available'.
 for 'resume'(from project page) 'saved' -> 'temp'
 */
-function get_available_page1( $projectid, $proj_state, $pguser, &$err )
+function get_available_page1( $projectid, $proj_state, $pguser)
 // Returns an LPage, unless no page is available,
-// in which case returns NULL and sets $err.
+// in which case throws an exception.
 {
     global $preceding_proofer_restriction;
     // Make sure project is still in same state.
-//    $err = project_continuity_test($projectid, $proj_state, TRUE);
-//    if ( $err ) return NULL;
     $project = new Project(get_project_data($projectid));
     validate_state($project, $proj_state);
 
@@ -116,11 +106,11 @@ function get_available_page1( $projectid, $proj_state, $pguser, &$err )
     $order = 'image ASC';
     // but this can be overridden below.
 
-//    $project = new Project($projectid);
-
     $err = can_user_get_pages_in_project( $pguser, $project, $round );
-    if ( $err ) return NULL;
-
+    if ($err)
+    {
+        throw new Exception($err);
+    }
     if ( $project->difficulty == 'beginner' and $round->is_a_mentor_round() )
     {
             // For beginner projects in a mentor round,
@@ -223,18 +213,8 @@ function get_available_page1( $projectid, $proj_state, $pguser, &$err )
     ORDER BY $order
     LIMIT 1";
 
-    $res = mysqli_query(DPDatabase::get_connection(), $sql);
-    if(!$res)
-    {
-        throw_sql_error($sql);
-    }
-
-    $res = mysqli_query(DPDatabase::get_connection(), "SELECT @imageid");
-    if(!$res)
-    {
-        throw_sql_error($sql);
-    }
-//throw new Exception(print_r(mysqli_fetch_row($res), TRUE));
+    $res = try_query($sql);
+    $res = try_query("SELECT @imageid");
     $imagefile = mysqli_fetch_row($res)[0];
     if(!$imagefile)
     {
@@ -244,7 +224,6 @@ function get_available_page1( $projectid, $proj_state, $pguser, &$err )
     _log_page_event( $projectid, $imagefile, 'checkout', $pguser, $round, TRUE );
     _project_adjust_n_available_pages( $projectid, -1 );
     $lpage = new LPage( $projectid, $imagefile, $new_state, 0 );
-    $err = NULL;
     return $lpage;
 }
 
@@ -266,12 +245,7 @@ function get_indicated_LPage1(
         FROM $projectid
         WHERE image='$imagefile'
     ";
-    $res = mysqli_query(DPDatabase::get_connection(), $sql);
-    if(!$res)
-    {
-        throw_sql_error($sql);
-    }
-
+    $res = try_query($sql);
     $row = mysqli_fetch_row($res);
     if (!$row)
     {

@@ -5,8 +5,7 @@ include_once($relPath.'misc.inc'); // html_safe()
 include_once($relPath.'Project.inc');
 include_once($relPath.'project_states.inc'); // project_states_text()
 include_once($relPath.'LPage.inc');
-include_once('errors.inc'); // throw_sql_error
-include_once('api_page.inc');
+//include_once('api_page.inc');
 
 function project($project_id, $action)
 {
@@ -39,11 +38,7 @@ function project_state_action($project_id, $proj_state, $action)
     {
         // returns page index (image file name) and changes page state to out
         // could be a stale link so validate
-        $lpage = get_available_page1($project_id, $proj_state, $pguser, $err);
-        if($err)
-        {
-            throw new Exception($error);
-        }
+        $lpage = get_available_page($project_id, $proj_state, $pguser);
         return page_data($lpage);
     }
 }
@@ -52,7 +47,7 @@ function project_page_action($project_id, $proj_state, $image_id, $page_state, $
 {
     global $pguser;
 
-    $lpage = get_indicated_LPage1($project_id, $proj_state, $image_id, $page_state, false);
+    $lpage = get_indicated_LPage($project_id, $proj_state, $image_id, $page_state, false);
     switch($action) {
     case 'checkoutpage':
         $lpage->resume_saved_page($pguser);
@@ -77,6 +72,11 @@ function project_page_action($project_id, $proj_state, $image_id, $page_state, $
         $text_data = array_get($_POST, 'text-data', '');
         $lpage->saveAsDone($text_data, $pguser);
         break;
+    case 'saveanddonext':
+        $text_data = array_get($_POST, 'text-data', '');
+        $lpage->saveAsDone($text_data, $pguser);
+        $lpage = get_available_page($project_id, $proj_state, $pguser);
+        return page_data($lpage);
     default:
         break;
     }

@@ -2,7 +2,7 @@
 include_once($relPath.'pg.inc'); // get_pg_catalog_url_for_etext
 include_once($relPath.'maybe_mail.inc');
 include_once($relPath.'forum_interface.inc'); // get_forum_email_address()
-include_once($relPath.'../api/errors.inc'); // throw_sql_error()
+include_once($relPath.'errors.inc'); // try_query()
 
 function upi_set_t_latest_home_visit( $username, $projectid, $timestamp )
 {
@@ -28,10 +28,7 @@ function upi_set_t_latest_page_event( $username, $projectid, $timestamp )
         ON DUPLICATE KEY UPDATE
             t_latest_page_event = $timestamp
     ";
-    if(!mysqli_query(DPDatabase::get_connection(), $sql))
-    {
-        throw_sql_error($sql);
-    }
+    try_query($sql);
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

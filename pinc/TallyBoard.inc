@@ -17,6 +17,7 @@
 // -----------------------------------------------------------------------------
 
 include_once($relPath.'misc.inc');
+include_once($relPath.'errors.inc'); // try_query()
 
 // A TallyBoard maintains all tally data (past and present)
 // for a particular combination of tally_name and holder_type.
@@ -73,7 +74,7 @@ class TallyBoard
             intval($holder_id),
             intval($amount),
             intval($amount));
-        mysqli_query(DPDatabase::get_connection(), $sql) or die(mysqli_error(DPDatabase::get_connection()));
+        try_query($sql);
     }
 
     // -------------------------------------------------------------------------

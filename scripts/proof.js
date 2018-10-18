@@ -102,7 +102,7 @@ function initProofControl() {
             textArea.value = data.text;
         }
 
-        function setup1(data) {
+        function loadImageText(data) {
             console.log(data);
             imageID = data.imageID;
             scanImage.src = imageUrl + data.imageID;
@@ -122,10 +122,10 @@ function initProofControl() {
         imageUrl = projectsUrl + projectID + "/";
         if (imageID) {
             // check out a done or inprogress page
-            $.get(apiUrl, {'q': projectPagePath() + "/checkoutpage"}, setup1);
+            $.get(apiUrl, {'q': projectPagePath() + "/checkoutpage"}, loadImageText);
         } else {
             // checkout a new page
-            $.post(apiUrl, {'q': 'v1/project/' + projectID + "/state/" + projState + "/checkoutnextpage"}, setup1);
+            $.post(apiUrl, {'q': 'v1/project/' + projectID + "/state/" + projState + "/checkoutnextpage"}, loadImageText);
         }
 
         return {
@@ -143,6 +143,10 @@ function initProofControl() {
 
             saveAsInProgress: function () {
                 $.post(apiUrl, {'q': projectPagePath() + "/saveasinprogress", 'text-data': textArea.value}, loadState);
+            },
+
+            saveAndDoNext: function () {
+                $.post(apiUrl, {'q': projectPagePath() + "/saveanddonext", 'text-data': textArea.value}, loadImageText);
             },
 
             saveAsDone: function () {
