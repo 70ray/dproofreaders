@@ -1,6 +1,7 @@
 <?php
 $relPath="../pinc/";
 include_once($relPath.'base.inc');
+include_once($relPath.'site_vars.php'); // $utf8_site
 include_once($relPath.'misc.inc'); // html_safe()
 include_once($relPath.'Project.inc');
 include_once($relPath.'project_states.inc'); // project_states_text()
@@ -27,7 +28,14 @@ function project($project_id, $action)
 
 function page_data($lpage)
 {
-    return array('imageID' => $lpage->imagefile, 'pageState' => $lpage->page_state, 'text' => $lpage->get_text());
+    global $utf8_site;
+
+    $text = $lpage->get_text();
+    if(!$utf8_site)
+    {
+        $text = utf8_encode($text);
+    }
+    return array('imageID' => $lpage->imagefile, 'pageState' => $lpage->page_state, 'text' => $text);
 }
 
 function project_state_action($project_id, $proj_state, $action)
@@ -45,9 +53,15 @@ function project_state_action($project_id, $proj_state, $action)
 
 function project_page_action($project_id, $proj_state, $image_id, $page_state, $action)
 {
-    global $pguser;
+    global $pguser, $utf8_site;
 
     $lpage = get_indicated_LPage($project_id, $proj_state, $image_id, $page_state, false);
+    $text_data = array_get($_POST, 'text-data', '');
+    if(!$utf8_site)
+    {
+        $text_data = utf8_decode($text_data);
+    }
+
     switch($action) {
     case 'checkoutpage':
         $lpage->resume_saved_page($pguser);
@@ -57,7 +71,7 @@ function project_page_action($project_id, $proj_state, $image_id, $page_state, $
         $lpage->returnToRound($pguser);
         break;
     case 'reverttoorig':
-        $text_data = array_get($_POST, 'text-data', '');
+//        $text_data = array_get($_POST, 'text-data', '');
         $lpage->saveAsInProgress($text_data, $pguser);
         $lpage->revertToOriginal();
         return page_data($lpage);
@@ -65,15 +79,15 @@ function project_page_action($project_id, $proj_state, $image_id, $page_state, $
         $lpage->revertToSaved();
         return page_data($lpage);
     case 'saveasinprogress':
-        $text_data = array_get($_POST, 'text-data', '');
+//        $text_data = array_get($_POST, 'text-data', '');
         $lpage->saveAsInProgress($text_data, $pguser);
         return array('pageState' => $lpage->page_state);
     case 'saveasdone':
-        $text_data = array_get($_POST, 'text-data', '');
+//        $text_data = array_get($_POST, 'text-data', '');
         $lpage->saveAsDone($text_data, $pguser);
         break;
     case 'saveanddonext':
-        $text_data = array_get($_POST, 'text-data', '');
+//        $text_data = array_get($_POST, 'text-data', '');
         $lpage->saveAsDone($text_data, $pguser);
         $lpage = get_available_page($project_id, $proj_state, $pguser);
         return page_data($lpage);
