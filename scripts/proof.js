@@ -100,6 +100,10 @@ function initProofControl() {
             console.log(data);
             setPageState(data);
             textArea.value = data.text;
+            textArea.focus();
+            textControl.setCaret(0);
+//    console.log(textArea.selectionStart);
+
         }
 
         function loadImageText(data) {
@@ -107,8 +111,7 @@ function initProofControl() {
             imageID = data.imageID;
             scanImage.src = imageUrl + data.imageID;
             scanImage.alt = data.imageID;
-            setPageState(data);
-            textArea.value = data.text;
+            loadText(data);
         }
 
         function toProjectPage() {

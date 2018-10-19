@@ -74,7 +74,7 @@ class CharacterSelector
         {
             if("0" != $char)
             {
-                $actions = " onmouseover='picker.showChar(\"$char\")' onclick='top.insertCharacter(\"$char\")' value='$char'";
+                $actions = " onmouseover='picker.showChar(\"$char\")' onclick='textControl.insertText(\"$char\")' value='$char'";
                 if(array_key_exists($char, $this->char_tooltips))
                 {
                     $actions .= " title='{$this->char_tooltips[$char]}'";

@@ -29,11 +29,14 @@ $imagefile  = array_get($_GET, 'imagefile', null);
 $header_args = [
     "css_files" => [
         "$code_url/styles/proof.css",
+        "$code_url/styles/picker.css",
     ],
     "js_files" => [
         "$code_url/scripts/api.js",
         "$code_url/scripts/messages.php",
         "$code_url/scripts/proof.js",
+        "$code_url/scripts/text_tools.js",
+        "$code_url/scripts/picker.js",
     ],
     "js_data" =>
         "var projectsUrl = '$projects_url/';
