@@ -4,6 +4,7 @@ include_once($relPath.'base.inc');
 include_once($relPath.'Project.inc');
 include_once($relPath.'slim_header.inc');
 include_once($relPath.'proof_components.inc');
+include_once($relPath.'ProofreadingToolbox.inc');
 
 require_login();
 
@@ -52,6 +53,8 @@ echo "<div class='image-div'><img id='scanimage' class='middle-align' src='' alt
 echo "<div class='text-div'><textarea id='text_area'></textarea></div>";
 echo "<div class='control-div'>";
 echo_controls();
+$toolbox = new ProofreadingToolbox();
+$toolbox->render();
 //echo "<button type='button' onClick='proofControl.stop();'>Stop Proofreading</button>";
 //echo "<button type='button' onClick='proofControl.returnToRound();'>Return Page to round</button>";
 echo "</div>";
