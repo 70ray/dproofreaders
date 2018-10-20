@@ -254,7 +254,8 @@ function get_indicated_LPage(
     {
         // This should only happen if they've been tweaking URLs.
         // Or if the page has actually been deleted.
-        throw new Exception(_("No such page '$imagefile'"));
+        $err = sprintf(_("Page '%s' does not exist"), $imagefile);
+        throw new Exception($err);
     }
 
     list($current_page_state) = $row;

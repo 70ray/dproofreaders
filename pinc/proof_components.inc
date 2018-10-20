@@ -47,10 +47,12 @@ function echo_controls()
     echo "</div></div>\n"; // end of Settings dropdown
 
     echo "<div class='dropdown'><button type='button' class='dropdown_button' onclick='proofControl.showMenu(\"proof_menu\", 2);'>", html_safe(_('Menu')), "&nbsp;^</button><div class='proof-menu-content nodisp' id='proof_menu'>\n";*/
+    echo "<div>";
     foreach($proof_buttons as $button)
     {
         $button->draw(false);
     //    echo "<br>\n";
     }
+    echo "</div>";
     /*echo "</div></div>\n"; // end of menu dropdown*/
 }

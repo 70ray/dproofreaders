@@ -51,18 +51,28 @@ class CharacterSelector
         echo "<script>initialCode = '$initial_code';</script>";
 
         echo "\n<div id='char-selector'>";
+        echo "\n<div id='char-blocks' class='float-left'>";
 
-        $selector_row = "";
+//        $selector_row = "";
 // also need a means for installing a subset of available keyboards and enabling a default
+
+        echo "<div id='selector_row'>";
         foreach($keyboards as $keyboard)
         {
             $code = $keyboard["code"];
-            $selector_row .= "<input type='button' id='id_$code' class='selector_button' onclick='picker.enableBoard(\"$code\")' value='$code'>";
+            echo "<input type='button' id='id_$code' class='selector_button' onclick='picker.enableBoard(\"$code\")' value='$code'>";
+        }
+        echo "</div>";
+        foreach($keyboards as $keyboard)
+        {
+            $code = $keyboard["code"];
+//            $selector_row .= "<input type='button' id='id_$code' class='selector_button' onclick='picker.enableBoard(\"$code\")' value='$code'>";
             $this->echo_row("upper $code", $keyboard['upper']);
             $this->echo_row("lower $code", $keyboard['lower']);
         }
-        echo "<div id='selector_row'>$selector_row</div>";
-        echo "<div class='char_box'><input type='text' class='big_text' id='large_char'></div>\n";
+//        echo "<div id='selector_row'>$selector_row</div>";
+        echo "</div>\n";
+        echo "<div class='char_box float-left'><input type='text' class='big_text' id='large_char'></div>\n";
         echo "</div>\n";
     }
 

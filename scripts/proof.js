@@ -84,7 +84,7 @@ function initProofControl() {
             // there is a text button and an icon button
             var revertButtons = document.querySelectorAll(".revert_button");
             // must end with 'temp' or 'out'
-            var disableButton = pageState.endsWith("out");
+            var disableButton = (pageState.slice(-3) === "out");
             var i = 0;
             while (i < revertButtons.length) {
                 revertButtons[i].disabled = disableButton;
@@ -97,17 +97,15 @@ function initProofControl() {
         }
 
         function loadText(data) {
-            console.log(data);
+    console.log(data);
             setPageState(data);
             textArea.value = data.text;
             textArea.focus();
             textControl.setCaret(0);
-//    console.log(textArea.selectionStart);
-
         }
 
         function loadImageText(data) {
-            console.log(data);
+    console.log(data);
             imageID = data.imageID;
             scanImage.src = imageUrl + data.imageID;
             scanImage.alt = data.imageID;
