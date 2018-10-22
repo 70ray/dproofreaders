@@ -1,5 +1,6 @@
 /*global document window Image projectsUrl alert codeUrl imageFile messages
- $ apiUrl projectID projState imageID pageState confirm */
+ $ apiUrl projectID projState imageID pageState confirm textControl picker
+initSplit */
 
 var proofControl;
 function initProofControl() {
@@ -80,18 +81,18 @@ function initProofControl() {
             showImage();
         }*/
 
+        function setupToolbox(isFormatting) {
+            if (!isFormatting) {
+                $(".format-tool", '#tool_box').hide();
+            }
+        }
+
         function setPageState(data) {
             pageState = data.pageState;
-            // there is a text button and an icon button
-            var revertButtons = document.querySelectorAll(".revert_button");
+            // there could be a text button and an icon button
             // must end with 'temp' or 'out'
             var disableButton = (pageState.slice(-3) === "out");
-            var i = 0;
-            while (i < revertButtons.length) {
-                revertButtons[i].disabled = disableButton;
-                i += 1;
-            }
-            splitControl = initSplit(1, 0.5);
+            $(".revert_button").prop("disabled", disableButton);
         }
 
         function loadState(data) {
@@ -107,11 +108,12 @@ function initProofControl() {
         }
 
         function loadImageText(data) {
-//    console.log(data);
+    console.log(data);
             imageID = data.imageID;
             scanImage.src = imageUrl + data.imageID;
             scanImage.alt = data.imageID;
             loadText(data);
+            setupToolbox(data.isFormattingRound);
         }
 
         function toProjectPage() {
@@ -124,6 +126,7 @@ function initProofControl() {
 
         function setup1(data) {
             picker.loadKb(data);
+            splitControl = initSplit(1, 0.5);
             imageUrl = projectsUrl + projectID + "/";
             if (imageID) {
                 // check out a done or inprogress page
@@ -134,6 +137,7 @@ function initProofControl() {
             }
         }
 
+        // do this first because it affects height of toolbox, before split setup
         $.get(apiUrl, {'q': 'v1/project/' + projectID + "/keydata"}, setup1);
 
         return {

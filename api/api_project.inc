@@ -37,7 +37,7 @@ function page_data($lpage)
     {
         $text = utf8_encode($text);
     }
-    return array('imageID' => $lpage->imagefile, 'pageState' => $lpage->page_state, 'text' => $text);
+    return array('imageID' => $lpage->imagefile, 'pageState' => $lpage->page_state, 'text' => $text, 'isFormattingRound' => $lpage->is_formatting_round());
 }
 
 function project_state_action($project_id, $proj_state, $action)

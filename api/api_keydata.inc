@@ -10,8 +10,8 @@ function get_keydata()
     $keyboards = array(
     array(
         'code' => "EU",
-        'upper' => "À Â Ä Æ È É Ê Ë Î Ï Ô Ö Ù Û Ü ß Ç 0",
-        'lower' => "à â ä æ è é ê ë î ï ô ö ù û ü 0 ç ÿ"
+        'upper' => "À Â Ä Æ È É Ê Ë Î Ï Ô Ö Ù Û Ü 0 Ç 0",
+        'lower' => "à â ä æ è é ê ë î ï ô ö ù û ü ß ç ÿ"
         ),
     array(
         'code' =>'¶',

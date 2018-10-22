@@ -37,13 +37,30 @@ class ProofreadingToolbox
     function draw_tool_buttons()
     {
         echo "<div class='float-left'>";
-        draw_tool_button('i', _('Italics'), '<i>i</i>', 'textControl.surroundSelection("<i>","</i>");');
-        draw_tool_button('b', _('Bold'), '<b>B</b>', 'textControl.surroundSelection("<b>","</b>");');
-        draw_tool_button('s', _('Small Caps markup'), '<span style="font-variant: small-caps;">Sc</span>', 'textControl.surroundSelection("<sc>","</sc>");');
-        draw_tool_button('g', _('Gesperrt (spaced out)'), 'g', 'textControl.surroundSelection("<g>","</g>");');
-        draw_tool_button('f', _('Antiqua'), 'f', 'textControl.surroundSelection("<f>","</f>");');
+        draw_tool_button('i', _('Italics'), '<i>i</i>', 'textControl.surroundSelection("<i>","</i>");', 'format-tool');
+        draw_tool_button('b', _('Bold'), '<b>B</b>', 'textControl.surroundSelection("<b>","</b>");', 'format-tool');
+        draw_tool_button('s', _('Small Caps markup'), '<span style="font-variant: small-caps;">Sc</span>', 'textControl.surroundSelection("<sc>","</sc>");', 'format-tool');
+        draw_tool_button('g', _('Gesperrt (spaced out)'), 'g', 'textControl.surroundSelection("<g>","</g>");', 'format-tool');
+        draw_tool_button('f', _('Antiqua'), 'f', 'textControl.surroundSelection("<f>","</f>");', 'format-tool');
+        draw_tool_button('m', _('Remove markup from selection'),"<span style='text-decoration: line-through;'>&lt;x&gt;</span>", 'textControl.transformText("remove_markup");');
+        draw_tool_button('u', _('Uppercase selection'), 'ABC', 'textControl.transformText("upper-case");');
         echo "</div>";
     }
 }
 
+/* 
+        $this->define_tool_button(
+            'title_case',
+            't',
+            _('Title case selection'),
+            'Abc',
+            "transformText('title-case')"
+        );
+        $this->define_tool_button(
+            'lower_case',
+            'l',
+            _('Lowercase selection'),
+            'abc',
+            "transformText('lower-case')"
+*/
 // vim: sw=4 ts=4 expandtab

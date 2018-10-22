@@ -296,6 +296,11 @@ class LPage
 
     // -------------------------------------------------------------------------
 
+    function is_formatting_round()
+    {
+        return is_formatting_round($this->round);
+    }
+
     function can_be_reverted_to_last_save()
     {
         return ( $this->reverting_to_orig==1

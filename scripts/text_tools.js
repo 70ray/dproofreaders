@@ -6,10 +6,37 @@ function initTextControl() {
     "use strict";
     textControl = (function () {
         var textArea = document.getElementById("text_area");
+        var startPos;
+        var endPos;
+        var scrollTop;
+        var theText;
+        var myText;
+
+        function initialise() {
+            startPos = textArea.selectionStart;
+            endPos = textArea.selectionEnd;
+            scrollTop = textArea.scrollTop;
+            theText = textArea.value;
+            myText = theText.substring(startPos, endPos);
+        }
 
         function setCaret(cPos) {
             textArea.selectionStart = cPos;
             textArea.selectionEnd = cPos;
+        }
+
+        function finalise(tagOpen, tagClose) {
+            var subst;
+            if (myText.slice(-1) === " ") { // exclude ending space char, if any
+                subst = tagOpen + myText.slice(0, -1) + tagClose + " ";
+            } else {
+                subst = tagOpen + myText + tagClose;
+            }
+            textArea.value = theText.slice(0, startPos) + subst + theText.slice(endPos);
+            textArea.focus();
+            var cPos = startPos + (tagOpen.length + myText.length + tagClose.length);
+            setCaret(cPos);
+            textArea.scrollTop = scrollTop;
         }
 
         function isFootnoteLabel(label) {
@@ -20,71 +47,111 @@ function initTextControl() {
             return parseInt(label) === label && label > 0;
         }
 
-        // Used when wrapping body text in markup or tags.
-        // Modify the opening and closing tags and body text depending
-        // on the context to make editing easier for the user.
-        // Return updated tags and body.
-        function processText(tagOpen, tagClose, bodyText) {
-            // If there's no selected text:
-            // * Illustration markup may appear w/o a title, so remove the ': '.
-            // * Formatting markup is redundant w/o any content, so don't produce it.
-            if (bodyText === '') {
-                if (tagOpen === '[Illustration: ') {
-                    tagOpen = '[Illustration';
-                } else if (tagOpen[0] === '<') {
-                    tagOpen = '';
-                    tagClose = '';
-                }
-            }
-            // Handle footnote label substitution
-            if (tagOpen === '[Footnote #: ') {
-                // Split the selected text on the first space in the string.
-                // If the first part is a label use it in the opening tag in
-                // place of '#', otherwise remove the ' #' from the opening tag.
-                var label = '';
-                var i = bodyText.indexOf(' ');
-                if (i !== -1) {
-                    var first = bodyText.substr(0, i);
-                    if (isFootnoteLabel(first)) {
-                        label = ' ' + first;
-                        bodyText = bodyText.substr(i + 1);
-                    }
-                }
-                tagOpen = tagOpen.replace(' #', label);
-                // If there's no body text, remove the label entirely.
-                if (bodyText === '') {
-                    tagOpen = tagOpen.replace(': ', '');
-                }
-            }
-            return [tagOpen, tagClose, bodyText];
-        }
 
         function insertTags(tagOpen, tagClose, replace) {
-            var startPos = textArea.selectionStart;
-            var endPos = textArea.selectionEnd;
-            var scrollTop = textArea.scrollTop;
-            var theText = textArea.value;
-            var myText = theText.substring(startPos, endPos);
+            function processText() {
+                // Used when wrapping body text in markup or tags.
+                // Modify the opening and closing tags and body text depending
+                // on the context to make editing easier for the user.
+                // Return updated tags and body.
+                // If there's no selected text:
+                // * Illustration markup may appear w/o a title, so remove the ': '.
+                // * Formatting markup is redundant w/o any content, so don't produce it.
+                if (myText === '') {
+                    if (tagOpen === '[Illustration: ') {
+                        tagOpen = '[Illustration';
+                    } else if (tagOpen[0] === '<') {
+                        tagOpen = '';
+                        tagClose = '';
+                    }
+                }
+                // Handle footnote label substitution
+                if (tagOpen === '[Footnote #: ') {
+                    // Split the selected text on the first space in the string.
+                    // If the first part is a label use it in the opening tag in
+                    // place of '#', otherwise remove the ' #' from the opening tag.
+                    var label = '';
+                    var i = myText.indexOf(' ');
+                    if (i !== -1) {
+                        var first = myText.substr(0, i);
+                        if (isFootnoteLabel(first)) {
+                            label = ' ' + first;
+                            myText = myText.substr(i + 1);
+                        }
+                    }
+                    tagOpen = tagOpen.replace(' #', label);
+                    // If there's no body text, remove the label entirely.
+                    if (myText === '') {
+                        tagOpen = tagOpen.replace(': ', '');
+                    }
+                }
+            }
+
+            initialise();
             if (replace) {
                 myText = '';
             }
-            var subst;
-            var proc = processText(tagOpen, tagClose, myText);
-            tagOpen = proc[0];
-            tagClose = proc[1];
-            myText = proc[2];
+            processText();
+            finalise(tagOpen, tagClose);
+        }
 
-            if (myText.slice(-1) === " ") { // exclude ending space char, if any
-                subst = tagOpen + myText.slice(0, -1) + tagClose + " ";
-            } else {
-                subst = tagOpen + myText + tagClose;
+        function lc_common(str) {
+            var words = str.split(' ');
+            var i;
+            var common_lc_words =
+                    ':At:Under:Near:Upon:By:Of:In:On:For' + // prepositions
+                    ':Is:Was:Are' +    // 'small' verbs
+                    ':But:And:Or' +    // conjunctions
+                    ':A:An:The' +      // articles
+                    ':Am:Pm:Bc:Ad' +   // small caps abbreviations
+                    ':De:Van:La:Le:';  // LOTE
+
+            // Start at i=1 to avoid changing the first word (leave it Titlecased).
+            // E.g. if str is "A Winter's Tale", we don't want to lowercase the "A".
+            for (i = 1; i < words.length; i += 1) {
+                // If the word appears in the :-delimited list above, it should be lower case
+                if (common_lc_words.indexOf(':' + words[i] + ':') !== -1) {
+                    words[i] = words[i].toLowerCase();
+                }
             }
-            textArea.value = theText.slice(0, startPos) + subst + theText.slice(endPos);
-            textArea.focus();
+            return words.join(' ');
+        }
 
-            var cPos = startPos + (tagOpen.length + myText.length + tagClose.length);
-            setCaret(cPos);
-            textArea.scrollTop = scrollTop;
+        function title_case(str) {
+            str = str.toLowerCase();
+            var newStr = '';
+            var i;
+            for (i = 0; i < str.length; i += 1) {
+                // Capitalise the first letter, or anything after a space, newline or period.
+                if (i === 0 || ' \n.'.indexOf(str.charAt(i - 1)) !== -1) {
+                    newStr += str.charAt(i).toUpperCase();
+                } else {
+                    newStr += str.charAt(i);
+                }
+            }
+            newStr = lc_common(newStr);
+            return newStr;
+        }
+
+        function transformText(transformType) {
+            initialise();
+            switch (transformType) {
+            case 'title-case':
+                myText = title_case(myText);
+                break;
+            case 'upper-case':
+                myText = myText.toUpperCase();
+                break;
+            case 'lower-case':
+                myText = myText.toLowerCase();
+                break;
+            case 'remove_markup':
+                myText = myText.replace(/<\/?([ibfg]|sc)>/gi, '');
+                break;
+            default:
+                break;
+            }
+            finalise('', '');
         }
 
         return {
@@ -100,7 +167,9 @@ function initTextControl() {
 
             surroundSelection: function (wOT, wCT) {
                 insertTags(wOT, wCT, false);
-            }
+            },
+
+            transformText: transformText
         };
     }());
 }
