@@ -29,11 +29,13 @@ $imagefile  = array_get($_GET, 'imagefile', null);
 $header_args = [
     "css_files" => [
         "$code_url/styles/proof.css",
+        "$code_url/styles/split_view.css",
         "$code_url/styles/character_selector.css",
     ],
     "js_files" => [
         "$code_url/scripts/api.js",
         "$code_url/scripts/messages.php",
+        "$code_url/scripts/splitControl.js",
         "$code_url/scripts/proof.js",
         "$code_url/scripts/text_tools.js",
         "$code_url/scripts/character_selector.js",
@@ -51,17 +53,19 @@ $header_args = [
 slim_header(_("Proofreading Interface"), $header_args);
 
 
-echo "<div class='flex-container'>";
-echo "<div class='image-div'><img id='scanimage' class='middle-align' src='' alt=''></div>";
-echo "<div class='text-div'><textarea id='text_area'></textarea></div>";
-echo "<div class='control-div'>";
+//echo "<div class='flex-container'>";
+echo "<div id='topbar'></div>";
+echo "<div id='pane_1'><div class='center-align' id='imagedisplay'><img id='scanimage' class='middle-align' src='' alt=''></div></div>";
+echo "<div id='dragbar'></div>";
+echo "<div id='pane_2'><div id = 'proofdiv' class='center-align'><textarea id='text_area'></textarea></div></div>";
+echo "<div id='botbar' class='control-div'>";
 echo_controls();
 $toolbox = new ProofreadingToolbox();
 $toolbox->render();
 //echo "<button type='button' onClick='proofControl.stop();'>Stop Proofreading</button>";
 //echo "<button type='button' onClick='proofControl.returnToRound();'>Return Page to round</button>";
 echo "</div>";
-echo "</div>";
+//echo "</div>";
 
 
 /*

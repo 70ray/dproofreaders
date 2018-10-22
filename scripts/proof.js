@@ -8,7 +8,8 @@ function initProofControl() {
         var scanImage = document.getElementById("scanimage");
         var textArea = document.getElementById("text_area");
         var imageUrl;
-
+        var splitControl;
+//            splitControl = initSplit(1, 0.5);
 /*        function setRevertButton() {
             // the page state can only be out or temp
             // there is a text button and an icon button
@@ -90,6 +91,7 @@ function initProofControl() {
                 revertButtons[i].disabled = disableButton;
                 i += 1;
             }
+            splitControl = initSplit(1, 0.5);
         }
 
         function loadState(data) {
@@ -97,7 +99,7 @@ function initProofControl() {
         }
 
         function loadText(data) {
-    console.log(data);
+//    console.log(data);
             setPageState(data);
             textArea.value = data.text;
             textArea.focus();
@@ -105,7 +107,7 @@ function initProofControl() {
         }
 
         function loadImageText(data) {
-    console.log(data);
+//    console.log(data);
             imageID = data.imageID;
             scanImage.src = imageUrl + data.imageID;
             scanImage.alt = data.imageID;
@@ -120,14 +122,19 @@ function initProofControl() {
             return 'v1/project/' + projectID + "/state/" + projState + "/page/" + imageID + "/state/" + pageState;
         }
 
-        imageUrl = projectsUrl + projectID + "/";
-        if (imageID) {
-            // check out a done or inprogress page
-            $.get(apiUrl, {'q': projectPagePath() + "/checkoutpage"}, loadImageText);
-        } else {
-            // checkout a new page
-            $.post(apiUrl, {'q': 'v1/project/' + projectID + "/state/" + projState + "/checkoutnextpage"}, loadImageText);
+        function setup1(data) {
+            picker.loadKb(data);
+            imageUrl = projectsUrl + projectID + "/";
+            if (imageID) {
+                // check out a done or inprogress page
+                $.get(apiUrl, {'q': projectPagePath() + "/checkoutpage"}, loadImageText);
+            } else {
+                // checkout a new page
+                $.post(apiUrl, {'q': 'v1/project/' + projectID + "/state/" + projState + "/checkoutnextpage"}, loadImageText);
+            }
         }
+
+        $.get(apiUrl, {'q': 'v1/project/' + projectID + "/keydata"}, setup1);
 
         return {
             revertToOriginal: function () {

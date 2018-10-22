@@ -6,7 +6,7 @@ include_once($relPath.'misc.inc'); // html_safe()
 include_once($relPath.'Project.inc');
 include_once($relPath.'project_states.inc'); // project_states_text()
 include_once($relPath.'LPage.inc');
-//include_once('api_page.inc');
+include_once('api_keydata.inc');
 
 function project($project_id, $action)
 {
@@ -21,6 +21,8 @@ function project($project_id, $action)
             $fields = ['fileid', 'image'];
         }
         return get_project_pages($project_id, $fields);
+    case 'keydata':
+        return get_keydata();
     default:
         break;
     }

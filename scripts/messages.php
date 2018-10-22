@@ -10,11 +10,20 @@ $messages = [
     'confirmStop' => _('Are you sure you want to stop proofreading?'),
     'confirmRevertOrig' => _("Are you sure you want to revert to the original text for this round?"),
     'confirmRevertToLastSave' => _("Are you sure you want to revert to your last save?"),
-
 ];
+
+$key_titles = [
+    '¶' => _('pilcrow'),
+    '°' => _('degree'),
+    'º' => _('masculine ordinal'),
+    '·' => _('mid-dot'),
+];
+
 function make_safe(&$item)
 {
     $item = javascript_safe($item);
 }
 array_walk($messages, 'make_safe');
+array_walk($key_titles, 'make_safe');
 echo "var messages = ",  json_encode($messages);
+echo "\nvar keyTitles = ",  json_encode($key_titles);

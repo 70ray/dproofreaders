@@ -1,0 +1,32 @@
+/* no border or margin in here, if there is no top bar we don't want it to
+take up any space */
+#topbar {
+    position:absolute;
+    left: 0;
+    top:0;
+    width:100%;
+}
+
+#pane_1 {
+    position:absolute;
+    left: 0;
+    top:0;
+    overflow:auto
+}
+
+#dragbar {
+    position:absolute;
+    background-color:gray;
+}
+
+#pane_2 {
+    position:absolute;
+    right:0;
+}
+
+#botbar {
+    position: absolute;
+    bottom:0;
+    left:0;
+    width:100%;
+}
