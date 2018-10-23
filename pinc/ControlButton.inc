@@ -35,9 +35,3 @@ class ControlButton
         echo "<button type='button' onclick='$this->handler' {$class_string}title='$this->attr_title'>$caption</button>";
     }
 }
-
-function draw_class_button($class, $handler, $label, $image)
-{
-    $label = attr_safe($label);
-    echo "<button type='button' onclick='$handler' class='$class image-button' title='$label'><img src='gfx/$image' class='middle-align' alt='$label'></button>";
-}

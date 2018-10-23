@@ -4,6 +4,10 @@ include_once($relPath.'ControlButton.inc');
 function echo_controls()
 {
 //    global $code_url, $userP;
+    $split_control_buttons = [
+        new ControlButton('proofControl.setSplit(1);', _('Switch to Vertical'), 'bt4.png', 'h_split'),
+        new ControlButton('proofControl.setSplit(0);', _('Switch to Horizontal'), 'bt5.png', 'v_split')
+    ];
 
     $proof_buttons = [
         new ControlButton('proofControl.revertToOriginal();', _("Revert to Original Document"), 'bt8.png'),
@@ -48,6 +52,10 @@ function echo_controls()
 
     echo "<div class='dropdown'><button type='button' class='dropdown_button' onclick='proofControl.showMenu(\"proof_menu\", 2);'>", html_safe(_('Menu')), "&nbsp;^</button><div class='proof-menu-content nodisp' id='proof_menu'>\n";*/
     echo "<div>";
+    foreach($split_control_buttons as $button)
+    {
+        $button->draw(true);
+    }
     foreach($proof_buttons as $button)
     {
         $button->draw(false);

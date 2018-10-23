@@ -25,5 +25,5 @@ function make_safe(&$item)
 }
 array_walk($messages, 'make_safe');
 array_walk($key_titles, 'make_safe');
-echo "var messages = ",  json_encode($messages);
-echo "\nvar keyTitles = ",  json_encode($key_titles);
+echo "var messages = ",  json_encode($messages), ";\n";
+echo "var keyTitles = ",  json_encode($key_titles), ";\n";

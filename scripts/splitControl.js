@@ -48,7 +48,6 @@ function initSplit(verticalSplit, splitRatio) {
         var base; // edge of splitttable area
         pane1.style.top = toppx;
         pane2.style.bottom = botpx;
-    console.log("botpx", botpx);
         if (verticalSplit) {
             range = winWidth;
             base = 0;

@@ -2,12 +2,6 @@ body {
   margin:0;
 }
 
-.flex-container {
-    display: flex;
-    flex-direction: column;
-    height:100vh;
-}
-
 .image-div {
     background-color: #CDC0B0;
     text-align: center;
@@ -38,7 +32,11 @@ textarea {
     border: 0;
 }
 
-.control_div {
-    background-color: #f1d1b4;
-    padding:0.5em;
+.control-div {
+    background-color: Bisque;
+    padding-left:0.5em;
+}
+
+.image-button {
+    padding:0;
 }

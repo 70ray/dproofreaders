@@ -30,7 +30,7 @@ $header_args = [
     "css_files" => [
         "$code_url/styles/proof.css",
         "$code_url/styles/split_view.css",
-        "$code_url/styles/character_selector.css",
+        "$code_url/styles/toolbox.css",
     ],
     "js_files" => [
         "$code_url/scripts/api.js",
@@ -52,8 +52,6 @@ $header_args = [
 
 slim_header(_("Proofreading Interface"), $header_args);
 
-
-//echo "<div class='flex-container'>";
 echo "<div id='topbar'></div>";
 echo "<div id='pane_1'><div class='center-align' id='imagedisplay'><img id='scanimage' class='middle-align' src='' alt=''></div></div>";
 echo "<div id='dragbar'></div>";

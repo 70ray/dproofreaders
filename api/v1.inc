@@ -1,5 +1,6 @@
 <?php
 include_once('api_project.inc');
+include_once('api_settings.inc');
 // DP API v1
 function v1_project($params)
 {
@@ -32,4 +33,11 @@ function v1_project_state_page_state($params)
     $page_state = $params[3];
     $action = $params[4];
     return project_page_action($projectID, $proj_state, $imageID, $page_state, $action);
+}
+
+function v1_settings($params)
+{
+    $type = $params[0];
+    $action = $params[1];
+    return settings($type, $action);
 }

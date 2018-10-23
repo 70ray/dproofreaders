@@ -11,75 +11,6 @@ function initProofControl() {
         var imageUrl;
         var splitControl;
 //            splitControl = initSplit(1, 0.5);
-/*        function setRevertButton() {
-            // the page state can only be out or temp
-            // there is a text button and an icon button
-            var revertButtons = document.querySelectorAll(".revert_button");
-            var canRevert = document.getElementById('proofdiv').getAttribute('data-can_revert');
-            var disableButton = ('0' === canRevert)
-                ? true
-                : false;
-            var i = 0;
-            while (i < revertButtons.length) {
-                revertButtons[i].disabled = disableButton;
-                i += 1;
-            }
-        }*/
-/*        var imageArray;
-        var currentIndex;
-        var maxIndex;
-        var selector = document.getElementById("jumpto");
-        var prevButton = document.getElementById('prev-button');
-        var nextButton = document.getElementById('next-button');
-        var img = new Image();
-
-        function prefetch() {
-            // the images get saved in the browser cache
-            if (currentIndex > 0) {
-                img.src = imageUrl + imageArray[currentIndex - 1];
-            }
-            if (currentIndex < maxIndex) {
-                img.src = imageUrl + imageArray[currentIndex + 1];
-            }
-        }
-
-        function showImage() {
-            prevButton.disabled = (0 === currentIndex);
-            nextButton.disabled = (maxIndex === currentIndex);
-            var imgFile = imageArray[currentIndex];
-            scanImage.src = imageUrl + imgFile;
-            scanImage.alt = imgFile;
-        }
-
-        function setup2(pages) {
-            imageArray = [];
-            pages.forEach(function (item) {
-                imageArray.push(item.image);
-            });
-            if (imageArray.length === 0) {
-                prevButton.disabled = true;
-                nextButton.disabled = true;
-                alert(messages.noImages);
-                return;
-            }
-            // populate image selector
-            imageArray.forEach(function (image) {
-                var opt = document.createElement("option");
-                opt.value = image;
-                opt.text = image;
-                selector.add(opt);
-            });
-            currentIndex = imageArray.indexOf(imageFile);
-            if (currentIndex < 0) {
-                alert(messages.absentImage.replace("%s", imageFile));
-                currentIndex = 0;
-                imageFile = imageArray[0];
-            }
-            selector.selectedIndex = currentIndex;
-            maxIndex = imageArray.length - 1;
-            scanImage.addEventListener("load", prefetch);
-            showImage();
-        }*/
 
         function setupToolbox(isFormatting) {
             if (!isFormatting) {
@@ -124,9 +55,11 @@ function initProofControl() {
             return 'v1/project/' + projectID + "/state/" + projState + "/page/" + imageID + "/state/" + pageState;
         }
 
-        function setup1(data) {
-            picker.loadKb(data);
-            splitControl = initSplit(1, 0.5);
+        function setup2(data) {
+            console.log(data);
+            var vSplit = data.split;
+            splitControl = initSplit(vSplit, 0.5);
+            splitButtonsSetup(vSplit)
             imageUrl = projectsUrl + projectID + "/";
             if (imageID) {
                 // check out a done or inprogress page
@@ -137,10 +70,34 @@ function initProofControl() {
             }
         }
 
-        // do this first because it affects height of toolbox, before split setup
+        function setup1(data) {
+            console.log(data);
+            picker.loadKb(data);
+            $.get(apiUrl, {'q': 'v1/settings/proofing/get'}, setup2);
+        }
+
+        function splitButtonsSetup(mode) // 1=vertical, 0=horizontal 
+        {
+            var vButton = $(".v_split", ".control-div");
+            var hButton = $(".h_split", ".control-div");
+            if(mode) {
+                vButton.show();
+                hButton.hide();
+            } else {
+                vButton.hide();
+                hButton.show();
+            }
+        }
+
+        // get key datat first because it affects height of toolbox, before split setup
         $.get(apiUrl, {'q': 'v1/project/' + projectID + "/keydata"}, setup1);
 
         return {
+            setSplit: function (mode) {
+                splitButtonsSetup(mode);
+                splitControl.setSplit(mode);
+            },
+
             revertToOriginal: function () {
                 if (confirm(messages.confirmRevertOrig)) {
                     $.post(apiUrl, {'q': projectPagePath() + "/reverttoorig", 'text-data': textArea.value}, loadText);
@@ -176,51 +133,6 @@ function initProofControl() {
                     toProjectPage();
                 }
             }
-
-//        }
-
-/*            // set the return link
-            var returnLink = document.getElementById('return-link');
-            if (returnLink) {
-                returnLink.href = codeUrl + "project.php?id=" + project.projectid;
-                returnLink.innerHTML = messages.returnToProject.replace("%s", project.nameofwork);
-            }
-            // set the image url
-            imageUrl = projectsUrl + project.projectid + "/";
-            // get the images
-            $.get(apiUrl, {"q": "v1/project/" + project.projectid + "/pages", "fields": ["image"]}, setup2);
-        }*/
-
-//        $.get(apiUrl, {'q': 'v1/project/' + projectID}, setup1);
-
-/*        return {
-            setSize: function () {
-                var percent = parseInt(document.getElementById("percent").value);
-                if ((10 < percent) && (percent < 1000)) {
-                    scanImage.style.width = (10 * percent) + 'px';
-                }
-            },
-
-            selectImage: function (selector) {
-                currentIndex = selector.selectedIndex;
-                showImage();
-            },
-
-            prevImage: function () {
-                if (currentIndex > 0) {
-                    currentIndex -= 1;
-                    selector.selectedIndex = currentIndex;
-                    showImage();
-                }
-            },
-
-            nextImage: function () {
-                if (currentIndex < maxIndex) {
-                    currentIndex += 1;
-                    selector.selectedIndex = currentIndex;
-                    showImage();
-                }
-            }*/
         };
     }());
 }

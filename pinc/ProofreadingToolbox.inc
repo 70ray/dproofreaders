@@ -1,13 +1,14 @@
 <?php
 //include_once($relPath.'site_vars.php'); // $wikihiero_dir $utf8_site
 //include_once($relPath.'misc.inc'); // attr_safe(), html_safe()
-include_once($relPath.'CharacterSelector.inc');
+//include_once($relPath.'CharacterSelector.inc');
 //include_once($relPath.'faq.inc');
 
 function draw_tool_button($accesskey, $title, $label, $onclick, $class = '')
 {
     $title_safe = attr_safe($title);
-    echo "<button type='button' onclick='$onclick' accesskey='$accesskey' class='$class' title='$title_safe'>$label</button>";
+    $class_string = $class ? "class='$class'" : '';
+    echo "<button type='button' onclick='$onclick' accesskey='$accesskey' $class_string title='$title_safe'>$label</button>";
 }
 //    public function __construct($id, $accesskey, $title, $label, $onclick)
 //    {
@@ -21,7 +22,7 @@ class ProofreadingToolbox
 //        $this->initialize_popup_links();
 //        $this->draw_tool_buttons();
 //        $this->initialize_tool_links();
-        $this->character_selector = new CharacterSelector();
+//        $this->character_selector = new CharacterSelector();
     }
 
     public function render()
@@ -29,9 +30,16 @@ class ProofreadingToolbox
 //        global $code_url;
 
         echo "<div id='tool_box'>";
-        $this->character_selector->echo_block();
+        $this->draw_character_selector();
         $this->draw_tool_buttons();
         echo '</div>';
+    }
+
+    function draw_character_selector()
+    {
+        // this is further constructed by javascript using data from the server
+        echo "\n<div id='char-selector' class='float-left'></div>\n";
+        echo "<div class='char_box float-left'><input type='text' class='big_text' id='large_char'></div>\n";
     }
 
     function draw_tool_buttons()
