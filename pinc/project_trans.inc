@@ -2,6 +2,7 @@
 include_once($relPath.'site_vars.php');
 include_once($relPath.'Project.inc');
 include_once($relPath.'ProjectTransition.inc');
+include_once($relPath.'log_message.inc');
 
 function project_transition( $projectid, $new_state, $who, $extras = array() )
 // Move the given project to the given state,
@@ -48,7 +49,7 @@ function project_transition( $projectid, $new_state, $who, $extras = array() )
         if ($testing)
         {
             $sentence = _("Transition succeeded trivially - states are the same.");
-            echo "$indent$transition_str: $sentence$eol";
+            log_message("$indent$transition_str: $sentence$eol");
         }
         return '';
     }
@@ -73,7 +74,7 @@ function project_transition( $projectid, $new_state, $who, $extras = array() )
         if ($testing)
         {
             $sentence = _("Transition succeeded.");
-            echo "$indent$transition_str: $sentence$eol";
+            log_message("$indent$transition_str: $sentence$eol");
         }
     }
     else

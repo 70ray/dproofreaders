@@ -1,17 +1,19 @@
 <?php
 include_once($relPath.'project_states.inc');
 include_once($relPath.'stages.inc');
+include_once($relPath.'errors.inc'); // try_query()
 
 // -----------------------------------------------------------------------------
 
 function Project_getNumPagesInState( $projectid, $page_state , $counter = "*")
 {
-    $res = mysqli_query(DPDatabase::get_connection(), "SELECT COUNT($counter) FROM $projectid WHERE state='$page_state'");
+    $res = try_query("SELECT COUNT($counter) FROM $projectid WHERE state='$page_state'");
+/*    $res = mysqli_query(DPDatabase::get_connection(), "SELECT COUNT($counter) FROM $projectid WHERE state='$page_state'");
     if (!$res)
     {
         echo mysqli_error(DPDatabase::get_connection());
         return 0;
-    }
+    }*/
 
     list($num_pages) = mysqli_fetch_row($res);
 

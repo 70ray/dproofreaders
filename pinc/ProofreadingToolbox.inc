@@ -7,8 +7,9 @@
 function draw_tool_button($accesskey, $title, $label, $onclick, $class = '')
 {
     $title_safe = attr_safe($title);
+    $access_string = $accesskey ? "accesskey='$accesskey'" : '';
     $class_string = $class ? "class='$class'" : '';
-    echo "<button type='button' onclick='$onclick' accesskey='$accesskey' $class_string title='$title_safe'>$label</button>";
+    echo "<button type='button' onclick='$onclick' $access_string $class_string title='$title_safe'>$label</button>\n";
 }
 //    public function __construct($id, $accesskey, $title, $label, $onclick)
 //    {
@@ -52,23 +53,12 @@ class ProofreadingToolbox
         draw_tool_button('f', _('Antiqua'), 'f', 'textControl.surroundSelection("<f>","</f>");', 'format-tool');
         draw_tool_button('m', _('Remove markup from selection'),"<span style='text-decoration: line-through;'>&lt;x&gt;</span>", 'textControl.transformText("remove_markup");');
         draw_tool_button('u', _('Uppercase selection'), 'ABC', 'textControl.transformText("upper-case");');
+        draw_tool_button('t', _('Title case selection'), 'Abc', 'textControl.transformText("title-case");');
+        draw_tool_button('l', _('Lowercase selection'), 'abc', 'textControl.transformText("lower-case");');
+        draw_tool_button('', '[Greek:', '[Greek: ]', 'textControl.surroundSelection("[Greek: ","]");');
+        draw_tool_button('', '[Sidenote:', '[Sidenote: ]', 'textControl.surroundSelection("[Sidenote: ","]");', 'format-tool');
         echo "</div>";
     }
 }
 
-/* 
-        $this->define_tool_button(
-            'title_case',
-            't',
-            _('Title case selection'),
-            'Abc',
-            "transformText('title-case')"
-        );
-        $this->define_tool_button(
-            'lower_case',
-            'l',
-            _('Lowercase selection'),
-            'abc',
-            "transformText('lower-case')"
-*/
 // vim: sw=4 ts=4 expandtab

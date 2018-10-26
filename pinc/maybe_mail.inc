@@ -3,6 +3,7 @@ include_once($relPath.'site_vars.php');
 include_once($relPath.'misc.inc'); // html_safe()
 include_once($relPath.'Project.inc');
 include_once($relPath.'User.inc');
+include_once($relPath.'log_message.inc');
 
 function maybe_mail( $to, $subject, $message, $additional_headers = null )
 // If this is for real, send the message.
@@ -29,16 +30,11 @@ function maybe_mail( $to, $subject, $message, $additional_headers = null )
 
     if ( $testing )
     {
-        echo "\n<hr>\n";
-        echo "\$testing is $testing. If it were FALSE, the following mail would have been sent:\n";
-        echo "<pre>\n";
-        echo html_safe("To: $to\n");
-        echo html_safe("Subject: $subject\n");
-        echo html_safe("$additional_headers");
-        echo "\n";
-        echo html_safe("$message\n");
-        echo "</pre>\n";
-        echo "<hr>\n";
+        log_message("\n\$testing is $testing. If it were FALSE, the following mail would have been sent:\n
+To: $to
+Subject: $subject
+$additional_headers
+$message");
     }
     else
     {

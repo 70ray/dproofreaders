@@ -12,51 +12,9 @@ include_once($relPath.'page_tally.inc');
 include_once($relPath.'project_continuity.inc');
 include_once($relPath.'abort.inc');
 include_once($relPath.'maybe_mail.inc');
+include_once($relPath.'projectinfo.inc');
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-function get_project_data($projectid)
-{
-    if(!$projectid)
-    {
-        throw new Exception(_("No project is specified"));
-    }
-    // Check if $projectid has the form of a valid project ID, either in its
-    // long form (projectID####) or just the project number (####).
-    if (1 != preg_match('/^projectID[0-9a-f]{13}$/', $projectid))
-    {
-        if (1 == preg_match('/^[0-9a-f]{13}$/', $projectid))
-        {
-            $projectid = "projectID$projectid";
-        }
-        else
-        {
-            $error = sprintf(_("'%s' is not a valid projectID."), html_safe($projectid));
-            throw new Exception($error);
-        }
-    }
-    // See if the projectID exists in the projects table
-    $sql = "
-        SELECT *
-        FROM projects
-        WHERE projectid = '$projectid'";
-    $res = try_query($sql);
-    $project_data = mysqli_fetch_assoc($res);
-    if(!$project_data)
-    {
-        $error = sprintf(_("There is no project with projectid '%s'"), $projectid);
-        throw new Exception($error);
-    }
-    return $project_data;
-}
-
-function get_project_pages($projectid, $fields)
-{
-    $query_fields = implode(', ', $fields);
-    $sql = "SELECT $query_fields FROM $projectid";
-    $res = try_query($sql);
-    return mysqli_fetch_all($res, MYSQLI_ASSOC);
-}
 
 function validate_state($project, $expected_state)
 {
@@ -426,7 +384,7 @@ the project will automatically be made unavailable.";
         $error_msg = project_transition( $this->projectid, $this->round->project_bad_state, PT_AUTO );
         if ($error_msg)
         {
-            echo "$error_msg<br>\n";
+            throw new Exception("$error_msg");
         }
         return TRUE;
     }

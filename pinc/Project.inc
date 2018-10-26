@@ -8,7 +8,48 @@ include_once($relPath.'User.inc');
 include_once($relPath.'MARCRecord.inc');
 include_once($relPath.'stages.inc'); // is_formatting_round()
 
-class NonexistentProjectException extends Exception { }
+function get_project_data($projectid)
+{
+    if(!$projectid)
+    {
+        throw new Exception(_("No project is specified"));
+    }
+    // Check if $projectid has the form of a valid project ID, either in its
+    // long form (projectID####) or just the project number (####).
+    if (1 != preg_match('/^projectID[0-9a-f]{13}$/', $projectid))
+    {
+        if (1 == preg_match('/^[0-9a-f]{13}$/', $projectid))
+        {
+            $projectid = "projectID$projectid";
+        }
+        else
+        {
+            $error = sprintf(_("'%s' is not a valid projectID."), html_safe($projectid));
+            throw new Exception($error);
+        }
+    }
+    // See if the projectID exists in the projects table
+    $sql = "
+        SELECT *
+        FROM projects
+        WHERE projectid = '$projectid'";
+    $res = try_query($sql);
+    $project_data = mysqli_fetch_assoc($res);
+    if(!$project_data)
+    {
+        $error = sprintf(_("There is no project with projectid '%s'"), $projectid);
+        throw new Exception($error);
+    }
+    return $project_data;
+}
+
+function get_project_pages($projectid, $fields)
+{
+    $query_fields = implode(', ', $fields);
+    $sql = "SELECT $query_fields FROM $projectid";
+    $res = try_query($sql);
+    return mysqli_fetch_all($res, MYSQLI_ASSOC);
+}
 
 class Project
 {
@@ -17,16 +58,7 @@ class Project
         if ( is_string($arg) )
         {
             // $arg is the projectid.
-            $res = mysqli_query(DPDatabase::get_connection(), "
-                SELECT *
-                FROM projects
-                WHERE projectid = '$arg'
-            ") or die(mysqli_error(DPDatabase::get_connection()));
-            $row = mysqli_fetch_assoc($res);
-            if (!$row)
-            {
-                throw new NonexistentProjectException("no project with projectid='$arg'");
-            }
+            $row = get_project_data($arg);
             $row['t_retrieved'] = time();
         }
         elseif ( is_array($arg) )

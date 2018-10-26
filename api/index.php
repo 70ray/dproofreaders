@@ -6,43 +6,10 @@ header('Content-Type: application/json');
 $path = $_REQUEST["q"];
 $returnObject = null;
 
-register_shutdown_function( "fatal_handler" );
-
-function fatal_handler() {
-    $errfile = "unknown file";
-    $errstr  = "shutdown";
-    $errno   = E_CORE_ERROR;
-    $errline = 0;
-
-    $error = error_get_last();
-
-    if( $error !== NULL)
-    {
-        $errno   = $error["type"];
-        $errfile = $error["file"];
-        $errline = $error["line"];
-        $errstr  = $error["message"];
-
-        http_response_code(512);
-        echo json_encode(array("error" => $errno . $errfile . $errline . $errstr,));
-        die('error');
-    }
-}
-
-function exception_error_handler( $severity, $message, $file, $line ) 
-{
-    if ( !( error_reporting() & $severity ) ) {
-        // This error code is not included in error_reporting
-        return;
-    }
-    
-    http_response_code(512);
-    echo json_encode(array("error" => $severity . $message . $file . $line,));
-    die('error');
-}
-set_error_handler( "exception_error_handler" );
-
-echo json_encode(api_router($path));
+$test_log = '';
+$data = api_router($path);
+$data['log'] = $test_log;
+echo json_encode($data);
 # ---------------------------------------------------------------------------
 function api_router($path)
 {
@@ -66,9 +33,6 @@ function api_router($path)
             array_push($params, $element);
         $index += 1;
     }
-    // let path define the resource but last element define the action
-    $action = array_pop($function_path);
-    array_push($params, $action);
 //    array_push($function_path, $_SERVER['REQUEST_METHOD']);
     $function = implode('_', $function_path);
     if(!function_exists($function))

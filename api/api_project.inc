@@ -93,7 +93,12 @@ function project_page_action($project_id, $proj_state, $image_id, $page_state, $
         $lpage->saveAsDone($text_data, $pguser);
         $lpage = get_available_page($project_id, $proj_state, $pguser);
         return page_data($lpage);
+    case 'reportbad':
+        $reason   = array_get($_REQUEST, 'reason', 0);
+        $project_bad = $lpage->markAsBad($pguser, $reason);
+        return array('projectBad' => $project_bad);
     default:
+        throw new Exception("$action not implemented");
         break;
     }
 }

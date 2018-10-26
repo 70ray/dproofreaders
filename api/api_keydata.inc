@@ -19,5 +19,5 @@ function get_keydata()
         'lower' => "§ 0 £"
         )
     );
-    return $keyboards;
+    return array('keyboards' => $keyboards);
 }

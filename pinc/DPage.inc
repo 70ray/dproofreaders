@@ -379,7 +379,7 @@ function Page_clearRound( $projectid, $image, $round, $user )
 // -----------------------------------------------------------------------------
 
 $PAGE_BADNESS_REASONS = array(
-    '',
+    _('No reason'),
     _('Missing Image'),
     _('Missing Text'),
     _('Image/Text Mismatch'),
@@ -437,7 +437,8 @@ function _Page_require(
 {
     $user_item = ( is_null($allowed_user_colname) ? '0' : $allowed_user_colname );
     $sql = "SELECT state, $user_item FROM $projectid WHERE image='$image'";
-    $res = mysqli_query(DPDatabase::get_connection(), $sql);
+    $res = try_query($sql);
+/*    $res = mysqli_query(DPDatabase::get_connection(), $sql);
     if ( !$res )
     {
         echo "The following mysql query:<br>\n";
@@ -445,7 +446,7 @@ function _Page_require(
         echo "raised the following error:<br>\n";
         echo mysqli_error(DPDatabase::get_connection()), "<br>\n";
         exit;
-    }
+    }*/
 
     list( $curr_page_state, $curr_page_owner ) = mysqli_fetch_row($res);
     if ( !in_array( $curr_page_state, $allowed_states ) )
@@ -462,7 +463,7 @@ function _Page_require(
             . "    "
             . sprintf( _("But it is in %s"), $curr_page_state )
             ;
-        abort($err);
+        throw new Exception($err);
     }
 
     if ( is_null($allowed_user_colname) )
@@ -483,7 +484,7 @@ function _Page_require(
                     _("This operation (%s) can only be done by the user who has the page checked out, which you are not."),
                     $op_name )
                 ;
-            abort($err);
+            throw new Exception($err);
         }
     }
 }
@@ -491,6 +492,8 @@ function _Page_require(
 function _Page_UPDATE( $projectid, $image, $settings )
 {
     $sql = "UPDATE $projectid SET $settings WHERE image='$image'";
+    try_query($sql);
+/*
     $res = mysqli_query(DPDatabase::get_connection(), $sql);
     if ( !$res )
     {
@@ -499,7 +502,7 @@ function _Page_UPDATE( $projectid, $image, $settings )
         echo "raised the following error:<br>\n";
         echo mysqli_error(DPDatabase::get_connection()), "<br>\n";
         exit;
-    }
+    }*/
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
