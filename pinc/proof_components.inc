@@ -25,7 +25,16 @@ function echo_controls()
     (new ControlButton('proofControl.setSplit(1);', _('Switch to Vertical'), 'bt4.png', 'h_split'))->draw(true);
     (new ControlButton('proofControl.setSplit(0);', _('Switch to Horizontal'), 'bt5.png', 'v_split'))->draw(true);
 
-    echo "<div id='proof_control' class='inline'>space filler space filler space filler\n";
+    // Image size control
+    echo "<span class='ilb'>", html_safe(_("Image")), "&nbsp;";
+    echo "<button type='button' onclick='proofControl.zoomImage(0.909)' title='", attr_safe(_('Zoom out')), "'>-</button>";
+    echo "<button type='button' onclick='proofControl.zoomImage(1.1)' title='", attr_safe(_('Zoom in')), "'>+</button>";
+    echo "<button type='button' onclick='proofControl.sizeImage(\"fit-width\")' title='", attr_safe(_('Fit Width')), "'>&harr;</button>";
+    echo "<button type='button' onclick='proofControl.sizeImage(\"fit-height\")' title='", attr_safe(_('Fit Height')), "'>&varr;</button>";
+    echo "<button type='button' onclick='proofControl.sizeImage(\"intrinsic\")' title='", attr_safe(_('Intrinsic Size')), "'>I</button>";
+    echo "</span>";
+
+    echo "<div id='proof_control' class='inline'>\n";
 
     // settings dropdown - do not close on any click or ms edge and ie color controls won't work
     echo "<div class='dropdown'><button type='button' class='dropdown_button' onclick='proofControl.showMenu(\"proof_settings\", 1);'>", html_safe(_('Settings')), "&nbsp;^</button><div class='proof-menu-content nodisp setting-grid-wrapper' id='proof_settings'>\n";
@@ -42,6 +51,7 @@ function echo_controls()
     echo "<div class='box_2col center-align'><button type='button' onclick='proofControl.saveProfile()'>", html_safe(_('Save Profile')), "</button></div>\n";
     echo "</div></div>\n"; // end of Settings dropdown
 
+    // menu
     echo "<div class='dropdown'><button type='button' class='dropdown_button' onclick='proofControl.showMenu(\"proof_menu\", 2);'>", html_safe(_('Menu')), "&nbsp;^</button><div class='proof-menu-content nodisp' id='proof_menu'>\n";
     foreach($proof_buttons as $button)
     {
@@ -50,9 +60,11 @@ function echo_controls()
     }
     echo "</div></div>\n"; // end of menu dropdown
 
+    // font control
     echo "<select id='font-select' title='", attr_safe(_("Change Font Face")), "' onChange='proofControl.changeFontFamily(this)'></select>\n";
     echo "<select id='font-size-select' title='", attr_safe(_("Change Font Size")), "' onChange='proofControl.changeFontSize(this)'></select>\n";
 
+    // icons
     echo "<div id='icon_bar' class='inline'>";
     foreach($proof_buttons as $button)
     {

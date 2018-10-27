@@ -24,7 +24,8 @@ $(function () {
                 textBackground: "#ffffff",
                 showIcons: true,
                 fontFamily: 'monospace',
-                fontSize: '14px'
+                fontSize: '14px',
+                zoom: 100
             }
         },
         profile: "profile_0",
@@ -83,13 +84,6 @@ $(function () {
     function toProjectPage() {
         window.location.replace(codeUrl + "project.php?id=" + projectID + "&expected_state=" + projState);
     }
-
-/*    function copy(dest, source) {
-        var key;
-        for (key in source) {
-            dest[key] = source[key];
-        }
-    }*/
 
     function deepCopy(dest, source, keep) {
         var i;
@@ -150,7 +144,6 @@ $(function () {
 
 
     function setupFontFamilySelectors() {
-//        var fontSelector = document.getElementById("font-select");
         var optionList = [];
         var font;
         for (font in settings.fonts) {
@@ -189,6 +182,31 @@ $(function () {
         }
     }
 
+    function setZoom() {
+        var zoom = proofStyle.zoom;
+        console.log(zoom);
+        switch (zoom) {
+        case 'fit-width':
+            scanImage.style.width = '100%';
+            scanImage.style.height = 'auto';
+            break;
+        case 'fit-height':
+            scanImage.style.width = 'auto';
+            scanImage.style.height = '100%';
+            break;
+        case 'intrinsic':
+            scanImage.style.width = 'auto';
+            scanImage.style.height = 'auto';
+            break;
+        default: // must be a number
+            // use percentage of 1000 pixels
+            // although naturalWidth could be better a new image reports 0
+            // if it is slow to load
+            scanImage.style.width = (10 * zoom) + 'px';
+            scanImage.style.height = 'auto';
+        }
+    }
+
     function projectPagePath() {
         return 'v1/project/' + projectID + "/state/" + projState + "/page/" + imageID + "/state/" + pageState;
     }
@@ -198,8 +216,7 @@ $(function () {
         settings = deepCopy(settings, JSON.parse(data.settings), true);
         console.log(settings);
         proofStyle = settings.profiles[settings.profile];
-//        proofStyle = deepCopy(proofStyle, defaultStyle, false);
-  //      proofStyle = deepCopy(proofStyle, JSON.parse(data.settings), true);
+        setZoom();
         setupFontFamilySelectors();
         setTextFontFamily();
         setupFontSize();
@@ -260,6 +277,17 @@ $(function () {
     $.get(apiUrl, {'q': 'v1/project/' + projectID + "/action/keydata"}, setupKeyboard);
 
     proofControl = {
+        zoomImage: function (ratio) {
+            // find new width as percentage of 1000 px
+            proofStyle.zoom = Math.floor((scanImage.width * ratio) / 10);
+            setZoom();
+        },
+
+        sizeImage: function (code) {
+            proofStyle.zoom = code;
+            setZoom();
+        },
+
         setSplit: function (mode) {
             proofStyle.split = mode;
             splitButtonsSetup();
