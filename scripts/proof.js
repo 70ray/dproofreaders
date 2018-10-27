@@ -6,19 +6,44 @@ var proofControl;
 $(function () {
     "use strict";
     var scanImage = document.getElementById("scanimage");
+    var fontSelector = document.getElementById("font-select");
+    var removeFontSelector = document.getElementById("font-remove");
     var textArea = $("#text_area");
     var imageDiv = $("#imagedisplay");
     var imageUrl;
     var splitControl;
     var proofStyle = {};
+    var settings = {};
+
+    var defaultSettings = {
+        profiles: {
+            profile_0: {
+                split: 1,
+                imageBackground: "#CDC0B0",
+                textColor: "#000000",
+                textBackground: "#ffffff",
+                showIcons: true,
+                fontFamily: 'monospace',
+                fontSize: '14px'
+            }
+        },
+        profile: "profile_0",
+        fonts: {'monospace': 0, 'Arial': 0, 'Courier': 0, 'DPCustomMono2': 0, 'Lucida': 0, 'Lucida Console': 0, 'Consolas': 0}
+    };
 
     var defaultStyle = {
         split: 1,
         imageBackground: "#CDC0B0",
         textColor: "#000000",
         textBackground: "#ffffff",
-        showIcons: true
+        showIcons: true,
+        fontFamily: 'monospace',
+        fontSize: '14px'
     };
+
+    function sprintf(string, p1) {
+        return string.replace("%s", p1);
+    }
 
     function setupToolbox(isFormatting) {
         if (!isFormatting) {
@@ -59,11 +84,28 @@ $(function () {
         window.location.replace(codeUrl + "project.php?id=" + projectID + "&expected_state=" + projState);
     }
 
-    function copy(dest, source) {
+/*    function copy(dest, source) {
         var key;
         for (key in source) {
             dest[key] = source[key];
         }
+    }*/
+
+    function deepCopy(dest, source, keep) {
+        var i;
+        if (source && typeof source === 'object') {
+            if (!keep) {
+                dest = Array.isArray(source) ? [] : {};
+            }
+            if (dest) {
+                for (i in source) {
+                    dest[i] = deepCopy(dest[i], source[i], keep);
+                }
+            }
+        } else {
+            dest = source;
+        }
+        return dest;
     }
 
     function setColors() {
@@ -85,16 +127,82 @@ $(function () {
         $(".h_split", ".control-div")[mode ? 'hide' : 'show']();
     }
 
+    function setTextFontFamily() {
+        textArea.css("fontFamily", proofStyle.fontFamily);
+    }
+
+    function setupSelector(selector, optionList, selectedOption) {
+        // empty it first
+        while (selector.length) {
+            selector.remove(0);
+        }
+        optionList.forEach(function (item) {
+            var opt = document.createElement("option");
+            opt.value = item;
+            opt.text = item;
+            if (item === selectedOption) {
+                opt.selected = true;
+            }
+            selector.add(opt);
+        });
+    }
+
+
+
+    function setupFontFamilySelectors() {
+//        var fontSelector = document.getElementById("font-select");
+        var optionList = [];
+        var font;
+        for (font in settings.fonts) {
+            optionList.push(font);
+        }
+        optionList.sort();
+        setupSelector(fontSelector, optionList, proofStyle.fontFamily);
+        setupSelector(removeFontSelector, optionList);
+    }
+
+    function setTextFontSize() {
+        textArea.css("font-size", proofStyle.fontSize);
+    }
+
+    function setupFontSize() {
+        setTextFontSize();
+        var fontSizeSelector = document.getElementById("font-size-select");
+        var fontSize = 10;
+        function addOption() {
+            var opt = document.createElement("option");
+            var sizeString = fontSize + "px";
+            opt.value = sizeString;
+            opt.text = sizeString;
+            if (sizeString === proofStyle.fontSize) {
+                opt.selected = true;
+            }
+            fontSizeSelector.add(opt);
+        }
+        while (fontSize < 22) {
+            addOption();
+            fontSize += 1;
+        }
+        while (fontSize < 42) {
+            addOption();
+            fontSize += 2;
+        }
+    }
+
     function projectPagePath() {
         return 'v1/project/' + projectID + "/state/" + projState + "/page/" + imageID + "/state/" + pageState;
     }
 
     function setupProfile(data) {
-//        console.log(data.settings)
-        copy(proofStyle, defaultStyle);
-        copy(proofStyle, JSON.parse(data.settings));
-//        console.log(proofStyle);
-//        console.log(proofStyle.showIcons);
+        settings = deepCopy(settings, defaultSettings, false);
+        settings = deepCopy(settings, JSON.parse(data.settings), true);
+        console.log(settings);
+        proofStyle = settings.profiles[settings.profile];
+//        proofStyle = deepCopy(proofStyle, defaultStyle, false);
+  //      proofStyle = deepCopy(proofStyle, JSON.parse(data.settings), true);
+        setupFontFamilySelectors();
+        setTextFontFamily();
+        setupFontSize();
         setColors();
         setupIcons();
         $('#show_icons').prop("checked", proofStyle.showIcons);
@@ -200,10 +308,40 @@ $(function () {
             setColors();
         },
 
+        addFont: function () {
+            var newFont = $('#new-font').val();
+            if (newFont !== "") {
+                settings.fonts[newFont] = 0;
+                setupFontFamilySelectors();
+            }
+        },
+
+        removeFont: function () {
+            var font = removeFontSelector.value;
+            if (font === proofStyle.fontFamily) {
+                alert("Cannot delete the current font");
+                return;
+            }
+            if (confirm(sprintf("delete font %s?", font))) {
+                delete settings.fonts[font];
+                setupFontFamilySelectors();
+            }
+        },
+
         saveProfile: function () {
 //            console.log(proofStyle);
 //            console.log(JSON.stringify(proofStyle));
-            $.post(apiUrl, {'q': 'v1/settings/put', 'data': JSON.stringify(proofStyle)});
+            $.post(apiUrl, {'q': 'v1/settings/put', 'data': JSON.stringify(settings)});
+        },
+
+        changeFontFamily: function (selector) {
+            proofStyle.fontFamily = selector.value;
+            setTextFontFamily();
+        },
+
+        changeFontSize: function (selector) {
+            proofStyle.fontSize = selector.value;
+            setTextFontSize();
         },
 
         revertToOriginal: function () {

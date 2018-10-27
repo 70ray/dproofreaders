@@ -35,6 +35,10 @@ function echo_controls()
     echo "<div class='box_2col center-align'><button type='button' onclick='proofControl.restoreColors()'>", html_safe(_('Restore Default Colors')), "</button></div>\n";
     echo "<div class='right-align'><label for='show_icons'>", html_safe(_('Show Icons')), "</label></div><div><input type='checkbox' id='show_icons' onchange='proofControl.iconControl(this);' checked ></div>\n";
     echo "<div class='right-align'><label for='wrap_text'>", html_safe(_('Wrap Text')), "</label></div><div><input type='checkbox' id='wrap_text' onchange='proofControl.wrapControl(this);'></div>\n";
+
+    echo "<div class='right-align'><button type='button' onclick='proofControl.addFont()'>", html_safe(_('Add Font')), "</button></div><div><input type='text' size='20' id='new-font'></div>\n";
+    echo "<div class='right-align'><button type='button' onclick='proofControl.removeFont()'>", html_safe(_('Remove Font')), "</button></div><div><select id='font-remove'></select></div>\n";
+
     echo "<div class='box_2col center-align'><button type='button' onclick='proofControl.saveProfile()'>", html_safe(_('Save Profile')), "</button></div>\n";
     echo "</div></div>\n"; // end of Settings dropdown
 
@@ -45,6 +49,9 @@ function echo_controls()
         echo "<br>\n";
     }
     echo "</div></div>\n"; // end of menu dropdown
+
+    echo "<select id='font-select' title='", attr_safe(_("Change Font Face")), "' onChange='proofControl.changeFontFamily(this)'></select>\n";
+    echo "<select id='font-size-select' title='", attr_safe(_("Change Font Size")), "' onChange='proofControl.changeFontSize(this)'></select>\n";
 
     echo "<div id='icon_bar' class='inline'>";
     foreach($proof_buttons as $button)

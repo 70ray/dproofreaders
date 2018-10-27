@@ -6,6 +6,7 @@ header('Content-Type: application/json');
 $path = $_REQUEST["q"];
 $returnObject = null;
 
+// this is used for testing messages such as simulated emails
 $test_log = '';
 $data = api_router($path);
 $data['log'] = $test_log;
