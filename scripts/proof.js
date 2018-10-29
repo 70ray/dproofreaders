@@ -11,24 +11,25 @@ $(function () {
     var textArea = $("#text_area");
     var imageDiv = $("#imagedisplay");
     var imageUrl;
-    var splitControl;
-    var proofStyle = {};
-    var settings = {};
+//    var splitControl;
+    var profile = {};
 
-    var defaultSettings = {
+    var settings = {
         profiles: {
             profile_0: {
                 split: 1,
+                ratio: 0.5,
                 imageBackground: "#CDC0B0",
                 textColor: "#000000",
                 textBackground: "#ffffff",
                 showIcons: true,
                 fontFamily: 'monospace',
                 fontSize: '14px',
-                zoom: 100
+                zoom: 100,
+                wrap: false
             }
         },
-        profile: "profile_0",
+        profileName: "profile_0",
         fonts: {'monospace': 0, 'Arial': 0, 'Courier': 0, 'DPCustomMono2': 0, 'Lucida': 0, 'Lucida Console': 0, 'Consolas': 0}
     };
 
@@ -88,13 +89,14 @@ $(function () {
     function deepCopy(dest, source, keep) {
         var i;
         if (source && typeof source === 'object') {
-            if (!keep) {
+//            if (!keep) {
+  //              dest = Array.isArray(source) ? [] : {};
+    //        }
+            if (!dest) {
                 dest = Array.isArray(source) ? [] : {};
             }
-            if (dest) {
-                for (i in source) {
-                    dest[i] = deepCopy(dest[i], source[i], keep);
-                }
+            for (i in source) {
+                dest[i] = deepCopy(dest[i], source[i], keep);
             }
         } else {
             dest = source;
@@ -103,26 +105,26 @@ $(function () {
     }
 
     function setColors() {
-        imageDiv.css("backgroundColor", proofStyle.imageBackground);
-        $('#image_back_color').val(proofStyle.imageBackground);
-        textArea.css('color', proofStyle.textColor);
-        $('#text_color').val(proofStyle.textColor);
-        textArea.css('backgroundColor', proofStyle.textBackground);
-        $('#back_color').val(proofStyle.textBackground);
+        imageDiv.css("backgroundColor", profile.imageBackground);
+        $('#image_back_color').val(profile.imageBackground);
+        textArea.css('color', profile.textColor);
+        $('#text_color').val(profile.textColor);
+        textArea.css('backgroundColor', profile.textBackground);
+        $('#back_color').val(profile.textBackground);
     }
 
     function setupIcons() {
-        $('#icon_bar')[proofStyle.showIcons ? 'show' : 'hide']();
+        $('#icon_bar')[profile.showIcons ? 'show' : 'hide']();
     }
 
     function splitButtonsSetup() {
-        var mode = proofStyle.split;
+        var mode = profile.split;
         $(".v_split", ".control-div")[mode ? 'show' : 'hide']();
         $(".h_split", ".control-div")[mode ? 'hide' : 'show']();
     }
 
     function setTextFontFamily() {
-        textArea.css("fontFamily", proofStyle.fontFamily);
+        textArea.css("fontFamily", profile.fontFamily);
     }
 
     function setupSelector(selector, optionList, selectedOption) {
@@ -141,7 +143,18 @@ $(function () {
         });
     }
 
-
+    function drawProfileList() {
+        var optionList = [];
+        var prof;
+        for (prof in settings.profiles) {
+            optionList.push(prof);
+        }
+        optionList.sort();
+        var listSelector = document.getElementById("list-select-profiles");
+        var saveSelector = document.getElementById("list-save-profiles");
+        setupSelector(listSelector, optionList, settings.profileName);
+        setupSelector(saveSelector, optionList);
+    }
 
     function setupFontFamilySelectors() {
         var optionList = [];
@@ -150,12 +163,12 @@ $(function () {
             optionList.push(font);
         }
         optionList.sort();
-        setupSelector(fontSelector, optionList, proofStyle.fontFamily);
+        setupSelector(fontSelector, optionList, profile.fontFamily);
         setupSelector(removeFontSelector, optionList);
     }
 
     function setTextFontSize() {
-        textArea.css("font-size", proofStyle.fontSize);
+        textArea.css("font-size", profile.fontSize);
     }
 
     function setupFontSize() {
@@ -167,7 +180,7 @@ $(function () {
             var sizeString = fontSize + "px";
             opt.value = sizeString;
             opt.text = sizeString;
-            if (sizeString === proofStyle.fontSize) {
+            if (sizeString === profile.fontSize) {
                 opt.selected = true;
             }
             fontSizeSelector.add(opt);
@@ -182,9 +195,14 @@ $(function () {
         }
     }
 
+    function setWrap() {
+        var wrap = profile.wrap ? 'soft' : 'off';
+        textArea.prop("wrap", wrap);
+    }
+
     function setZoom() {
-        var zoom = proofStyle.zoom;
-        console.log(zoom);
+        var zoom = profile.zoom;
+//        console.log(zoom);
         switch (zoom) {
         case 'fit-width':
             scanImage.style.width = '100%';
@@ -207,25 +225,41 @@ $(function () {
         }
     }
 
+    function setProfileName() {
+        $("#profile-name").text(settings.profileName);
+    }
+
+    function copyProfile(newProfileName) {
+        settings.profiles[newProfileName] = deepCopy(settings.profiles[newProfileName], profile);
+        settings.profileName = newProfileName;
+        setProfileName();
+        saveSettings();
+    }
+
     function projectPagePath() {
         return 'v1/project/' + projectID + "/state/" + projState + "/page/" + imageID + "/state/" + pageState;
     }
 
-    function setupProfile(data) {
-        settings = deepCopy(settings, defaultSettings, false);
-        settings = deepCopy(settings, JSON.parse(data.settings), true);
-        console.log(settings);
-        proofStyle = settings.profiles[settings.profile];
+    function setupProfile() {
+        // make a copy so if we do a 'save as' the original will not be changed
+        profile = deepCopy(profile, settings.profiles[settings.profileName]);
+        setProfileName();
         setZoom();
         setupFontFamilySelectors();
         setTextFontFamily();
         setupFontSize();
         setColors();
         setupIcons();
-        $('#show_icons').prop("checked", proofStyle.showIcons);
-        splitControl = initSplit(proofStyle.split, 0.5);
+        $('#show_icons').prop("checked", profile.showIcons);
+        setWrap();
+        $("#wrap_text").prop("checked", profile.wrap);
+//        splitControl = initSplit(profile.split, 0.5);
+        splitControl.setSplit(profile.split, profile.ratio);
         splitButtonsSetup();
         imageUrl = projectsUrl + projectID + "/";
+    }
+
+    function loadPage() {
         if (imageID) {
             // check out a done or inprogress page
             $.get(apiUrl, {'q': projectPagePath() + "/action/checkoutpage"}, loadImageText);
@@ -235,10 +269,21 @@ $(function () {
         }
     }
 
+    function loadSettings(data) {
+        settings = deepCopy(settings, JSON.parse(data.settings), true);
+        console.log(settings);
+        setupProfile();
+        loadPage();
+    }
+
+    function saveSettings() {
+        $.post(apiUrl, {'q': 'v1/settings/put', 'data': JSON.stringify(settings)});
+    }
+
     function setupKeyboard(data) {
 //            console.log(data);
         picker.loadKb(data.keyboards);
-        $.get(apiUrl, {'q': 'v1/settings/get'}, setupProfile);
+        $.get(apiUrl, {'q': 'v1/settings/get'}, loadSettings);
     }
 
     function closeDropDowns() {
@@ -279,19 +324,27 @@ $(function () {
     proofControl = {
         zoomImage: function (ratio) {
             // find new width as percentage of 1000 px
-            proofStyle.zoom = Math.floor((scanImage.width * ratio) / 10);
+            profile.zoom = Math.floor((scanImage.width * ratio) / 10);
             setZoom();
         },
 
         sizeImage: function (code) {
-            proofStyle.zoom = code;
+            profile.zoom = code;
             setZoom();
         },
 
         setSplit: function (mode) {
-            proofStyle.split = mode;
+            profile.split = mode;
             splitButtonsSetup();
-            splitControl.setSplit(mode);
+            splitControl.setSplit(mode, 0.5);
+        },
+
+        showProfileMenu: function() {
+            closeDropDowns();
+            $("#profile_menu").removeClass('nodisp');
+            $(window).click(closeOnClickOutside);
+            $(window).keydown(escapeDropDowns);
+            drawProfileList();
         },
 
         showMenu: function (id, mode) {
@@ -309,30 +362,35 @@ $(function () {
         },
 
         iconControl: function (control) {
-            proofStyle.showIcons = control.checked;
+            profile.showIcons = control.checked;
             setupIcons();
             splitControl.reLayout(); // height of control bar may be changed
         },
 
+        wrapControl: function (control) {
+            profile.wrap = control.checked;
+            setWrap();
+        },
+
         setTextColor: function (control) {
-            proofStyle.textColor = control.value;
-            textArea.css("color", proofStyle.textColor);
+            profile.textColor = control.value;
+            textArea.css("color", profile.textColor);
         },
 
         setBackColor: function (control) {
-            proofStyle.textBackground = control.value;
-            textArea.css("backgroundColor", proofStyle.textBackground);
+            profile.textBackground = control.value;
+            textArea.css("backgroundColor", profile.textBackground);
         },
 
         setImageBackColor: function (control) {
-            proofStyle.imageBackground = control.value;
-            imageDiv.css("backgroundColor", proofStyle.imageBackground);
+            profile.imageBackground = control.value;
+            imageDiv.css("backgroundColor", profile.imageBackground);
         },
 
         restoreColors: function () {
-            proofStyle.imageBackground = defaultStyle.imageBackground;
-            proofStyle.textColor = defaultStyle.textColor;
-            proofStyle.textBackground = defaultStyle.textBackground;
+            profile.imageBackground = defaultStyle.imageBackground;
+            profile.textColor = defaultStyle.textColor;
+            profile.textBackground = defaultStyle.textBackground;
             setColors();
         },
 
@@ -346,7 +404,7 @@ $(function () {
 
         removeFont: function () {
             var font = removeFontSelector.value;
-            if (font === proofStyle.fontFamily) {
+            if (font === profile.fontFamily) {
                 alert("Cannot delete the current font");
                 return;
             }
@@ -356,19 +414,40 @@ $(function () {
             }
         },
 
+        selectProfile: function(control) {
+            var prof = control.value;
+            if(prof === "") {
+                return;
+            }
+            settings.profileName = prof;
+            setupProfile();
+        },
+
         saveProfile: function () {
-//            console.log(proofStyle);
-//            console.log(JSON.stringify(proofStyle));
-            $.post(apiUrl, {'q': 'v1/settings/put', 'data': JSON.stringify(settings)});
+            profile.ratio = splitControl.getRatio();
+            copyProfile(settings.profileName);
+        },
+
+        saveNewProfile: function () {
+            var newProfileName = $('#new-profile').val();
+            if (newProfileName === "") {
+                return;
+            }
+            copyProfile(newProfileName);
+        },
+
+        saveAsProfile: function () {
+            var newProfileName = $("#list-save-profiles").val();
+            copyProfile(newProfileName);
         },
 
         changeFontFamily: function (selector) {
-            proofStyle.fontFamily = selector.value;
+            profile.fontFamily = selector.value;
             setTextFontFamily();
         },
 
         changeFontSize: function (selector) {
-            proofStyle.fontSize = selector.value;
+            profile.fontSize = selector.value;
             setTextFontSize();
         },
 

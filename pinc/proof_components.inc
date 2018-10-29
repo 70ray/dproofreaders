@@ -36,6 +36,15 @@ function echo_controls()
 
     echo "<div id='proof_control' class='inline'>\n";
 
+    // profile menu - close on click
+    echo "<div class='dropdown'><button type='button' class='dropdown_button' onclick='proofControl.showProfileMenu();'>", html_safe(_('Profile')), "&nbsp;^</button><div class='proof-menu-content nodisp setting-grid-wrapper' id='profile_menu'>\n";
+    echo "<div class='box_2col center-align' id='profile-name'>Profile name</div>\n";
+    echo "<div class='right-align'>", html_safe(_('Select Profile')), "</div><div><select id='list-select-profiles' onchange='proofControl.selectProfile(this)'></select></div>\n";
+    echo "<div class='right-align'><button type='button' onclick='proofControl.saveProfile();'>", html_safe(_('Save')), "</button></div><div></div>\n";
+    echo "<div class='right-align'><button type='button' onclick='proofControl.saveNewProfile();'>", html_safe(_('Save as new')), "</button></div><div><input type='text' size='20' id='new-profile'></div>\n";
+    echo "<div class='right-align'><button type='button' onclick='proofControl.saveAsProfile();'>", html_safe(_('Save as')), "</button></div><div><select id='list-save-profiles'></select></div>\n";
+    echo "</div></div>\n"; // end of profile dropdown
+
     // settings dropdown - do not close on any click or ms edge and ie color controls won't work
     echo "<div class='dropdown'><button type='button' class='dropdown_button' onclick='proofControl.showMenu(\"proof_settings\", 1);'>", html_safe(_('Settings')), "&nbsp;^</button><div class='proof-menu-content nodisp setting-grid-wrapper' id='proof_settings'>\n";
     echo "<div class='right-align'><label for='image_back_color'>", html_safe(_('Image Background')), "</label></div><div><input type='color' id='image_back_color' onchange='proofControl.setImageBackColor(this)'></div>\n";
@@ -48,10 +57,9 @@ function echo_controls()
     echo "<div class='right-align'><button type='button' onclick='proofControl.addFont()'>", html_safe(_('Add Font')), "</button></div><div><input type='text' size='20' id='new-font'></div>\n";
     echo "<div class='right-align'><button type='button' onclick='proofControl.removeFont()'>", html_safe(_('Remove Font')), "</button></div><div><select id='font-remove'></select></div>\n";
 
-    echo "<div class='box_2col center-align'><button type='button' onclick='proofControl.saveProfile()'>", html_safe(_('Save Profile')), "</button></div>\n";
     echo "</div></div>\n"; // end of Settings dropdown
 
-    // menu
+    // proofreading menu
     echo "<div class='dropdown'><button type='button' class='dropdown_button' onclick='proofControl.showMenu(\"proof_menu\", 2);'>", html_safe(_('Menu')), "&nbsp;^</button><div class='proof-menu-content nodisp' id='proof_menu'>\n";
     foreach($proof_buttons as $button)
     {
@@ -60,7 +68,7 @@ function echo_controls()
     }
     echo "</div></div>\n"; // end of menu dropdown
 
-    // font control
+    // font controls
     echo "<select id='font-select' title='", attr_safe(_("Change Font Face")), "' onChange='proofControl.changeFontFamily(this)'></select>\n";
     echo "<select id='font-size-select' title='", attr_safe(_("Change Font Size")), "' onChange='proofControl.changeFontSize(this)'></select>\n";
 

@@ -1,3 +1,6 @@
+#tool_box {
+    overflow:auto;
+}
 
 /* character picker */
 .float-left {
@@ -35,7 +38,7 @@
   font-size: 180%;
   width: 1em;
   background-color: #FFF8DC;
-  margin-left: 0.2em;
+  margin: 0.2em;
 }
 .picker {
   background-color: Beige;

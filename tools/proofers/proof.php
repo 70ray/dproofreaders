@@ -56,13 +56,13 @@ echo "<div id='topbar'></div>";
 echo "<div id='pane_1'><div class='center-align' id='imagedisplay'><img id='scanimage' class='middle-align' src='' alt=''></div></div>";
 echo "<div id='dragbar'></div>";
 echo "<div id='pane_2'><div id = 'proofdiv' class='center-align'><textarea id='text_area'></textarea></div></div>";
-echo "<div id='botbar' class='control-div'>";
+echo "<div id='botbar'><div class='control-div'>";
 echo_controls();
 $toolbox = new ProofreadingToolbox();
 $toolbox->render();
 //echo "<button type='button' onClick='proofControl.stop();'>Stop Proofreading</button>";
 //echo "<button type='button' onClick='proofControl.returnToRound();'>Return Page to round</button>";
-echo "</div>";
+echo "</div></div>";
 //echo "</div>";
 
 
