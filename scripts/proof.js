@@ -127,19 +127,21 @@ $(function () {
         textArea.css("fontFamily", profile.fontFamily);
     }
 
-    function setupSelector(selector, optionList, selectedOption) {
+    function setupSelector(selector, optionList, selectedOption, exclude) {
         // empty it first
         while (selector.length) {
             selector.remove(0);
         }
         optionList.forEach(function (item) {
-            var opt = document.createElement("option");
-            opt.value = item;
-            opt.text = item;
-            if (item === selectedOption) {
-                opt.selected = true;
+            if (!(exclude && (item === selectedOption))) {
+                var opt = document.createElement("option");
+                opt.value = item;
+                opt.text = item;
+                if (item === selectedOption) {
+                    opt.selected = true;
+                }
+                selector.add(opt);
             }
-            selector.add(opt);
         });
     }
 
@@ -152,8 +154,10 @@ $(function () {
         optionList.sort();
         var listSelector = document.getElementById("list-select-profiles");
         var saveSelector = document.getElementById("list-save-profiles");
+        var deleteSelector = document.getElementById("list-delete-profiles");
         setupSelector(listSelector, optionList, settings.profileName);
-        setupSelector(saveSelector, optionList);
+        setupSelector(saveSelector, optionList, settings.profileName, true);
+        setupSelector(deleteSelector, optionList, settings.profileName, true);
     }
 
     function setupFontFamilySelectors() {
@@ -230,9 +234,10 @@ $(function () {
     }
 
     function copyProfile(newProfileName) {
+        profile.ratio = splitControl.getRatio();
         settings.profiles[newProfileName] = deepCopy(settings.profiles[newProfileName], profile);
         settings.profileName = newProfileName;
-        setProfileName();
+//        setProfileName();
         saveSettings();
     }
 
@@ -253,7 +258,6 @@ $(function () {
         $('#show_icons').prop("checked", profile.showIcons);
         setWrap();
         $("#wrap_text").prop("checked", profile.wrap);
-//        splitControl = initSplit(profile.split, 0.5);
         splitControl.setSplit(profile.split, profile.ratio);
         splitButtonsSetup();
         imageUrl = projectsUrl + projectID + "/";
@@ -288,6 +292,7 @@ $(function () {
 
     function closeDropDowns() {
         $(".proof-menu-content").addClass('nodisp');
+        $(window).unbind("click keydown");
     }
 
     if (!Element.prototype.matches) {
@@ -298,7 +303,7 @@ $(function () {
         // do not close if click on the button or it will never appear
         if (!event.target.matches('.dropdown_button')) {
             closeDropDowns();
-            $(window).unbind("click keydown");
+//            $(window).unbind("click keydown");
         }
     }
 
@@ -306,7 +311,7 @@ $(function () {
         // do not close if click on the button or menu box
         if (!event.target.matches('.dropdown *')) {
             closeDropDowns();
-            $(window).unbind("click keydown");
+//            $(window).unbind("click keydown");
             return false;
         }
     }
@@ -314,7 +319,7 @@ $(function () {
     function escapeDropDowns(event) {
         if (event.keyCode === 27) {
             closeDropDowns();
-            $(window).unbind("click keydown");
+//            $(window).unbind("click keydown");
         }
     }
 
@@ -408,23 +413,21 @@ $(function () {
                 alert("Cannot delete the current font");
                 return;
             }
-            if (confirm(sprintf("delete font %s?", font))) {
+            if (confirm(sprintf("Are you sure you want to delete %s?", font))) {
                 delete settings.fonts[font];
                 setupFontFamilySelectors();
             }
         },
 
-        selectProfile: function(control) {
-            var prof = control.value;
-            if(prof === "") {
-                return;
-            }
-            settings.profileName = prof;
+        selectProfile: function() {
+            var profileName = $("#list-select-profiles").val();
+            settings.profileName = profileName;
+            closeDropDowns();
             setupProfile();
         },
 
         saveProfile: function () {
-            profile.ratio = splitControl.getRatio();
+            closeDropDowns();
             copyProfile(settings.profileName);
         },
 
@@ -433,12 +436,23 @@ $(function () {
             if (newProfileName === "") {
                 return;
             }
+            closeDropDowns();
             copyProfile(newProfileName);
         },
 
         saveAsProfile: function () {
             var newProfileName = $("#list-save-profiles").val();
+            closeDropDowns();
             copyProfile(newProfileName);
+        },
+
+        deleteProfile: function () {
+            var profileName = $("#list-delete-profiles").val();
+            if(confirm(sprintf("Are you sure you want to delete %s?", profileName))) {
+                delete settings.profiles[profileName];
+            }
+            closeDropDowns();
+            saveSettings();
         },
 
         changeFontFamily: function (selector) {

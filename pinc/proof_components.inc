@@ -39,10 +39,11 @@ function echo_controls()
     // profile menu - close on click
     echo "<div class='dropdown'><button type='button' class='dropdown_button' onclick='proofControl.showProfileMenu();'>", html_safe(_('Profile')), "&nbsp;^</button><div class='proof-menu-content nodisp setting-grid-wrapper' id='profile_menu'>\n";
     echo "<div class='box_2col center-align' id='profile-name'>Profile name</div>\n";
-    echo "<div class='right-align'>", html_safe(_('Select Profile')), "</div><div><select id='list-select-profiles' onchange='proofControl.selectProfile(this)'></select></div>\n";
+    echo "<div class='right-align'><button type='button' onclick='proofControl.selectProfile();'>", html_safe(_('Select Profile')), "</button></div><div><select id='list-select-profiles'></select></div>\n";
     echo "<div class='right-align'><button type='button' onclick='proofControl.saveProfile();'>", html_safe(_('Save')), "</button></div><div></div>\n";
     echo "<div class='right-align'><button type='button' onclick='proofControl.saveNewProfile();'>", html_safe(_('Save as new')), "</button></div><div><input type='text' size='20' id='new-profile'></div>\n";
     echo "<div class='right-align'><button type='button' onclick='proofControl.saveAsProfile();'>", html_safe(_('Save as')), "</button></div><div><select id='list-save-profiles'></select></div>\n";
+    echo "<div class='right-align'><button type='button' onclick='proofControl.deleteProfile();'>", html_safe(_('Delete')), "</button></div><div><select id='list-delete-profiles'></select></div>\n";
     echo "</div></div>\n"; // end of profile dropdown
 
     // settings dropdown - do not close on any click or ms edge and ie color controls won't work
