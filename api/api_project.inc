@@ -21,8 +21,8 @@ function project($project_id, $action)
             $fields = ['fileid', 'image'];
         }
         return get_project_pages($project_id, $fields);
-    case 'keydata':
-        return get_keydata();
+    case 'langdata':
+        return get_langdata($project_id);
     default:
         break;
     }

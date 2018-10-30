@@ -168,7 +168,7 @@ $(function () {
         }
         optionList.sort();
         setupSelector(fontSelector, optionList, profile.fontFamily);
-        setupSelector(removeFontSelector, optionList);
+        setupSelector(removeFontSelector, optionList, profile.fontFamily, true);
     }
 
     function setTextFontSize() {
@@ -263,7 +263,10 @@ $(function () {
         imageUrl = projectsUrl + projectID + "/";
     }
 
-    function loadPage() {
+    function loadSettings(data) {
+        settings = deepCopy(settings, JSON.parse(data.settings), true);
+//        console.log(settings);
+        setupProfile();
         if (imageID) {
             // check out a done or inprogress page
             $.get(apiUrl, {'q': projectPagePath() + "/action/checkoutpage"}, loadImageText);
@@ -273,20 +276,14 @@ $(function () {
         }
     }
 
-    function loadSettings(data) {
-        settings = deepCopy(settings, JSON.parse(data.settings), true);
-        console.log(settings);
-        setupProfile();
-        loadPage();
-    }
-
     function saveSettings() {
         $.post(apiUrl, {'q': 'v1/settings/put', 'data': JSON.stringify(settings)});
     }
 
-    function setupKeyboard(data) {
-//            console.log(data);
+    function setupLangs(data) {
+            console.log(data);
         picker.loadKb(data.keyboards);
+        textArea.attr("dir", data.langdir);
         $.get(apiUrl, {'q': 'v1/settings/get'}, loadSettings);
     }
 
@@ -323,8 +320,8 @@ $(function () {
         }
     }
 
-    // get key data first because it affects height of toolbox, before split setup
-    $.get(apiUrl, {'q': 'v1/project/' + projectID + "/action/keydata"}, setupKeyboard);
+    // get key data before split setup because it affects height of toolbox
+    $.get(apiUrl, {'q': 'v1/project/' + projectID + "/action/langdata"}, setupLangs);
 
     proofControl = {
         zoomImage: function (ratio) {

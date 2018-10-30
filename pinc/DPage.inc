@@ -217,7 +217,7 @@ function Page_modifyText( $projectid, $image, $page_text, $text_column, $user )
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
+/*
 function Page_checkout( $projectid, $image, $round, $user )
 {
     _Page_require( $projectid, $image,
@@ -239,7 +239,7 @@ function Page_checkout( $projectid, $image, $round, $user )
 
     return $round->page_out_state;
 }
-
+*/
 // -----------------------------------------------------------------------------
 
 function Page_saveAsInProgress( $projectid, $image, $round, $user, $page_text )

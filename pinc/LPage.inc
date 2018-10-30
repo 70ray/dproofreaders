@@ -10,7 +10,7 @@ include_once($relPath.'DPage.inc');
 include_once($relPath.'Project.inc');
 include_once($relPath.'page_tally.inc');
 include_once($relPath.'project_continuity.inc');
-include_once($relPath.'abort.inc');
+//include_once($relPath.'abort.inc');
 include_once($relPath.'maybe_mail.inc');
 include_once($relPath.'projectinfo.inc');
 
@@ -55,7 +55,7 @@ function get_available_page( $projectid, $proj_state, $pguser)
 {
     global $preceding_proofer_restriction;
     // Make sure project is still in same state.
-    $project = new Project(get_project_data($projectid));
+    $project = new Project($projectid);
     validate_state($project, $proj_state);
 
     $round = get_Round_for_project_state($proj_state);
@@ -198,7 +198,7 @@ function get_indicated_LPage(
 // in which case throws exception
 {
     // Make sure project is still in same state.
-    $project = new Project(get_project_data($projectid));
+    $project = new Project($projectid);
     validate_state($project, $proj_state);
 
     $sql = "
@@ -290,14 +290,14 @@ class LPage
 
         return $page_text;
     }
-
+/*
     function get_language()
     {
         $project = new Project($this->projectid);
         $lang = proj_lang_code($project->language,"primary");
         return $lang;
     }
-
+*/
     function get_username_for_round( $round )
     {
         $res = mysqli_query(DPDatabase::get_connection(), "
@@ -310,13 +310,13 @@ class LPage
     }
 
     // -------------------------------------------------------------------------
-
+/*
     function checkout( $user )
     {
         $this->page_state =
             Page_checkout( $this->projectid, $this->imagefile, $this->round, $user );
     }
-
+*/
     function saveAsInProgress( $page_text, $user )
     {
         $this->page_state = Page_saveAsInProgress( $this->projectid, $this->imagefile, $this->round, $user, $page_text );
@@ -417,19 +417,19 @@ the project will automatically be made unavailable.";
             // For now, just confirm that the user is entitled to resume
             // this page. (In the DONE case, Page_reopen performs this check.)
 
-            $res = mysqli_query(DPDatabase::get_connection(), "
+            $sql = "
                 SELECT {$this->round->user_column_name}
                 FROM $this->projectid
                 WHERE image='$this->imagefile'
-            ");
+            ";
+            $res = try_query($sql);
             list($current_round_user) = mysqli_fetch_row($res);
-
             if ($pguser != $current_round_user)
             {
                 $err = sprintf(
                     _('You (%1$s) do not have the necessary access to page %2$s'),
                     $pguser, $this->imagefile );
-                abort($err);
+                throw new Exception($err);
             }
         }
     }
@@ -437,4 +437,3 @@ the project will automatically be made unavailable.";
 } // end class
 
 // vim: sw=4 ts=4 expandtab
-?>

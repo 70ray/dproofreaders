@@ -1,12 +1,14 @@
 <?php
 $relPath="../pinc/";
+include_once($relPath.'languages.inc');
 
-function get_keydata()
+function get_langdata($project_id)
 {
     // space is separator, 0 means no character in this position
     // this data would normally be obtained from the database
     // each character can be multibyte
     // we are cheating by having this file encoded in utf8 when not utf8 site
+    // otherwise would have to utf8_encode the strings
     $keyboards = array(
     array(
         'code' => "EU",
@@ -19,5 +21,10 @@ function get_keydata()
         'lower' => "§ 0 £"
         )
     );
-    return array('keyboards' => $keyboards);
+
+    $project = new Project($project_id);
+    $lang_code = proj_lang_code($project->language, "primary");
+    $dir = lang_direction($lang_code);
+
+    return array('keyboards' => $keyboards, 'langdir' => $dir);
 }
