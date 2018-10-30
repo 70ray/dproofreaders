@@ -1,6 +1,6 @@
-/*global document window Image projectsUrl alert codeUrl imageFile messages
+/*global document window projectsUrl alert codeUrl messages
  $ apiUrl projectID projState imageID pageState confirm textControl picker
-initSplit Element */
+ Element */
 
 var proofControl;
 $(function () {
@@ -11,7 +11,6 @@ $(function () {
     var textArea = $("#text_area");
     var imageDiv = $("#imagedisplay");
     var imageUrl;
-//    var splitControl;
     var profile = {};
 
     var settings = {
@@ -267,13 +266,8 @@ $(function () {
         settings = deepCopy(settings, JSON.parse(data.settings), true);
 //        console.log(settings);
         setupProfile();
-        if (imageID) {
-            // check out a done or inprogress page
-            $.get(apiUrl, {'q': projectPagePath() + "/action/checkoutpage"}, loadImageText);
-        } else {
-            // checkout a new page
-            $.post(apiUrl, {'q': 'v1/project/' + projectID + "/state/" + projState + "/action/checkoutnextpage"}, loadImageText);
-        }
+        // check out a done or inprogress page
+        $.get(apiUrl, {'q': projectPagePath() + "/action/checkoutpage"}, loadImageText);
     }
 
     function saveSettings() {
@@ -300,7 +294,6 @@ $(function () {
         // do not close if click on the button or it will never appear
         if (!event.target.matches('.dropdown_button')) {
             closeDropDowns();
-//            $(window).unbind("click keydown");
         }
     }
 
@@ -308,7 +301,6 @@ $(function () {
         // do not close if click on the button or menu box
         if (!event.target.matches('.dropdown *')) {
             closeDropDowns();
-//            $(window).unbind("click keydown");
             return false;
         }
     }
@@ -316,7 +308,6 @@ $(function () {
     function escapeDropDowns(event) {
         if (event.keyCode === 27) {
             closeDropDowns();
-//            $(window).unbind("click keydown");
         }
     }
 

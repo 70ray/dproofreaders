@@ -91,7 +91,21 @@ if ( $user_is_logged_in )
 }
 
 do_update_pp_activity();
-output_header($title_for_theme, NO_STATSBAR);
+
+$header_args = [
+    "js_files" => [
+        "$code_url/scripts/api.js",
+        "$code_url/scripts/project.js",
+    ],
+    "js_data" => "
+        var codeUrl = '$code_url/';
+        var apiUrl = '$code_url/api/';
+        var projectID = '$projectid';
+        var projState = '$expected_state';
+    "
+];
+
+output_header($title_for_theme, NO_STATSBAR, $header_args);
 if ($detail_level==1)
 {
     echo "<h1>$title</h1>\n";
@@ -264,47 +278,61 @@ function decide_blurbs()
     if ( $blurb )
         return array( $blurb, $blurb );
 
+    // If there's any proofreading to be done, this is the link to use.
+    $proofreading_link = "<button type='button' onclick='projectControl.startProofReading();'>" . _("Start Proofreading") . "</button>";
+
+    // When were the project comments last modified?
+    $comments_timestamp = $project->t_last_change_comments;
+    $comments_time_str = strftime($datetime_format, $comments_timestamp);
+    $comments_last_modified_blurb = _("Project Comments last modified:") . " " . $comments_time_str;
+
+    // Other possible components of blurbs:
+    $please_scroll_down = _("Please scroll down and read the Project Comments for any special instructions <b>before</b> proofreading!");
+    $the_link_appears_below = _("The 'Start Proofreading' link appears below the Project Comments");
+    $comments_have_changed =
+        "<p class='error'>"
+        . _("Project Comments have changed!")
+        . "</p>";
+
+    // ---
+
+    $bottom_blurb =
+        $comments_last_modified_blurb
+        . "<br>"
+        . $proofreading_link;
+
+    // Has the user saved a page of this project since the project comments were
+    // last changed? If not, it's unlikely they've seen the revised comments.
+    $res = mysqli_query(DPDatabase::get_connection(), "
+        SELECT {$round->time_column_name}
+        FROM $projectid
+        WHERE state='{$round->page_save_state}' AND {$round->user_column_name}='$pguser'
+        ORDER BY {$round->time_column_name} DESC
+        LIMIT 1
+    ");
+    $row = mysqli_fetch_assoc($res);
+    if (!$row)
     {
-        // If there's any proofreading to be done, this is the link to use.
-        $url = url_for_pi_do_whichever_page( $projectid, $state, TRUE );
-        $label = _("Start Proofreading");
-        $proofreading_link = "<b><a href='$url'>$label</a></b>";
-
-        // When were the project comments last modified?
-        $comments_timestamp = $project->t_last_change_comments;
-        $comments_time_str = strftime($datetime_format, $comments_timestamp);
-        $comments_last_modified_blurb = _("Project Comments last modified:") . " " . $comments_time_str;
-
-        // Other possible components of blurbs:
-        $please_scroll_down = _("Please scroll down and read the Project Comments for any special instructions <b>before</b> proofreading!");
-        $the_link_appears_below = _("The 'Start Proofreading' link appears below the Project Comments");
-        $comments_have_changed =
-            "<p class='error'>"
-            . _("Project Comments have changed!")
-            . "</p>";
-
-        // ---
-
-        $bottom_blurb =
-            $comments_last_modified_blurb
+        // The user has not saved any pages for this project.
+        $top_blurb =
+            $please_scroll_down
             . "<br>"
-            . $proofreading_link;
+            . $comments_last_modified_blurb
+            . "<br>"
+            . $the_link_appears_below;
+    }
+    else
+    {
+        // The user has saved a page for this project.
+        $my_latest_save_timestamp = $row[$round->time_column_name];
 
-        // Has the user saved a page of this project since the project comments were
-        // last changed? If not, it's unlikely they've seen the revised comments.
-        $res = mysqli_query(DPDatabase::get_connection(), "
-            SELECT {$round->time_column_name}
-            FROM $projectid
-            WHERE state='{$round->page_save_state}' AND {$round->user_column_name}='$pguser'
-            ORDER BY {$round->time_column_name} DESC
-            LIMIT 1
-        ");
-        $row = mysqli_fetch_assoc($res);
-        if (!$row)
+        if ($my_latest_save_timestamp < $comments_timestamp)
         {
-            // The user has not saved any pages for this project.
+            // The latest page-save was before the comments were revised.
+            // The user probably hasn't seen the revised project comments.
             $top_blurb =
-                $please_scroll_down
+                $comments_have_changed
+                . $please_scroll_down
                 . "<br>"
                 . $comments_last_modified_blurb
                 . "<br>"
@@ -312,32 +340,14 @@ function decide_blurbs()
         }
         else
         {
-            // The user has saved a page for this project.
-            $my_latest_save_timestamp = $row[$round->time_column_name];
-
-            if ($my_latest_save_timestamp < $comments_timestamp)
-            {
-                // The latest page-save was before the comments were revised.
-                // The user probably hasn't seen the revised project comments.
-                $top_blurb =
-                    $comments_have_changed
-                    . $please_scroll_down
-                    . "<br>"
-                    . $comments_last_modified_blurb
-                    . "<br>"
-                    . $the_link_appears_below;
-            }
-            else
-            {
-                // The latest page-save was after the comments were revised.
-                // We'll assume that the user has read the new comments.
-                $top_blurb =
-                    $please_scroll_down
-                    . "<br>"
-                    . $comments_last_modified_blurb
-                    . "<br>"
-                    . $proofreading_link;
-            }
+            // The latest page-save was after the comments were revised.
+            // We'll assume that the user has read the new comments.
+            $top_blurb =
+                $please_scroll_down
+                . "<br>"
+                . $comments_last_modified_blurb
+                . "<br>"
+                . $proofreading_link;
         }
     }
 

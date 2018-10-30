@@ -44,12 +44,13 @@ function project_state_action($project_id, $proj_state, $action)
 {
     global $pguser;
 
-    if('checkoutnextpage' == $action)
+    switch ($action)
     {
-        // returns page index (image file name) and changes page state to out
-        // could be a stale link so validate
+    // returns page index (image file name) and changes page state to out
+    // could be a stale link so validate
+    case 'checkoutnextpage':
         $lpage = get_available_page($project_id, $proj_state, $pguser);
-        return page_data($lpage);
+        return array('imageID' => $lpage->imagefile, 'pageState' => $lpage->page_state);
     }
 }
 
@@ -73,7 +74,6 @@ function project_page_action($project_id, $proj_state, $image_id, $page_state, $
         $lpage->returnToRound($pguser);
         break;
     case 'reverttoorig':
-//        $text_data = array_get($_POST, 'text-data', '');
         $lpage->saveAsInProgress($text_data, $pguser);
         $lpage->revertToOriginal();
         return page_data($lpage);
@@ -81,15 +81,12 @@ function project_page_action($project_id, $proj_state, $image_id, $page_state, $
         $lpage->revertToSaved();
         return page_data($lpage);
     case 'saveasinprogress':
-//        $text_data = array_get($_POST, 'text-data', '');
         $lpage->saveAsInProgress($text_data, $pguser);
         return array('pageState' => $lpage->page_state);
     case 'saveasdone':
-//        $text_data = array_get($_POST, 'text-data', '');
         $lpage->saveAsDone($text_data, $pguser);
         break;
     case 'saveanddonext':
-//        $text_data = array_get($_POST, 'text-data', '');
         $lpage->saveAsDone($text_data, $pguser);
         $lpage = get_available_page($project_id, $proj_state, $pguser);
         return page_data($lpage);
