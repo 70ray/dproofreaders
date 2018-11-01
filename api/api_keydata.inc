@@ -11,7 +11,7 @@ function get_langdata($project_id)
     // otherwise would have to utf8_encode the strings
     $keyboards = array(
     array(
-        'code' => "EU",
+        'code' => "DF",
         'upper' => "À Â Ä Æ È É Ê Ë Î Ï Ô Ö Ù Û Ü 0 Ç 0",
         'lower' => "à â ä æ è é ê ë î ï ô ö ù û ü ß ç ÿ"
         ),

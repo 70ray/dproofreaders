@@ -21,7 +21,7 @@ $header_args = [
     ],
     "js_files" => [
         "$code_url/scripts/api.js",
-        "$code_url/scripts/messages.php",
+        "$code_url/scripts/display_image_messages.php",
         "$code_url/scripts/display_image.js",
     ],
     "js_data" =>

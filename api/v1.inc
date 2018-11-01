@@ -26,7 +26,9 @@ function v1_project_state_page_state_action($params)
     $imageID = $params[2];
     $page_state = $params[3];
     $action = $params[4];
-    return project_page_action($projectID, $proj_state, $imageID, $page_state, $action);
+    $project_page = new ProjectPage($projectID, $proj_state, $imageID, $page_state);
+    return $project_page->return_data($action);
+//    return project_page_action($projectID, $proj_state, $imageID, $page_state, $action);
 }
 
 function v1_settings($params)

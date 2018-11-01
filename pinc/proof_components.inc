@@ -1,12 +1,48 @@
 <?php
-include_once($relPath.'ControlButton.inc');
+
+// enables a button to be drawn either with an icon or with text
+class ControlButton
+{
+    function __construct($handler, $label, $image, $class_name = '', $title = '')
+    {
+        $this->handler = $handler;
+        if($title == '')
+        {
+            $title = $label;
+        }
+        $this->label = $label;
+        $this->attr_title = attr_safe($title);
+        $this->image = $image;
+        $this->class_names = $class_name;
+    }
+
+    function draw($use_image)
+    {
+        if($use_image)
+        {
+            // middle align prevents extra space in button below image
+            $caption = "<img src='gfx/$this->image' class='middle-align' alt='$this->attr_title'>";
+            $this->class_names .= ' image-button'; // this removes padding
+        }
+        else
+        {
+            $caption = html_safe($this->label);
+        }
+        $class_string = '';
+        if($this->class_names != '')
+        {
+            $class_string = "class='$this->class_names' ";
+        }
+        echo "<button type='button' onclick='$this->handler' {$class_string}title='$this->attr_title'>$caption</button>";
+    }
+}
 
 function echo_controls()
 {
 //    global $code_url, $userP;
 
     $proof_buttons = [
-        new ControlButton('proofControl.revertToOriginal();', _("Revert to Original Document"), 'bt8.png'),
+        new ControlButton('proofControl.revertToOriginal();', _("Save & Revert to Original Document"), 'bt8.png'),
         new ControlButton('proofControl.revertToLastSave();', _("Revert to Last Save"), 'bt7.png', 'revert_button'),
         new ControlButton('proofControl.saveAsInProgress();', _("Save as 'In Progress'"), 'bt3.png'),
         new ControlButton('proofControl.saveAndDoNext();', _("Save as 'Done' & Proofread Next Page"), 'bt2.png'),
@@ -17,6 +53,8 @@ function echo_controls()
 //        new ControlButton('showNW();', _("Show All Text"), 'bt9.png'),
         new ControlButton('proofControl.reportBadPage();', _("Report Bad Page"), 'bt14.png'),
 //        new ControlButton('proofControl.preview();', _("Preview"), 'bt20.png'),
+         new ControlButton('proofControl.projectComments();', _("Project Comments"), 'bt12.png', '', _("View Project Comments in New Window")),
+         new ControlButton('proofControl.viewImage();', _("Image"), 'bt10.png', '', _("View Image in New Window")),
     ];
 
     echo "<div id='control_div'>";
@@ -26,7 +64,7 @@ function echo_controls()
     (new ControlButton('proofControl.setSplit(0);', _('Switch to Horizontal'), 'bt5.png', 'v_split'))->draw(true);
 
     // Image size control
-    echo "<span class='ilb'>", html_safe(_("Image")), "&nbsp;";
+//    echo "<span class='ilb'>", html_safe(_("Image")), "&nbsp;";
     echo "<button type='button' onclick='proofControl.zoomImage(0.909)' title='", attr_safe(_('Zoom out')), "'>-</button>";
     echo "<button type='button' onclick='proofControl.zoomImage(1.1)' title='", attr_safe(_('Zoom in')), "'>+</button>";
     echo "<button type='button' onclick='proofControl.sizeImage(\"fit-width\")' title='", attr_safe(_('Fit Width')), "'>&harr;</button>";
@@ -41,7 +79,7 @@ function echo_controls()
     echo "<div class='box_2col center-align' id='profile-name'>Profile name</div>\n";
     echo "<div class='right-align'><button type='button' onclick='proofControl.selectProfile();'>", html_safe(_('Select Profile')), "</button></div><div><select id='list-select-profiles'></select></div>\n";
     echo "<div class='right-align'><button type='button' onclick='proofControl.saveProfile();'>", html_safe(_('Save')), "</button></div><div></div>\n";
-    echo "<div class='right-align'><button type='button' onclick='proofControl.saveNewProfile();'>", html_safe(_('Save as new')), "</button></div><div><input type='text' size='20' id='new-profile'></div>\n";
+    echo "<div class='right-align'><button type='button' onclick='proofControl.saveNewProfile();'>", html_safe(_('Save as new')), "</button></div><div><input type='text' size='10' id='new-profile'></div>\n";
     echo "<div class='right-align'><button type='button' onclick='proofControl.saveAsProfile();'>", html_safe(_('Save as')), "</button></div><div><select id='list-save-profiles'></select></div>\n";
     echo "<div class='right-align'><button type='button' onclick='proofControl.deleteProfile();'>", html_safe(_('Delete')), "</button></div><div><select id='list-delete-profiles'></select></div>\n";
     echo "</div></div>\n"; // end of profile dropdown
@@ -51,7 +89,7 @@ function echo_controls()
     echo "<div class='right-align'><label for='image_back_color'>", html_safe(_('Image Background')), "</label></div><div><input type='color' id='image_back_color' onchange='proofControl.setImageBackColor(this)'></div>\n";
     echo "<div class='right-align'><label for='text_color'>", html_safe(_('Text Color')), "</label></div><div><input type='color' id='text_color' onchange='proofControl.setTextColor(this);'></div>\n";
     echo "<div class='right-align'><label for='back_color'>", html_safe(_('Text Background')), "</label></div><div><input type='color' id='back_color' onchange='proofControl.setBackColor(this)'></div>\n";
-    echo "<div class='box_2col center-align'><button type='button' onclick='proofControl.restoreColors()'>", html_safe(_('Restore Default Colors')), "</button></div>\n";
+//    echo "<div class='box_2col center-align'><button type='button' onclick='proofControl.restoreColors()'>", html_safe(_('Restore Default Colors')), "</button></div>\n";
     echo "<div class='right-align'><label for='show_icons'>", html_safe(_('Show Icons')), "</label></div><div><input type='checkbox' id='show_icons' onchange='proofControl.iconControl(this);' checked ></div>\n";
     echo "<div class='right-align'><label for='wrap_text'>", html_safe(_('Wrap Text')), "</label></div><div><input type='checkbox' id='wrap_text' onchange='proofControl.wrapControl(this);'></div>\n";
 
@@ -82,5 +120,6 @@ function echo_controls()
 
     echo "</div>"; // end of icon_bar
     echo "</div>"; // end of proof_control div
+    echo "&nbsp;<span id='page-info' class='small bold'></span>";
     echo "</div>"; // end of control div
 }

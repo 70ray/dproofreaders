@@ -192,8 +192,7 @@ function get_indicated_LPage(
     $projectid,
     $proj_state,
     $imagefile,
-    $page_state,
-    $reverting_to_orig )
+    $page_state)
 // Returns an LPage, unless the parameters do not correctly identify a page,
 // in which case throws exception
 {
@@ -226,7 +225,7 @@ function get_indicated_LPage(
         throw new Exception($err);
     }
 
-    return new LPage($projectid, $imagefile, $page_state, $reverting_to_orig);
+    return new LPage($projectid, $imagefile, $page_state);
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -238,12 +237,12 @@ class LPage
 // and the Presentation layer is most of tools/proofers/*.
 // However, we're not very strict about the divisions yet.)
 {
-    function __construct($projectid, $imagefile, $page_state, $reverting_to_orig)
+    function __construct($projectid, $imagefile, $page_state)
     {
         $this->projectid  = $projectid;
         $this->imagefile  = $imagefile;
         $this->page_state = $page_state;
-        $this->reverting_to_orig = $reverting_to_orig;
+        $this->reverting_to_orig = 0;
 
         // It's debatable whether LPage should have a 'reverting_to_orig' property.
         // You could argue that it's an interface-level artifact,

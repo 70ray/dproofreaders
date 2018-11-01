@@ -45,7 +45,7 @@ class ProofreadingToolbox
 
     function draw_tool_buttons()
     {
-        echo "<div class='float-left'>";
+        echo "<div>";
         draw_tool_button('i', _('Italics'), '<i>i</i>', 'textControl.surroundSelection("<i>","</i>");', 'format-tool');
         draw_tool_button('b', _('Bold'), '<b>B</b>', 'textControl.surroundSelection("<b>","</b>");', 'format-tool');
         draw_tool_button('s', _('Small Caps markup'), '<span style="font-variant: small-caps;">Sc</span>', 'textControl.surroundSelection("<sc>","</sc>");', 'format-tool');
@@ -57,6 +57,15 @@ class ProofreadingToolbox
         draw_tool_button('l', _('Lowercase selection'), 'abc', 'textControl.transformText("lower-case");');
         draw_tool_button('', '[Greek:', '[Greek: ]', 'textControl.surroundSelection("[Greek: ","]");');
         draw_tool_button('', '[Sidenote:', '[Sidenote: ]', 'textControl.surroundSelection("[Sidenote: ","]");', 'format-tool');
+        draw_tool_button('', '[Illustration:', '[Illustration: ]', 'textControl.surroundSelection("[Illustration: ","]");', 'format-tool');
+        draw_tool_button('', _('Note'), '[** ]', 'textControl.surroundSelection("[** ","]");');
+        draw_tool_button('', '[ ]', '[ ]', 'textControl.surroundSelection("[","]");');
+        draw_tool_button('', '{ }', '{ }', 'textControl.surroundSelection("{","}");');
+        draw_tool_button('', '[Footnote #:', '[Footnote #: ]', 'textControl.surroundSelection("[Footnote #: ","]");', 'format-tool');
+        draw_tool_button('', _('Start poetry/table'), '/* */', 'textControl.surroundSelection("/*\\n","\\n*/");', 'format-tool');
+        draw_tool_button('', _('Start block quote'), '/# #/', 'textControl.surroundSelection("/#\\n","\\n#/");', 'format-tool');
+        draw_tool_button('', _('Thought Break'), '&lt;tb&gt;', 'textControl.surroundSelection("\\n<tb>\\n","");', 'format-tool');
+        draw_tool_button('', '[Blank Page]', '[Blank Page]', 'textControl.replaceAllText("[Blank Page]");');
         echo "</div>";
     }
 }

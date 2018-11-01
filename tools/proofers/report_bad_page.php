@@ -1,11 +1,6 @@
 <?php
 $relPath="./../../pinc/";
 include_once($relPath.'base.inc');
-//include_once($relPath.'project_states.inc');
-//include_once($relPath.'project_trans.inc');
-//include_once($relPath.'stages.inc');
-//include_once($relPath.'theme.inc');
-//include_once($relPath.'projectinfo.inc');
 include_once($relPath.'misc.inc'); // array_get()
 include_once($relPath.'slim_header.inc');
 
@@ -20,6 +15,7 @@ $header = _("Report Bad Page");
 $header_args = [
     "js_files" => [
         "$code_url/scripts/api.js",
+        "$code_url/scripts/bad_page_messages.php",
         "$code_url/scripts/report_bad_page.js",
     ],
     "js_data" =>"

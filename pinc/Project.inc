@@ -8,7 +8,7 @@ include_once($relPath.'User.inc');
 include_once($relPath.'MARCRecord.inc');
 include_once($relPath.'stages.inc'); // is_formatting_round()
 
-function get_project_data($projectid)
+function get_project_data($projectid, $fields = array('*'))
 {
     if(!$projectid)
     {
@@ -28,9 +28,10 @@ function get_project_data($projectid)
             throw new Exception($error);
         }
     }
+    $query_fields = implode(', ', $fields);
     // See if the projectID exists in the projects table
     $sql = "
-        SELECT *
+        SELECT $query_fields
         FROM projects
         WHERE projectid = '$projectid'";
     $res = try_query($sql);
@@ -41,14 +42,6 @@ function get_project_data($projectid)
         throw new Exception($error);
     }
     return $project_data;
-}
-
-function get_project_pages($projectid, $fields)
-{
-    $query_fields = implode(', ', $fields);
-    $sql = "SELECT $query_fields FROM $projectid";
-    $res = try_query($sql);
-    return mysqli_fetch_all($res, MYSQLI_ASSOC);
 }
 
 class Project

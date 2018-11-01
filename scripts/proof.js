@@ -1,6 +1,6 @@
 /*global document window projectsUrl alert codeUrl messages
  $ apiUrl projectID projState imageID pageState confirm textControl picker
- Element */
+ Element splitControl */
 
 var proofControl;
 $(function () {
@@ -73,8 +73,13 @@ $(function () {
     }
 
     function loadImageText(data) {
-//    console.log(data);
+  console.log(data);
         imageID = data.imageID;
+        var pageInfo = sprintf(messages.pageNumber, imageID.slice(0, -4));
+        if (data.prevLinks) {
+            pageInfo += " &mdash; " + data.prevLinks;
+        }
+        $("#page-info").html(pageInfo);
         scanImage.src = imageUrl + data.imageID;
         scanImage.alt = data.imageID;
         loadText(data);
@@ -92,7 +97,9 @@ $(function () {
   //              dest = Array.isArray(source) ? [] : {};
     //        }
             if (!dest) {
-                dest = Array.isArray(source) ? [] : {};
+                dest = Array.isArray(source)
+                    ? []
+                    : {};
             }
             for (i in source) {
                 dest[i] = deepCopy(dest[i], source[i], keep);
@@ -232,6 +239,10 @@ $(function () {
         $("#profile-name").text(settings.profileName);
     }
 
+    function saveSettings() {
+        $.post(apiUrl, {'q': 'v1/settings/put', 'data': JSON.stringify(settings)});
+    }
+
     function copyProfile(newProfileName) {
         profile.ratio = splitControl.getRatio();
         settings.profiles[newProfileName] = deepCopy(settings.profiles[newProfileName], profile);
@@ -268,10 +279,6 @@ $(function () {
         setupProfile();
         // check out a done or inprogress page
         $.get(apiUrl, {'q': projectPagePath() + "/action/checkoutpage"}, loadImageText);
-    }
-
-    function saveSettings() {
-        $.post(apiUrl, {'q': 'v1/settings/put', 'data': JSON.stringify(settings)});
     }
 
     function setupLangs(data) {
@@ -332,7 +339,7 @@ $(function () {
             splitControl.setSplit(mode, 0.5);
         },
 
-        showProfileMenu: function() {
+        showProfileMenu: function () {
             closeDropDowns();
             $("#profile_menu").removeClass('nodisp');
             $(window).click(closeOnClickOutside);
@@ -398,16 +405,16 @@ $(function () {
         removeFont: function () {
             var font = removeFontSelector.value;
             if (font === profile.fontFamily) {
-                alert("Cannot delete the current font");
+                alert(messages.cannotDeleteFont);
                 return;
             }
-            if (confirm(sprintf("Are you sure you want to delete %s?", font))) {
+            if (confirm(sprintf(messages.confirmRemove, font))) {
                 delete settings.fonts[font];
                 setupFontFamilySelectors();
             }
         },
 
-        selectProfile: function() {
+        selectProfile: function () {
             var profileName = $("#list-select-profiles").val();
             settings.profileName = profileName;
             closeDropDowns();
@@ -436,7 +443,7 @@ $(function () {
 
         deleteProfile: function () {
             var profileName = $("#list-delete-profiles").val();
-            if(confirm(sprintf("Are you sure you want to delete %s?", profileName))) {
+            if (confirm(sprintf(messages.confirmRemove, profileName))) {
                 delete settings.profiles[profileName];
             }
             closeDropDowns();
@@ -492,6 +499,14 @@ $(function () {
         reportBadPage: function () {
 //            window.location.replace(codeUrl + "tools/proofers/report_bad_page.php?id=" + projectID + "&expected_state=" + projState);
             window.location = codeUrl + "tools/proofers/report_bad_page.php?projectid=" + projectID + "&proj_state=" + projState + "&imagefile=" + imageID + "&page_state=" + pageState;
+        },
+
+        projectComments: function () {
+            window.open(codeUrl + "project.php?id=" + projectID + "&expected_state=" + projState + "&detail_level=1");
+        },
+
+        viewImage: function () {
+            window.open(codeUrl + "tools/project_manager/displayimage.php?project=" + projectID + "&imagefile=" + imageID);
         }
     };
 });

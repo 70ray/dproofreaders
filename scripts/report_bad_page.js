@@ -19,10 +19,10 @@ $(function () {
     function checkState (data) {
 //        console.log(data);
         if (data.projectBad) {
-            alert("The project has now been marked as bad. Click 'OK' to Return to the Activity Hub");
+            alert(messages.markedAsBad);
             window.location.replace(codeUrl + "/activity_hub.php");
         } else {
-            alert("The report has been submitted. Click 'OK' to Return to the Project Page");
+            alert(messages.reportSubmitted);
             window.location.replace(codeUrl + "/project.php?id=" + projectID + "&expected_state=" + projState);
         }
     }
@@ -30,7 +30,7 @@ $(function () {
     badPageControl = {
         report: function () {
             if (reasonSelector.selectedIndex === 0) {
-                alert("Please select a reason.");
+                alert(messages.selectReason);
                 return;
             }
             $.post(apiUrl, {'q': 'v1/project/' + projectID + "/state/" + projState + "/page/" + imageID + "/state/" + pageState + "/action/reportbad",  'reason': reasonSelector.selectedIndex}, checkState);

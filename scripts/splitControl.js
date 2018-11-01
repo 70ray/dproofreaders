@@ -83,8 +83,7 @@ $(function () {
     }
 
     function windowMouseUp() {
-        document.removeEventListener("mousemove", windowMouseMove, false);
-        document.removeEventListener("mouseup", windowMouseUp, false);
+        $(document).unbind("mousemove mouseup");
         // restore normal operation
         pane2.css("pointerEvents", "auto");
         pane1.css("pointerEvents", "auto");
@@ -92,8 +91,7 @@ $(function () {
 
     function dragBarMouseDown(event) {
         event.preventDefault();
-        document.addEventListener("mousemove", windowMouseMove, false);
-        document.addEventListener("mouseup", windowMouseUp, false);
+        $(document).mousemove(windowMouseMove).mouseup(windowMouseUp);
         // if there is an iframe it will take mousemove
         pane2.css("pointerEvents", "none");
         pane1.css("pointerEvents", "none");
@@ -102,7 +100,7 @@ $(function () {
     minSiz = 50;
     reLayout();
     dragBar.mousedown(dragBarMouseDown);
-    window.addEventListener("resize", reLayout, false);
+    $(window).resize(reLayout);
 
     splitControl = {
         setSplit: function (vertical, ratio) {
