@@ -98,7 +98,7 @@ $(function () {
     }
 
     minSiz = 50;
-    reLayout();
+//    reLayout();
     dragBar.mousedown(dragBarMouseDown);
     $(window).resize(reLayout);
 
