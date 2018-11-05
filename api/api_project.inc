@@ -8,6 +8,7 @@ include_once($relPath.'project_states.inc'); // project_states_text()
 include_once($relPath.'LPage.inc');
 include_once($relPath.'links.inc'); // private_message_link()
 include_once($relPath.'forum_interface.inc'); // get_forum_user_id()
+include_once($relPath.'wordcheck_engine.inc');
 include_once('api_keydata.inc');
 
 function project($project_id, $action)
@@ -30,6 +31,10 @@ function project($project_id, $action)
         return get_project_pages($project_id, $fields);
     case 'langdata':
         return get_langdata($project_id);
+    case 'good_word_suggestions':
+        $start_time = get_integer_param($_GET, 'start_time', 0, -1, 10000000);
+        return array('goodWordData' => project_good_word_suggestions($project_id, $start_time));
+//        return project_good_word_suggestions($project_id, $start_time);
     default:
         break;
     }
@@ -177,4 +182,114 @@ function project_state_action($project_id, $proj_state, $action)
     }
 }
 
+function project_good_word_suggestions($projectid, $timeCutoff)
+{
+    global $utf8_site;
+
+    $goodFileObject = get_project_word_file($projectid, "good");
+    // set the timeCutoff
+    if($timeCutoff == -1)
+    {
+        $timeCutoffActual = $goodFileObject->mod_time;
+    }
+    else
+    {
+        $timeCutoffActual = $timeCutoff;
+    }
+    // load suggestions since cutoff
+    $suggestions = load_project_good_word_suggestions($projectid, $timeCutoffActual);
+    // if there are no suggestions since the cutoff return empty array
+
+    $messages = array();
+    // check that there are suggestions
+    if(count($suggestions)==0) {
+//        return array( array(), array(), $messages);
+        return array();
+    }
+
+    // load project good words
+    $project_good_words = load_project_good_words($projectid);
+
+    // load project bad words
+    $project_bad_words = load_project_bad_words($projectid);
+
+    // get the latest project text of all pages up to last possible round
+    $last_possible_round = get_Round_for_round_number(MAX_NUM_PAGE_EDITING_ROUNDS);
+    $pages_res = page_info_query($projectid, $last_possible_round->id, 'LE');
+    $all_words_w_freq = get_distinct_words_in_text( get_page_texts( $pages_res ));
+
+    // array to hold all words
+    $all_suggestions = array();
+
+    // parse the suggestions complex array
+    // it is in the format: $suggestions[$round][$pagenum]=$wordsArray
+    foreach( $suggestions as $round => $pageArray ) {
+        foreach( $pageArray as $page => $words) {
+            // add the words to the combined array too
+            $all_suggestions = array_merge($all_suggestions, $words);
+        }
+    }
+
+    // now, remove any words that are already on the project's good or bad words lists
+    $all_suggestions = array_diff( $all_suggestions, array_merge($project_good_words, $project_bad_words) );
+
+    // get the number of suggestion occurrences
+    $all_suggestions_w_occurrences = generate_frequencies( $all_suggestions );
+
+    // $all_suggestions doesn't have frequency info,
+    // so start with the info in $all_words_w_freq,
+    // and extract the items where the key matches a key in $all_suggestions.
+    $all_suggestions_w_freq = array_intersect_key( $all_words_w_freq, array_flip( $all_suggestions ) );
+
+    // multisort screws up all-numeric words so we need to preprocess first
+    prep_numeric_keys_for_multisort( $all_suggestions_w_freq );
+
+    // sort the list by frequency, then by word
+    array_multisort( array_values( $all_suggestions_w_freq ), SORT_DESC, array_map( 'strtolower', array_keys( $all_suggestions_w_freq ) ), SORT_ASC, $all_suggestions_w_freq );
+
+//    return array($all_suggestions_w_freq, $all_suggestions_w_occurrences, $messages);
+    // make an array of arrays [word, freq, occurences]
+    $suggestions_freq_occurences = array();
+    foreach($all_suggestions_w_freq as $word => $freq)
+    {
+        $occurences = $all_suggestions_w_occurrences[$word];
+        if(!$utf8_site)
+        {
+            $word = utf8_encode($word);
+        }
+        $suggestions_freq_occurences[] = array($word, $freq, $occurences);
+    }
+    return $suggestions_freq_occurences;
+}
+
+// arrays with numeric and string keys don't multisort correctly
+// appending a space to the end of the numeric keys forces them
+// to strings and multisort works correctly
+function prep_numeric_keys_for_multisort(&$assocArray) {
+    if(!is_array($assocArray)) return;
+    foreach($assocArray as $key => $val) {
+        if(!is_string($key)) {
+            unset($assocArray[$key]);
+            $assocArray["$key "]=$val;
+        }
+    }
+}
+/*
+    $newProjectWords=array();
+    foreach($_POST as $key => $val) {
+        if(preg_match("/cb_(projectID[0-9a-f]{13})_(\d+)/",$key,$matches)) {
+            $projectid=$matches[1];
+            $word=decode_word($val);
+            if(!is_array(@$newProjectWords[$projectid]))
+                $newProjectWords[$projectid]=array();
+            array_push($newProjectWords[$projectid],$word);
+        }
+    }
+
+    foreach($newProjectWords as $projectid => $projectWords) {
+        $words = load_project_good_words($projectid);
+        $words = array_merge($words,$projectWords);
+        save_project_good_words($projectid,$words);
+    }
+*/
 // vim: sw=4 ts=4 expandtab

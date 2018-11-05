@@ -10,6 +10,7 @@ $returnObject = null;
 $test_log = '';
 $data = api_router($path);
 $data['log'] = $test_log;
+
 echo json_encode($data);
 # ---------------------------------------------------------------------------
 function api_router($path)

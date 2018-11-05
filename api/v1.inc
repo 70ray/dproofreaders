@@ -2,6 +2,7 @@
 include_once('api_project.inc');
 include_once('api_settings.inc');
 include_once('api_constants.inc');
+include_once('api_user.inc');
 // DP API v1
 function v1_project_action($params)
 {
@@ -40,4 +41,11 @@ function v1_settings($params)
 function v1_constants($params)
 {
     return constants($params[0]);
+}
+
+function v1_user_action($params)
+{
+    $username = $params[0];
+    $action = $params[1];
+    return user($username, $action);
 }

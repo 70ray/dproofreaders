@@ -11,6 +11,53 @@ include_once("./word_freq_table.inc");
 
 require_login();
 
+$submitLabel = _("Add selected words to Good Words List");
+$header_args = [
+    "js_files" => [
+        "$code_url/scripts/api.js",
+        "$code_url/scripts/good_words.js",
+        "$code_url/scripts/good_words_messages.php",
+    ],
+    "js_data" => "
+        var apiUrl = '$code_url/api/';
+        var timeCutoff = -1;
+    "
+];
+
+slim_header(_("Manage Suggestions"), $header_args);
+
+echo "<h1>" . _("Manage Suggestions") . "</h1>";
+
+// TRANSLATORS: PM = project manager
+echo "<p><a href='$code_url/tools/project_manager/projectmgr.php' target='_TOP'>" . _("Return to the PM page") . "</a></p>";
+
+//only shown if ( user_is_a_sitemanager() || user_is_proj_facilitator() )
+echo _("View projects for user:"), "&nbsp<input type='text' id='pm_name' size='10'><br>";
+
+$timeCutoffOptions=array(1,2,3,4,5,6,7,14,21);
+// initial value timeCutoff = -1; 
+echo _("Show") . ": ";
+echo "<select name='timeCutoff'>";
+echo "<option value='0'>" , _("All suggestions") , "</option>";
+echo "<option value='-1' selected>" , _("Suggestions since Good Words List was saved") , "</option>";
+foreach($timeCutoffOptions as $timeCutoffOption)
+{
+    $timeCutoffValue = ceil((time() - 24*60*60*$timeCutoffOption)/100)*100;
+    echo "<option value='$timeCutoffValue'>", sprintf(_("Suggestions made in the past %d days"),$timeCutoffOption), "</option>";
+//    if($timeCutoff==$timeCutoffValue) echo "selected";
+//    echo ">" . sprintf(_("Suggestions made in the past %d days"),$timeCutoffOption) . "</option>";
+}
+echo "</select>";
+echo "<br>";
+
+echo "<input type='button' onclick='sagws.show();' value='Submit'>";
+
+echo "<p id='time_cutoff_text'></p>";
+
+echo "<p>" . sprintf(_("Selecting any '%s' button will add all selected words to their corresponding project word list, not just the words in the section for the button itself."),$submitLabel) . "</p>";
+
+echo "<div id='project_data'></div>";
+/*
 // TRANSLATORS: This is a strftime-formatted string for the date with year and time
 $datetime_format = _("%A, %B %e, %Y at %X");
 
@@ -298,6 +345,6 @@ function _get_project_states_in_order() {
 
     return $projectStates;
 }
-
+*/
 // vim: sw=4 ts=4 expandtab
 ?>
