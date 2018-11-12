@@ -1,6 +1,7 @@
 <?php
 $relPath="../pinc/";
 include_once($relPath.'base.inc');
+include_once($relPath.'user_is.inc');
 /*include_once($relPath.'site_vars.php'); // $utf8_site
 include_once($relPath.'misc.inc'); // html_safe()
 include_once($relPath.'Project.inc');
@@ -18,6 +19,17 @@ function user($username, $action)
         return array('projects' => _get_projects_for_pm($username));
     default:
         break;
+    }
+}
+
+function identify($user_role)
+{
+    global $pguser;
+
+    switch($user_role)
+    {
+    case 'project_facilitator':
+        return array('name' => $pguser, 'project_facilitator' => user_is_proj_facilitator());
     }
 }
 

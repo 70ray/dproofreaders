@@ -70,6 +70,9 @@
 .display-flex {
   display: flex;
 }
+.hidden {
+  display: none;
+}
 .button {
   -webkit-appearance: button;
   -moz-appearance: button;

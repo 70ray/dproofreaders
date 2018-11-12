@@ -49,3 +49,9 @@ function v1_user_action($params)
     $action = $params[1];
     return user($username, $action);
 }
+
+function v1_identify($params)
+{
+    $user_role = $params[0];
+    return identify($user_role);
+}

@@ -11,12 +11,18 @@ body {
 .top-fix {
     background-color:Cornsilk;
     padding:0.5em;
-    flex:0 0 auto;
 }
 
-.image-div {
-    background-color: #CDC0B0;
-    text-align: center;
+.content {
     overflow:auto;
-    flex:1 1 100vh;
+    flex:1;
+}
+
+iframe {
+    border:0;
+    padding:0;
+    margin:0;
+    width:100%;
+    height:100%;
+    vertical-align: middle;
 }

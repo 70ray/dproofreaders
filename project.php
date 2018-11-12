@@ -100,8 +100,6 @@ $header_args = [
     "js_data" => "
         var codeUrl = '$code_url/';
         var apiUrl = '$code_url/api/';
-        var projectID = '$projectid';
-        var projState = '$expected_state';
     "
 ];
 
@@ -279,7 +277,7 @@ function decide_blurbs()
         return array( $blurb, $blurb );
 
     // If there's any proofreading to be done, this is the link to use.
-    $proofreading_link = "<button type='button' onclick='projectControl.startProofReading();'>" . _("Start Proofreading") . "</button>";
+    $proofreading_link = "<button type='button' onclick='projectControl.startProofReading(\"$projectid\", \"$state\");'>" . _("Start Proofreading") . "</button>";
 
     // When were the project comments last modified?
     $comments_timestamp = $project->t_last_change_comments;
