@@ -6,7 +6,7 @@ include_once($relPath.'slim_header.inc');
 include_once($relPath.'proof_components.inc');
 include_once($relPath.'ProofreadingToolbox.inc');
 
-require_login();
+//require_login();
 
 // (User clicked on "Start Proofreading" link or
 // one of the links in "Done" or "In Progress" trays.)

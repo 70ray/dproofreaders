@@ -342,8 +342,10 @@ class LPage
         $this->reverting_to_orig = 1;
     }
 
-    function revertToSaved()
+    function revertToSaved($pguser)
     {
+        _Page_require( $this->projectid, $this->imagefile, array( $this->round->page_temp_state ), $this->round->user_column_name, $pguser, 'revertToSaved' );
+
         $this->page_state = $this->round->page_temp_state;
         $this->reverting_to_orig = 0;
     }
@@ -415,24 +417,9 @@ the project will automatically be made unavailable.";
 
             // For now, just confirm that the user is entitled to resume
             // this page. (In the DONE case, Page_reopen performs this check.)
-
-            $sql = "
-                SELECT {$this->round->user_column_name}
-                FROM $this->projectid
-                WHERE image='$this->imagefile'
-            ";
-            $res = try_query($sql);
-            list($current_round_user) = mysqli_fetch_row($res);
-            if ($pguser != $current_round_user)
-            {
-                $err = sprintf(
-                    _('You (%1$s) do not have the necessary access to page %2$s'),
-                    $pguser, $this->imagefile );
-                throw new Exception($err);
-            }
+            _Page_require( $this->projectid, $this->imagefile, array( $this->round->page_temp_state ), $this->round->user_column_name, $pguser, 'resumeSavedPage' );
         }
     }
-
 } // end class
 
 // vim: sw=4 ts=4 expandtab

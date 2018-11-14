@@ -13,7 +13,7 @@ include_once('api_keydata.inc');
 
 function project($project_id, $action)
 {
-    global $utf8_site, $pguser;
+    global $utf8_site;
 
     switch($action)
     {
@@ -42,15 +42,12 @@ function project($project_id, $action)
         return get_langdata($project_id);
 
     case 'good_word_suggestions':
+        authorise_edit($project_id);
         $days = get_integer_param($_GET, 'days', 0, -1, 100);
         return project_good_word_suggestions($project_id, $days);
 
     case 'add_good_words':
-        $project_manager = get_project_data($project_id, ['username'])['username'];
-        if(($project_manager !== $pguser) && !user_is_proj_facilitator())
-        {
-            throw new Exception(_("It seems you are not authorised to perform this operation"));
-        }
+        authorise_edit($project_id);
         $good_words = array_get($_POST, 'words', json_encode(array()));
         $good_words = json_decode($good_words);
         if(!$utf8_site)
@@ -62,6 +59,17 @@ function project($project_id, $action)
 
     default:
         break;
+    }
+}
+
+function authorise_edit($project_id)
+{
+    global $pguser;
+
+    $project_manager = get_project_data($project_id, ['username'])['username'];
+    if(($project_manager !== $pguser) && !user_is_proj_facilitator())
+    {
+        throw new Exception(_("It seems you are not authorised to perform this operation"));
     }
 }
 
@@ -133,7 +141,7 @@ class ProjectPage
             $this->lpage->revertToOriginal();
             return $this->page_data(self::TEXT); // send text and state
         case 'reverttolastsave':
-            $this->lpage->revertToSaved();
+            $this->lpage->revertToSaved($pguser);
             return $this->page_data(self::TEXT);
         case 'saveasinprogress':
             $this->lpage->saveAsInProgress($text_data, $pguser);

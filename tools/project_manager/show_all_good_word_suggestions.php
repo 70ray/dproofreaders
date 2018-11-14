@@ -58,7 +58,7 @@ foreach($timeCutoffOptions as $timeCutoffOption)
 echo "</select>";
 echo "<br>";
 
-echo "<input type='button' onclick='sagws.show();' value='Submit'>";
+echo "<input type='button' onclick='sagws.show();' value='", attr_safe(_("Go")), "'>";
 
 echo "<p class='warning'>" . sprintf(_("Selecting a '%s' button will add selected words to the corresponding project word list."), $submitLabel) . "</p>\n";
 
