@@ -318,23 +318,57 @@ class LPage
 */
     function saveAsInProgress( $page_text, $user )
     {
-        $this->page_state = Page_saveAsInProgress( $this->projectid, $this->imagefile, $this->round, $user, $page_text );
+        $round = $this->round;
+        $this->Page_require(array( $round->page_out_state, $round->page_temp_state ), $round->user_column_name, $user, 'saveAsInProgress');
+        $timestamp = time();
+        $page_text = _normalize_page_text($page_text);
+        $this->Page_UPDATE(sprintf("
+            state='{$round->page_temp_state}',
+            {$round->time_column_name}=$timestamp,
+            {$round->user_column_name}='$user',
+            {$round->text_column_name}='%s'
+        ", mysqli_real_escape_string(DPDatabase::get_connection(), $page_text)));
+        _log_page_event( $projectid, $image, 'saveAsInProgress', $user, $round, TRUE );
+        $this->page_state = $round->page_temp_state;
         $this->reverting_to_orig = 0;
     }
 
-    function saveAsDone($text_data,$pguser)
+    function saveAsDone($text_data, $user)
     {
-        $this->page_state =
-            Page_saveAsDone( $this->projectid, $this->imagefile, $this->round, $pguser, $text_data );
+        $round = $this->round;
+        $this->Page_require( array( $round->page_out_state, $round->page_temp_state ), $round->user_column_name, $user, 'saveAsDone' );
 
+        $timestamp = time();
+        $page_text = _normalize_page_text($page_text);
+        $this->Page_UPDATE( $projectid, $image, sprintf("
+            state='{$round->page_save_state}',
+            {$round->time_column_name}=$timestamp,
+            {$round->user_column_name}='$user',
+            {$round->text_column_name}='%s'
+        ", mysqli_real_escape_string(DPDatabase::get_connection(), $page_text)));
+
+        _log_page_event( $projectid, $image, 'saveAsDone', $user, $round, TRUE );
+        _project_set_t_last_page_done( $projectid, $timestamp );
+        $this->page_state = $round->page_save_state;
         // add to user page count
-        page_tallies_add( $this->round->id, $pguser, +1 );
+        page_tallies_add( $round->id, $user, +1 );
     }
 
-    function returnToRound($pguser)
+    function returnToRound($user)
     {
-        $this->page_state =
-            Page_returnToRound( $this->projectid, $this->imagefile, $this->round, $pguser );
+        $round = $this->round;
+        $this->Page_require(array($round->page_out_state, $round->page_temp_state), $round->user_column_name, $user, 'returnToRound' );
+        $timestamp = time();
+
+        $this->Page_UPDATE("
+            state='{$round->page_avail_state}',
+            {$round->time_column_name}=$timestamp,
+            {$round->user_column_name}='$user'
+        " );
+
+        _log_page_event($projectid, $image, 'returnToRound', $user, $round, TRUE);
+        _project_adjust_n_available_pages( $projectid, +1 );
+        $this->page_state = $round->page_avail_state;
     }
 
     function revertToOriginal()
@@ -344,9 +378,10 @@ class LPage
 
     function revertToSaved($pguser)
     {
-        _Page_require( $this->projectid, $this->imagefile, array( $this->round->page_temp_state ), $this->round->user_column_name, $pguser, 'revertToSaved' );
+        $round = $this->round;
+        $this->Page_require(array($round->page_temp_state ), $round->user_column_name, $pguser, 'revertToSaved' );
 
-        $this->page_state = $this->round->page_temp_state;
+        $this->page_state = $round->page_temp_state;
         $this->reverting_to_orig = 0;
     }
 
@@ -355,7 +390,17 @@ class LPage
     {
         global $code_url, $site_abbreviation, $PAGE_BADNESS_REASONS;
 
-        Page_markAsBad( $this->projectid, $this->imagefile, $this->round, $user, $reason );
+        $round = $this->round;
+        $this->Page_require(array( $round->page_out_state, $round->page_temp_state ), $round->user_column_name, $user, 'markAsBad' );
+
+        $this->Page_UPDATE( $projectid, $image, "
+            state='{$round->page_bad_state}',
+            b_user='$user',
+            b_code=$reason,
+            {$round->text_column_name}={$round->prevtext_column_name}
+        " );
+
+        _log_page_event( $projectid, $image, 'markAsBad', $user, $round, TRUE );
 
         // Advise PM that the page has been marked bad.
 		$body_blurb =
@@ -374,15 +419,15 @@ the project will automatically be made unavailable.";
 
         $n_bad_pages =
             Project_getNumPagesInState(
-                $this->projectid, $this->round->page_bad_state );
+                $this->projectid, $round->page_bad_state );
         if ( $n_bad_pages < 10 ) return FALSE;
 
         $n_distinct_reporters =
             Project_getNumPagesInState(
-                $this->projectid, $this->round->page_bad_state, "DISTINCT(b_user)" );
+                $this->projectid, $round->page_bad_state, "DISTINCT(b_user)" );
         if ($n_distinct_reporters < 3) return FALSE;
 
-        $error_msg = project_transition( $this->projectid, $this->round->project_bad_state, PT_AUTO );
+        $error_msg = project_transition( $this->projectid, $round->project_bad_state, PT_AUTO );
         if ($error_msg)
         {
             throw new Exception("$error_msg");
@@ -417,8 +462,60 @@ the project will automatically be made unavailable.";
 
             // For now, just confirm that the user is entitled to resume
             // this page. (In the DONE case, Page_reopen performs this check.)
-            _Page_require( $this->projectid, $this->imagefile, array( $this->round->page_temp_state ), $this->round->user_column_name, $pguser, 'resumeSavedPage' );
+            $this->Page_require(array( $this->round->page_temp_state ), $this->round->user_column_name, $pguser, 'resumeSavedPage' );
         }
+    }
+
+    function Page_require($allowed_states, $allowed_user_colname, $requesting_user, $op_name )
+    {
+        $user_item = ( is_null($allowed_user_colname) ? '0' : $allowed_user_colname );
+        $sql = "SELECT state, $user_item FROM $this->projectid WHERE image='$this->imagefile'";
+        $res = try_query($sql);
+
+        list( $curr_page_state, $curr_page_owner ) = mysqli_fetch_row($res);
+        if ( !in_array( $curr_page_state, $allowed_states ) )
+        {
+            $err = "\n"
+                . "    "
+                . sprintf(
+                    _("This operation (%s) requires that the page be in one of the following states:"),
+                    $op_name )
+                . "\n"
+                . "        "
+                . implode( $allowed_states, ' ' )
+                . "\n"
+                . "    "
+                . sprintf( _("But it is in %s"), $curr_page_state )
+                ;
+            throw new Exception($err);
+        }
+
+        if ( is_null($allowed_user_colname) )
+        {
+            // The operation can be done by anyone,
+            // as far as this level is concerned.
+            // (Higher levels may restrict who can do it.)
+        }
+        else
+        {
+            // The operation can only be done by the person who currently
+            // "owns" the page.
+            if ( $requesting_user != $curr_page_owner )
+            {
+                $err = "\n"
+                    . "    "
+                    . sprintf(
+                        _("This operation (%s) can only be done by the user who has the page checked out, which you are not."),
+                        $op_name )
+                    ;
+                throw new Exception($err);
+            }
+        }
+    }
+
+    function Page_UPDATE($settings )
+    {
+        try_query("UPDATE $this->projectid SET $settings WHERE image='$this->imagefile'");
     }
 } // end class
 

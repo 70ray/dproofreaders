@@ -4,7 +4,7 @@ include_once($relPath.'base.inc');
 include_once($relPath.'misc.inc'); // array_get()
 include_once($relPath.'slim_header.inc');
 
-require_login();
+//require_login();
 
 $projectid = array_get($_GET, 'projectid', null); // will get validated in AJAX call
 $proj_state = array_get($_GET, 'proj_state', null);

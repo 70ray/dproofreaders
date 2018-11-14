@@ -242,7 +242,7 @@ function Page_checkout( $projectid, $image, $round, $user )
 */
 // -----------------------------------------------------------------------------
 
-function Page_saveAsInProgress( $projectid, $image, $round, $user, $page_text )
+/*function Page_saveAsInProgress( $projectid, $image, $round, $user, $page_text )
 {
     _Page_require( $projectid, $image,
         array( $round->page_out_state, $round->page_temp_state ),
@@ -262,10 +262,10 @@ function Page_saveAsInProgress( $projectid, $image, $round, $user, $page_text )
     _log_page_event( $projectid, $image, 'saveAsInProgress', $user, $round, TRUE );
 
     return $round->page_temp_state;
-}
+}*/
 
 // -----------------------------------------------------------------------------
-
+/*
 function Page_saveAsDone( $projectid, $image, $round, $user, $page_text )
 {
     _Page_require( $projectid, $image,
@@ -289,7 +289,7 @@ function Page_saveAsDone( $projectid, $image, $round, $user, $page_text )
 
     return $round->page_save_state;
 }
-
+*/
 // -----------------------------------------------------------------------------
 
 function Page_reopen( $projectid, $image, $round, $user )
@@ -313,7 +313,7 @@ function Page_reopen( $projectid, $image, $round, $user )
 }
 
 // -----------------------------------------------------------------------------
-
+/*
 function Page_returnToRound( $projectid, $image, $round, $user )
 {
     _Page_require( $projectid, $image,
@@ -334,7 +334,7 @@ function Page_returnToRound( $projectid, $image, $round, $user )
     _project_adjust_n_available_pages( $projectid, +1 );
 
     return $round->page_avail_state;
-}
+}*/
 
 // -----------------------------------------------------------------------------
 
@@ -386,7 +386,7 @@ $PAGE_BADNESS_REASONS = array(
     _('Corrupted Image'),
     _('Other'),
 );
-
+/*
 function Page_markAsBad( $projectid, $image, $round, $user, $reason )
 {
     _Page_require( $projectid, $image,
@@ -402,7 +402,7 @@ function Page_markAsBad( $projectid, $image, $round, $user, $reason )
     " );
 
     _log_page_event( $projectid, $image, 'markAsBad', $user, $round, TRUE );
-}
+}*/
 
 // -----------------------------------------------------------------------------
 
@@ -438,15 +438,6 @@ function _Page_require(
     $user_item = ( is_null($allowed_user_colname) ? '0' : $allowed_user_colname );
     $sql = "SELECT state, $user_item FROM $projectid WHERE image='$image'";
     $res = try_query($sql);
-/*    $res = mysqli_query(DPDatabase::get_connection(), $sql);
-    if ( !$res )
-    {
-        echo "The following mysql query:<br>\n";
-        echo $sql, "<br>\n";
-        echo "raised the following error:<br>\n";
-        echo mysqli_error(DPDatabase::get_connection()), "<br>\n";
-        exit;
-    }*/
 
     list( $curr_page_state, $curr_page_owner ) = mysqli_fetch_row($res);
     if ( !in_array( $curr_page_state, $allowed_states ) )
@@ -493,16 +484,6 @@ function _Page_UPDATE( $projectid, $image, $settings )
 {
     $sql = "UPDATE $projectid SET $settings WHERE image='$image'";
     try_query($sql);
-/*
-    $res = mysqli_query(DPDatabase::get_connection(), $sql);
-    if ( !$res )
-    {
-        echo "The following mysql query:<br>\n";
-        echo $sql, "<br>\n";
-        echo "raised the following error:<br>\n";
-        echo mysqli_error(DPDatabase::get_connection()), "<br>\n";
-        exit;
-    }*/
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
