@@ -7,7 +7,7 @@ function get_langdata($project_id)
     // space is separator, 0 means no character in this position
     // this data would normally be obtained from the database
     // each character can be multibyte
-    // we are cheating by having this file encoded in utf8 when not utf8 site
+    // this file is encoded in utf8
     // otherwise would have to utf8_encode the strings
     $keyboards = array(
     array(

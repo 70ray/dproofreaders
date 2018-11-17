@@ -11,7 +11,7 @@ $test_log = '';
 $data = api_router($path);
 $data['log'] = $test_log;
 
-echo json_encode($data);
+echo json_encode($data, JSON_UNESCAPED_UNICODE);
 # ---------------------------------------------------------------------------
 function api_router($path)
 {

@@ -2,27 +2,19 @@
 $relPath="../pinc/";
 include_once($relPath.'base.inc');
 include_once($relPath.'user_is.inc');
-/*include_once($relPath.'site_vars.php'); // $utf8_site
-include_once($relPath.'misc.inc'); // html_safe()
-include_once($relPath.'Project.inc');
-include_once($relPath.'project_states.inc'); // project_states_text()
-include_once($relPath.'LPage.inc');
-include_once($relPath.'links.inc'); // private_message_link()
-include_once($relPath.'forum_interface.inc'); // get_forum_user_id()
-include_once('api_keydata.inc');*/
 
-function user($username, $action)
+function user_action($userNM, $action)
 {
     switch($action)
     {
     case 'projects':
-        return array('projects' => _get_projects_for_pm($username));
+        return array('projects' => _get_projects_for_pm($userNM));
     default:
         break;
     }
 }
 
-function identify($user_role)
+function user_is($user_role)
 {
     global $pguser;
 
@@ -78,5 +70,49 @@ function _get_project_states_in_order() {
     }
 
     return $projectStates;
+}
+
+function loginUser($userNM, $userPW)
+{
+    if(!login_forum_user($userNM, $userPW))
+    {
+//        log_message("fail 1");
+        return false;
+    }
+    // Look for user in 'users' table.
+    $q = sprintf("
+        SELECT * FROM users WHERE username='%s'
+        ", mysqli_real_escape_string(DPDatabase::get_connection(), $userNM)
+    );
+    $u_res = try_query($q);
+    $u_row = mysqli_fetch_assoc($u_res);
+    if (!$u_row)
+    {
+//        log_message("fail 2");
+        return false;
+//        login_failure('reg_mismatch', $destination);
+    }
+    // -------------------------------------
+    // The login is successful!
+
+    // Note that phpbb_users.username and users.username are non-BINARY varchar,
+    // so the SQL comparison "username='$userNM'" is evaluated case-insensitively.
+    // This means that the user may have just logged in by typing a username
+    // that's case-different from the username that they registered with.
+    // That is, $userNM may be case-different from $u_row['username'].
+    // (E.g., I registered as 'jmdyck', but I can login as 'JMDyck'.)
+    //
+    // However, some places in the PHP code do case-sensitive comparisons of
+    // usernames (e.g., the code that determines whether the user is entitled
+    // to pull a particular page out of DONE or IN-PROGRESS). For those places,
+    // it's important that we always use the same form of the username. Following
+    // the principle of least surprise, we use the form used at registration time,
+    // i.e. the form stored in the users table.
+    //
+    $userNM = $u_row['username'];
+
+    // Start the DP session.
+    dpsession_begin( $userNM );
+    return true;
 }
 // vim: sw=4 ts=4 expandtab

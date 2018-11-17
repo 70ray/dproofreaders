@@ -1,6 +1,6 @@
 /*global document window projectsUrl alert codeUrl messages
  $ apiUrl projectID projState imageID pageState confirm textControl picker
- Element splitControl */
+ Element splitControl location */
 
 var proofControl;
 $(function () {
@@ -73,7 +73,7 @@ $(function () {
     }
 
     function loadImageText(data) {
-  console.log(data);
+//  console.log(data);
         imageID = data.imageID;
         var pageInfo = sprintf(messages.pageNumber, imageID.slice(0, -4));
         if (data.prevLinks) {
@@ -273,21 +273,6 @@ $(function () {
         imageUrl = projectsUrl + projectID + "/";
     }
 
-    function loadSettings(data) {
-        settings = deepCopy(settings, JSON.parse(data.settings), true);
-//        console.log(settings);
-        setupProfile();
-        // check out a done or inprogress page
-        $.get(apiUrl, {'q': projectPagePath() + "/action/checkoutpage"}, loadImageText);
-    }
-
-    function setupLangs(data) {
-            console.log(data);
-        picker.loadKb(data.keyboards);
-        textArea.attr("dir", data.langdir);
-        $.get(apiUrl, {'q': 'v1/settings/get'}, loadSettings);
-    }
-
     function closeDropDowns() {
         $(".proof-menu-content").addClass('nodisp');
         $(window).unbind("click keydown");
@@ -318,8 +303,24 @@ $(function () {
         }
     }
 
-    // get key data before split setup because it affects height of toolbox
-    $.get(apiUrl, {'q': 'v1/project/' + projectID + "/action/langdata"}, setupLangs);
+    function loadSettings(data) {
+        settings = deepCopy(settings, JSON.parse(data.settings), true);
+//        console.log(settings);
+        setupProfile();
+        // check out a done or inprogress page
+        $.get(apiUrl, {'q': projectPagePath() + "/action/checkoutpage"}, loadImageText);
+    }
+
+    function setupLangs(data) {
+//console.log(data);
+        picker.loadKb(data.keyboards);
+        textArea.attr("dir", data.langdir);
+        $.get(apiUrl, {'q': 'v1/settings/get'}, loadSettings);
+    }
+
+    requireLogin().then(function () {
+        $.get(apiUrl, {'q': 'v1/project/' + projectID + "/action/langdata"}, setupLangs);
+    });
 
     proofControl = {
         zoomImage: function (ratio) {
@@ -497,7 +498,6 @@ $(function () {
         },
 
         reportBadPage: function () {
-//            window.location.replace(codeUrl + "tools/proofers/report_bad_page.php?id=" + projectID + "&expected_state=" + projState);
             window.location = codeUrl + "tools/proofers/report_bad_page.php?projectid=" + projectID + "&proj_state=" + projState + "&imagefile=" + imageID + "&page_state=" + pageState;
         },
 

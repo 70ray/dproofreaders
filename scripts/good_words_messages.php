@@ -17,5 +17,5 @@ $messages = [
     'unSelectAll' => _("Unselect all")
 ];
 
-array_walk($messages, function(&$item) { $item = javascript_safe($item);} );
-echo "var messages = ",  json_encode($messages), ";\n";
+//array_walk($messages, function(&$item) { $item = javascript_safe($item);} );
+echo "var messages = ",  json_encode($messages, JSON_UNESCAPED_UNICODE), ";\n";

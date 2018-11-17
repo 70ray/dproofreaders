@@ -6,8 +6,6 @@ include_once($relPath.'slim_header.inc');
 include_once($relPath.'proof_components.inc');
 include_once($relPath.'ProofreadingToolbox.inc');
 
-//require_login();
-
 // (User clicked on "Start Proofreading" link or
 // one of the links in "Done" or "In Progress" trays.)
 
@@ -24,8 +22,11 @@ $header_args = [
     ],
     "js_files" => [
         "$code_url/scripts/api.js",
-        "$code_url/scripts/messages.php",
+        "$code_url/scripts/proof_messages.php",
+        "$code_url/scripts/login_message.php",
+        "$code_url/scripts/key_titles.php",
         "$code_url/scripts/splitControl.js",
+        "$code_url/scripts/requireLogin.js",
         "$code_url/scripts/proof.js",
         "$code_url/scripts/text_tools.js",
         "$code_url/scripts/character_selector.js",

@@ -1,4 +1,4 @@
-/*global $ apiUrl messages splitControl pgUser */
+/*global $ apiUrl messages splitControl requireLogin */
 var sagws;
 $(function () {
     "use strict";
@@ -91,13 +91,14 @@ $(function () {
 
     splitControl.setSplit(1, 0.3);
 
-    $.getJSON(apiUrl, {'q': 'v1/identify/project_facilitator'})
-        .done(function (data) {
+    requireLogin().then(function () {
+        $.getJSON(apiUrl, {'q': 'v1/useris/project_facilitator'}).done(function (data) {
             $("#pm_name").val(data.name);
             if (data.project_facilitator) {
                 $("#input-user").show();
             }
         });
+    });
 
     sagws = {
         show: function () {

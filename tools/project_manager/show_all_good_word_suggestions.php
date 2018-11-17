@@ -9,8 +9,6 @@ include_once($relPath.'misc.inc'); // array_get(), get_integer_param(), surround
 include_once('./post_files.inc');
 include_once("./word_freq_table.inc");
 
-require_login();
-
 $submitLabel = _("Add selected words to Good Words List");
 $header_args = [
     "css_files" => [
@@ -20,12 +18,13 @@ $header_args = [
     "js_files" => [
         "$code_url/scripts/api.js",
         "$code_url/scripts/splitControl.js",
+        "$code_url/scripts/requireLogin.js",
         "$code_url/scripts/good_words.js",
         "$code_url/scripts/good_words_messages.php",
     ],
     "js_data" => "
+        var codeUrl = '$code_url/';
         var apiUrl = '$code_url/api/';
-        var pgUser = '$pguser';
     "
 ];
 

@@ -5,8 +5,6 @@ include_once($relPath.'misc.inc');
 include_once($relPath.'slim_header.inc');
 include_once($relPath.'Project.inc');
 
-require_login();
-
 // get variables passed into page
 $projectid = array_get($_GET, 'project', null); // will get validated in AJAX call
 $imagefile = array_get($_GET, 'imagefile', null);
@@ -22,6 +20,7 @@ $header_args = [
     "js_files" => [
         "$code_url/scripts/api.js",
         "$code_url/scripts/display_image_messages.php",
+        "$code_url/scripts/requireLogin.js",
         "$code_url/scripts/display_image.js",
     ],
     "js_data" =>

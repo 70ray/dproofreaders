@@ -49,11 +49,11 @@ function validate_state($project, $expected_state)
 //for 'return to round', 'out' and 'temp' -> 'available'.
 //for 'resume'(from project page) 'saved' -> 'temp'
 
-function get_available_page( $projectid, $proj_state, $pguser)
+function get_available_page( $projectid, $proj_state)
 // Returns an LPage, unless no page is available,
 // in which case throws an exception.
 {
-    global $preceding_proofer_restriction;
+    global $preceding_proofer_restriction, $pguser;
     // Make sure project is still in same state.
     $project = new Project($projectid);
     validate_state($project, $proj_state);
@@ -316,58 +316,64 @@ class LPage
             Page_checkout( $this->projectid, $this->imagefile, $this->round, $user );
     }
 */
-    function saveAsInProgress( $page_text, $user )
+    function saveAsInProgress($page_text)
     {
+        global $pguser;
+
         $round = $this->round;
-        $this->Page_require(array( $round->page_out_state, $round->page_temp_state ), $round->user_column_name, $user, 'saveAsInProgress');
+        $this->Page_require(array($round->page_out_state, $round->page_temp_state ), 'saveAsInProgress');
         $timestamp = time();
         $page_text = _normalize_page_text($page_text);
         $this->Page_UPDATE(sprintf("
             state='{$round->page_temp_state}',
             {$round->time_column_name}=$timestamp,
-            {$round->user_column_name}='$user',
+            {$round->user_column_name}='$pguser',
             {$round->text_column_name}='%s'
         ", mysqli_real_escape_string(DPDatabase::get_connection(), $page_text)));
-        _log_page_event( $projectid, $image, 'saveAsInProgress', $user, $round, TRUE );
+        $this->log_page_event('saveAsInProgress');
         $this->page_state = $round->page_temp_state;
         $this->reverting_to_orig = 0;
     }
 
-    function saveAsDone($text_data, $user)
+    function saveAsDone($page_text)
     {
+        global $pguser;
+
         $round = $this->round;
-        $this->Page_require( array( $round->page_out_state, $round->page_temp_state ), $round->user_column_name, $user, 'saveAsDone' );
+        $this->Page_require( array( $round->page_out_state, $round->page_temp_state ), 'saveAsDone' );
 
         $timestamp = time();
         $page_text = _normalize_page_text($page_text);
-        $this->Page_UPDATE( $projectid, $image, sprintf("
+        $this->Page_UPDATE(sprintf("
             state='{$round->page_save_state}',
             {$round->time_column_name}=$timestamp,
-            {$round->user_column_name}='$user',
+            {$round->user_column_name}='$pguser',
             {$round->text_column_name}='%s'
         ", mysqli_real_escape_string(DPDatabase::get_connection(), $page_text)));
 
-        _log_page_event( $projectid, $image, 'saveAsDone', $user, $round, TRUE );
-        _project_set_t_last_page_done( $projectid, $timestamp );
+        $this->log_page_event('saveAsDone');
+        _project_set_t_last_page_done( $this->projectid, $timestamp );
         $this->page_state = $round->page_save_state;
         // add to user page count
-        page_tallies_add( $round->id, $user, +1 );
+        page_tallies_add( $round->id, $pguser, +1 );
     }
 
-    function returnToRound($user)
+    function returnToRound()
     {
+        global $pguser;
+
         $round = $this->round;
-        $this->Page_require(array($round->page_out_state, $round->page_temp_state), $round->user_column_name, $user, 'returnToRound' );
+        $this->Page_require(array($round->page_out_state, $round->page_temp_state), 'returnToRound' );
         $timestamp = time();
 
         $this->Page_UPDATE("
             state='{$round->page_avail_state}',
             {$round->time_column_name}=$timestamp,
-            {$round->user_column_name}='$user'
+            {$round->user_column_name}='$pguser'
         " );
 
-        _log_page_event($projectid, $image, 'returnToRound', $user, $round, TRUE);
-        _project_adjust_n_available_pages( $projectid, +1 );
+        $this->log_page_event('returnToRound');
+        _project_adjust_n_available_pages( $this->projectid, +1 );
         $this->page_state = $round->page_avail_state;
     }
 
@@ -376,31 +382,31 @@ class LPage
         $this->reverting_to_orig = 1;
     }
 
-    function revertToSaved($pguser)
+    function revertToSaved()
     {
         $round = $this->round;
-        $this->Page_require(array($round->page_temp_state ), $round->user_column_name, $pguser, 'revertToSaved' );
+        $this->Page_require(array($round->page_temp_state ), 'revertToSaved' );
 
         $this->page_state = $round->page_temp_state;
         $this->reverting_to_orig = 0;
     }
 
-    function markAsBad( $user, $reason )
+    function markAsBad($reason )
     // Return TRUE if this report causes project to be marked bad.
     {
-        global $code_url, $site_abbreviation, $PAGE_BADNESS_REASONS;
+        global $code_url, $site_abbreviation, $PAGE_BADNESS_REASONS, $pguser;
 
         $round = $this->round;
-        $this->Page_require(array( $round->page_out_state, $round->page_temp_state ), $round->user_column_name, $user, 'markAsBad' );
+        $this->Page_require(array($round->page_out_state, $round->page_temp_state), 'markAsBad' );
 
-        $this->Page_UPDATE( $projectid, $image, "
+        $this->Page_UPDATE("
             state='{$round->page_bad_state}',
-            b_user='$user',
+            b_user='$pguser',
             b_code=$reason,
             {$round->text_column_name}={$round->prevtext_column_name}
         " );
 
-        _log_page_event( $projectid, $image, 'markAsBad', $user, $round, TRUE );
+        $this->log_page_event('markAsBad');
 
         // Advise PM that the page has been marked bad.
 		$body_blurb =
@@ -437,85 +443,64 @@ the project will automatically be made unavailable.";
 
     // -----------------------------------------------------------------------------
 
-    function resume_saved_page( $pguser )
+    function resume_saved_page()
     {
-        if ($this->page_state == $this->round->page_save_state)
+        global $pguser;
+
+        $round = $this->round;
+        if ($this->page_state == $round->page_save_state)
         {
             // Page comes from DONE.
-
             // no need to update text, just record state change
-            $this->page_state = Page_reopen( $this->projectid, $this->imagefile, $this->round, $pguser );
+            $this->Page_require(array( $round->page_save_state), 'reopen' );
+            $timestamp = time();
+
+            $this->Page_UPDATE("
+                state='{$round->page_temp_state}',
+                {$round->time_column_name}=$timestamp,
+                {$round->user_column_name}='$pguser'
+            " );
+
+            $this->log_page_event('reopen');
+            $this->page_state = $round->page_temp_state;
 
             // When it was saved, the user's page-count was incremented.
             // Now they are 'unsaving' it, so decrement their page-count.
             // They'll get it back if/when they save-as-done again.
             // (Plugs a former page-count cheat.)
 
-            page_tallies_add( $this->round->id, $pguser, -1 );
+            page_tallies_add( $round->id, $pguser, -1 );
         }
         else
         {
-            // Page comes from IN PROGRESS.
+            // Page comes from IN PROGRESS (temp or out).
 
             // Resuming such a page has no actual effect on the page,
             // though it might in the future.
 
             // For now, just confirm that the user is entitled to resume
             // this page. (In the DONE case, Page_reopen performs this check.)
-            $this->Page_require(array( $this->round->page_temp_state ), $this->round->user_column_name, $pguser, 'resumeSavedPage' );
+            $this->Page_require(array($round->page_out_state, $round->page_temp_state), 'resumeSavedPage' );
         }
     }
 
-    function Page_require($allowed_states, $allowed_user_colname, $requesting_user, $op_name )
+    function Page_require($allowed_states, $op_name )
     {
-        $user_item = ( is_null($allowed_user_colname) ? '0' : $allowed_user_colname );
-        $sql = "SELECT state, $user_item FROM $this->projectid WHERE image='$this->imagefile'";
-        $res = try_query($sql);
+        global $pguser;
 
-        list( $curr_page_state, $curr_page_owner ) = mysqli_fetch_row($res);
-        if ( !in_array( $curr_page_state, $allowed_states ) )
-        {
-            $err = "\n"
-                . "    "
-                . sprintf(
-                    _("This operation (%s) requires that the page be in one of the following states:"),
-                    $op_name )
-                . "\n"
-                . "        "
-                . implode( $allowed_states, ' ' )
-                . "\n"
-                . "    "
-                . sprintf( _("But it is in %s"), $curr_page_state )
-                ;
-            throw new Exception($err);
-        }
-
-        if ( is_null($allowed_user_colname) )
-        {
-            // The operation can be done by anyone,
-            // as far as this level is concerned.
-            // (Higher levels may restrict who can do it.)
-        }
-        else
-        {
-            // The operation can only be done by the person who currently
-            // "owns" the page.
-            if ( $requesting_user != $curr_page_owner )
-            {
-                $err = "\n"
-                    . "    "
-                    . sprintf(
-                        _("This operation (%s) can only be done by the user who has the page checked out, which you are not."),
-                        $op_name )
-                    ;
-                throw new Exception($err);
-            }
-        }
+        _Page_require($this->projectid, $this->imagefile, $allowed_states, $this->round->user_column_name, $pguser, $op_name);
     }
 
     function Page_UPDATE($settings )
     {
         try_query("UPDATE $this->projectid SET $settings WHERE image='$this->imagefile'");
+    }
+
+    function log_page_event($event_type)
+    {
+        global $pguser;
+
+        _log_page_event($this->projectid, $this->imagefile, $event_type, $pguser, $this->round, true);
     }
 } // end class
 

@@ -10,6 +10,7 @@ include_once($relPath.'project_events.inc');
 include_once($relPath.'site_vars.php'); // $auto_post_to_project_topic
 include_once($relPath.'user_project_info.inc');
 include_once($relPath.'User.inc');
+include_once($relPath.'log_message.inc');
 
 define('PT_AUTO', '[AUTO]');
 
@@ -299,7 +300,7 @@ class ProjectTransition
 
         if ($testing)
         {
-            echo "    settings: $settings<br>\n";
+            log_message("    settings: $settings<br>\n");
         }
 
         $res = mysqli_query(DPDatabase::get_connection(), "

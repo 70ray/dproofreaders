@@ -20,10 +20,10 @@ $(function () {
 //        console.log(data);
         if (data.projectBad) {
             alert(messages.markedAsBad);
-            window.location.replace(codeUrl + "/activity_hub.php");
+            window.location.replace(codeUrl + "activity_hub.php");
         } else {
             alert(messages.reportSubmitted);
-            window.location.replace(codeUrl + "/project.php?id=" + projectID + "&expected_state=" + projState);
+            window.location.replace(codeUrl + "project.php?id=" + projectID + "&expected_state=" + projState);
         }
     }
 
@@ -37,5 +37,7 @@ $(function () {
         }
     };
 
-    $.get(apiUrl, {"q": "v1/constants/page_badness_reasons"}, setupSelector);
+    requireLogin().then(function () {
+        $.get(apiUrl, {"q": "v1/constants/page_badness_reasons"}, setupSelector);
+    });
 });

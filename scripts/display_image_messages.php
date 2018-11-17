@@ -8,5 +8,5 @@ $messages = [
     'returnToProject' => _("Return to Project Page for %s"),
 ];
 
-array_walk($messages, function(&$item) { $item = javascript_safe($item);} );
-echo "var messages = ",  json_encode($messages), ";\n";
+//array_walk($messages, function(&$item) { $item = javascript_safe($item);} );
+echo "var messages = ",  json_encode($messages, JSON_UNESCAPED_UNICODE), ";\n";

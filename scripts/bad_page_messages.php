@@ -1,6 +1,6 @@
 <?php
-$relPath="../pinc/";
-include_once($relPath.'misc.inc'); // javascript_safe()
+//$relPath="../pinc/";
+//include_once($relPath.'misc.inc'); // javascript_safe()
 
 $messages = [
     'markedAsBad' => _("The project has now been marked as bad. Click 'OK' to Return to the Activity Hub"),
@@ -8,5 +8,5 @@ $messages = [
     'selectReason' => _("Please select a reason."),
 ];
 
-array_walk($messages, function(&$item) { $item = javascript_safe($item);} );
-echo "var messages = ",  json_encode($messages), ";\n";
+//array_walk($messages, function(&$item) { $item = javascript_safe($item);} );
+echo "var messages = ",  json_encode($messages, JSON_UNESCAPED_UNICODE), ";\n";

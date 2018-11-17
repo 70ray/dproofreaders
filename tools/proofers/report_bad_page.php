@@ -16,10 +16,11 @@ $header_args = [
     "js_files" => [
         "$code_url/scripts/api.js",
         "$code_url/scripts/bad_page_messages.php",
+        "$code_url/scripts/requireLogin.js",
         "$code_url/scripts/report_bad_page.js",
     ],
     "js_data" =>"
-        var codeUrl = '$code_url';
+        var codeUrl = '$code_url/';
         var apiUrl = '$code_url/api/';
         var projectID = '$projectid';
         var projState = '$proj_state';
@@ -58,6 +59,6 @@ echo "<select id='badness-reason'></select>";
 echo "</p>";
 
 echo "<input type='button' onclick='badPageControl.report();' value='".attr_safe(_("Submit Report and return to the project page"))."'> ";
-echo "<input type='button' value='".attr_safe(_("Cancel"))."' onclick='javascript:history.go(-1)'>";
+echo "<input type='button' value='".attr_safe(_("Cancel"))."' onclick='history.back()'>";
 
 // vim: sw=4 ts=4 expandtab

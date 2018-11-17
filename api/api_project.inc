@@ -86,6 +86,8 @@ class ProjectPage
     function __construct($projectID, $proj_state, $imageID, $page_state)
     {
         $this->lpage = get_indicated_LPage($projectID, $proj_state, $imageID, $page_state);
+        $this->projectid = $projectID;
+        $this->proj_state = $proj_state;
     }
 
     const TEXT = 1;
@@ -120,7 +122,7 @@ class ProjectPage
 
     function return_data($action)
     {
-        global $pguser, $utf8_site;
+        global $utf8_site;
 
         $text_data = array_get($_POST, 'text-data', '');
         if(!$utf8_site)
@@ -130,32 +132,32 @@ class ProjectPage
 
         switch($action) {
         case 'checkoutpage':
-            $this->lpage->resume_saved_page($pguser);
+            $this->lpage->resume_saved_page();
             return $this->page_data(self::TEXT + self::INFO); // send everything
             break;
         case 'returnpage':
-            $this->lpage->returnToRound($pguser);
+            $this->lpage->returnToRound();
             break;
         case 'reverttoorig':
-            $this->lpage->saveAsInProgress($text_data, $pguser);
+            $this->lpage->saveAsInProgress($text_data);
             $this->lpage->revertToOriginal();
             return $this->page_data(self::TEXT); // send text and state
         case 'reverttolastsave':
-            $this->lpage->revertToSaved($pguser);
+            $this->lpage->revertToSaved();
             return $this->page_data(self::TEXT);
         case 'saveasinprogress':
-            $this->lpage->saveAsInProgress($text_data, $pguser);
+            $this->lpage->saveAsInProgress($text_data);
             return $this->page_data(0); // just state
         case 'saveasdone':
-            $this->lpage->saveAsDone($text_data, $pguser);
+            $this->lpage->saveAsDone($text_data);
             break;
         case 'saveanddonext':
-            $this->lpage->saveAsDone($text_data, $pguser);
-            $this->lpage = get_available_page($project_id, $proj_state, $pguser);
+            $this->lpage->saveAsDone($text_data);
+            $this->lpage = get_available_page($this->projectid, $this->proj_state);
             return $this->page_data(self::TEXT + self::INFO);
         case 'reportbad':
             $reason = array_get($_REQUEST, 'reason', 0);
-            $project_bad = $this->lpage->markAsBad($pguser, $reason);
+            $project_bad = $this->lpage->markAsBad($reason);
             return array('projectBad' => $project_bad);
         default:
             throw new Exception("$action not implemented");
@@ -203,14 +205,12 @@ class ProjectPage
 
 function project_state_action($project_id, $proj_state, $action)
 {
-    global $pguser;
-
     switch ($action)
     {
     // returns page index (image file name) and changes page state to out
     // could be a stale link so validate
     case 'checkoutnextpage':
-        $lpage = get_available_page($project_id, $proj_state, $pguser);
+        $lpage = get_available_page($project_id, $proj_state);
         return array('imageID' => $lpage->imagefile, 'pageState' => $lpage->page_state);
     }
 }

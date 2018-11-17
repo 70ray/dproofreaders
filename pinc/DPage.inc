@@ -291,7 +291,7 @@ function Page_saveAsDone( $projectid, $image, $round, $user, $page_text )
 }
 */
 // -----------------------------------------------------------------------------
-
+/*
 function Page_reopen( $projectid, $image, $round, $user )
 {
     _Page_require( $projectid, $image,
@@ -310,7 +310,7 @@ function Page_reopen( $projectid, $image, $round, $user )
     _log_page_event( $projectid, $image, 'reopen', $user, $round, TRUE );
 
     return $round->page_temp_state;
-}
+}*/
 
 // -----------------------------------------------------------------------------
 /*
@@ -568,11 +568,11 @@ function _project_adjust_n_pages( $projectid, $adjustment )
         $expr = "n_pages + $adjustment";
     }
 
-    mysqli_query(DPDatabase::get_connection(), "
+        try_query("
         UPDATE projects
         SET n_pages = $expr
         WHERE projectid='$projectid'
-    ") or die(mysqli_error(DPDatabase::get_connection()));
+    ");
 }
 
 function _project_adjust_n_available_pages( $projectid, $adjustment )

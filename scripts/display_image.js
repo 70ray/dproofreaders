@@ -78,7 +78,9 @@ $(function () {
         $.get(apiUrl, {"q": "v1/project/" + project.projectid + "/action/listpages", "fields": ["image"]}, setup2);
     }
 
-    $.get(apiUrl, {'q': 'v1/project/' + projectID + "/action/listdata"}, setup1);
+    requireLogin().then(function () {
+        $.get(apiUrl, {'q': 'v1/project/' + projectID + "/action/listdata"}, setup1);
+    });
 
     displayControl = {
         setSize: function () {
