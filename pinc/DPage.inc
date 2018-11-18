@@ -379,7 +379,7 @@ function Page_clearRound( $projectid, $image, $round, $user )
 // -----------------------------------------------------------------------------
 
 $PAGE_BADNESS_REASONS = array(
-    _('No reason'),
+    _(' '),
     _('Missing Image'),
     _('Missing Text'),
     _('Image/Text Mismatch'),

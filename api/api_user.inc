@@ -76,7 +76,6 @@ function loginUser($userNM, $userPW)
 {
     if(!login_forum_user($userNM, $userPW))
     {
-//        log_message("fail 1");
         return false;
     }
     // Look for user in 'users' table.
@@ -88,7 +87,6 @@ function loginUser($userNM, $userPW)
     $u_row = mysqli_fetch_assoc($u_res);
     if (!$u_row)
     {
-//        log_message("fail 2");
         return false;
 //        login_failure('reg_mismatch', $destination);
     }

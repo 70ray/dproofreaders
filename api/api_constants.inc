@@ -5,11 +5,16 @@ include_once($relPath.'DPage.inc');
 
 function constants($type)
 {
-    global $PAGE_BADNESS_REASONS;
+    global $utf8_site, $PAGE_BADNESS_REASONS;
 
     switch($type) {
     case 'page_badness_reasons':
-        return array('reasons' => $PAGE_BADNESS_REASONS);
+        $data = $PAGE_BADNESS_REASONS;
+        if(!$utf8_site)
+        {
+            array_walk($data, function(&$item) { $item = utf8_encode($item);} );
+        }
+        return array('reasons' => $data);
     default:
         break;
     }

@@ -11,7 +11,12 @@ $test_log = '';
 $data = api_router($path);
 $data['log'] = $test_log;
 
-echo json_encode($data, JSON_UNESCAPED_UNICODE);
+$retval = json_encode($data, JSON_UNESCAPED_UNICODE);
+if(!$retval)
+{
+    $retval = json_encode(array("error" => "json error: " . json_last_error_msg()));
+}
+echo $retval;
 # ---------------------------------------------------------------------------
 function api_router($path)
 {
