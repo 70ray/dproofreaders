@@ -1,6 +1,6 @@
 <?php
 $relPath="../pinc/";
-include_once($relPath.'misc.inc');
+include_once($relPath.'base.inc');
 
 $messages = [
     'noImages' => _("There are no images"),
@@ -8,5 +8,8 @@ $messages = [
     'returnToProject' => _("Return to Project Page for %s"),
 ];
 
-//array_walk($messages, function(&$item) { $item = javascript_safe($item);} );
-echo "var messages = ",  json_encode($messages, JSON_UNESCAPED_UNICODE), ";\n";
+if(!$utf8_site)
+{
+    array_walk($messages, function(&$item) { $item = utf8_encode($item);} );
+}
+echo "var messages = ",  json_encode($messages), ";\n";

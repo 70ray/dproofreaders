@@ -1,7 +1,6 @@
 <?php
 $relPath="../pinc/";
-include_once($relPath.'misc.inc');
-include_once($relPath.'gettext_setup.inc');
+include_once($relPath.'base.inc');
 
 $messages = [
     'lastMod' => _("Suggestions since the project's Good Words List was last modified are included."),
@@ -17,5 +16,8 @@ $messages = [
     'unSelectAll' => _("Unselect all")
 ];
 
-//array_walk($messages, function(&$item) { $item = javascript_safe($item);} );
-echo "var messages = ",  json_encode($messages, JSON_UNESCAPED_UNICODE), ";\n";
+if(!$utf8_site)
+{
+    array_walk($messages, function(&$item) { $item = utf8_encode($item);} );
+}
+echo "var messages = ",  json_encode($messages), ";\n";

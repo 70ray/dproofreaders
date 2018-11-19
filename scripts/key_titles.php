@@ -1,6 +1,6 @@
 <?php
 $relPath="../pinc/";
-include_once($relPath.'misc.inc');
+include_once($relPath.'base.inc');
 
 $key_titles = [
     '¶' => _('pilcrow'),
@@ -9,9 +9,8 @@ $key_titles = [
     '·' => _('mid-dot'),
 ];
 
-function make_safe(&$item)
+if(!$utf8_site)
 {
-    $item = javascript_safe($item);
+    array_walk($key_titles, function(&$item) { $item = utf8_encode($item);} );
 }
-//array_walk($key_titles, 'make_safe');
-echo "var keyTitles = ",  json_encode($key_titles, JSON_UNESCAPED_UNICODE), ";\n";
+echo "var keyTitles = ",  json_encode($key_titles), ";\n";

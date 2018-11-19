@@ -1,6 +1,6 @@
 <?php
-//$relPath="../pinc/";
-//include_once($relPath.'misc.inc');
+$relPath="../pinc/";
+include_once($relPath.'base.inc');
 
 $messages = [
     'confirmReturn' => _("This will discard all changes you have made on this page. Are you sure you want to return this page to the current round?"),
@@ -12,9 +12,8 @@ $messages = [
     'confirmRemove' => _("Are you sure you want to remove %s?"),
 ];
 
-/*function make_safe(&$item)
+if(!$utf8_site)
 {
-    $item = javascript_safe($item);
-}*/
-//array_walk($messages, 'make_safe');
-echo "var messages = ",  json_encode($messages, JSON_UNESCAPED_UNICODE), ";\n";
+    array_walk($messages, function(&$item) { $item = utf8_encode($item);} );
+}
+echo "var messages = ", json_encode($messages), ";\n";

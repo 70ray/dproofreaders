@@ -20,6 +20,8 @@ echo $retval;
 # ---------------------------------------------------------------------------
 function api_router($path)
 {
+    global $utf8_site;
+
     $path_elements = explode('/', $path);
     $api_version = array_shift($path_elements);
     if($api_version !== 'v1')
@@ -56,8 +58,13 @@ function api_router($path)
     catch(Exception $exception)
     {
         http_response_code(400);
+        $message = $exception->getMessage();
+        if(!$utf8_site)
+        {
+            $message = utf8_encode($message);
+        }
         return array(
-            "error" => "The following error occurred: " . $exception->getMessage(),
+            "error" => "The following error occurred: " . $message,
         );
     }
 }

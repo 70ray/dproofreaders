@@ -207,11 +207,8 @@ function project_state_action($project_id, $proj_state, $action)
 {
     switch ($action)
     {
-    // returns page index (image file name) and changes page state to out
-    // could be a stale link so validate
     case 'checkoutnextpage':
-        $lpage = get_available_page($project_id, $proj_state);
-        return array('imageID' => $lpage->imagefile, 'pageState' => $lpage->page_state);
+        return get_available_page($project_id, $proj_state);
     }
 }
 

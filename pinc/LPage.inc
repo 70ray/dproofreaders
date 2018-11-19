@@ -50,8 +50,8 @@ function validate_state($project, $expected_state)
 //for 'resume'(from project page) 'saved' -> 'temp'
 
 function get_available_page( $projectid, $proj_state)
-// Returns an LPage, unless no page is available,
-// in which case throws an exception.
+// Returns empty message, imagefilename and page state, unless no page is available,
+// in which case returns a message.
 {
     global $preceding_proofer_restriction, $pguser;
     // Make sure project is still in same state.
@@ -68,38 +68,38 @@ function get_available_page( $projectid, $proj_state)
     $err = can_user_get_pages_in_project( $pguser, $project, $round );
     if ($err)
     {
-        throw new Exception($err);
+        return array('message' => $err);
     }
     if ( $project->difficulty == 'beginner' and $round->is_a_mentor_round() )
     {
-            // For beginner projects in a mentor round,
-            // we serve up pages in a different order,
-            // to facilitate mentoring:
-            // 1) Mentors like to give prompt feedback.
-            // 2) Mentors like to deal with all of one proofreader's pages at a time.
-            //
-            // We look at the save-times recorded in the mentee round for pages
-            // in this project, and for each mentee, ascertain their earliest
-            // such save-time, and then order the mentees according to that time.
-            // (So the mentee with the "longest-waiting" page comes first.
-            // In the unlikely event that two mentees have exactly the same
-            // earliest-save-time (down to the second), we break the tie by
-            // taking the users in alphabetical order by username.)
-            //
-            // Taking the mentees in the above order, we serve each one's pages
-            // in 'book order' (i.e., ordered by 'image' field).
-            //
-            // (See http://www.pgdp.net/phpBB3/viewtopic.php?p=1027908#p1027908 and following.)
-            $order = "
-                (
-                    SELECT MIN({$round->mentee_round->time_column_name})
-                    FROM $projectid
-                    WHERE {$round->mentee_round->user_column_name}
-                      = p.{$round->mentee_round->user_column_name}
-                ),
-                {$round->mentee_round->user_column_name},
-                image
-            ";
+        // For beginner projects in a mentor round,
+        // we serve up pages in a different order,
+        // to facilitate mentoring:
+        // 1) Mentors like to give prompt feedback.
+        // 2) Mentors like to deal with all of one proofreader's pages at a time.
+        //
+        // We look at the save-times recorded in the mentee round for pages
+        // in this project, and for each mentee, ascertain their earliest
+        // such save-time, and then order the mentees according to that time.
+        // (So the mentee with the "longest-waiting" page comes first.
+        // In the unlikely event that two mentees have exactly the same
+        // earliest-save-time (down to the second), we break the tie by
+        // taking the users in alphabetical order by username.)
+        //
+        // Taking the mentees in the above order, we serve each one's pages
+        // in 'book order' (i.e., ordered by 'image' field).
+        //
+        // (See http://www.pgdp.net/phpBB3/viewtopic.php?p=1027908#p1027908 and following.)
+        $order = "
+            (
+                SELECT MIN({$round->mentee_round->time_column_name})
+                FROM $projectid
+                WHERE {$round->mentee_round->user_column_name}
+                  = p.{$round->mentee_round->user_column_name}
+            ),
+            {$round->mentee_round->user_column_name},
+            image
+        ";
     }
 
     // The page to be retrieved must be an available page, of course.
@@ -177,13 +177,12 @@ function get_available_page( $projectid, $proj_state)
     $imagefile = mysqli_fetch_row($res)[0];
     if(!$imagefile)
     {
-        throw new Exception(_("No more files are available for proofreading in this round of the project."));
+        return array('message' => _("No more files are available for proofreading in this round of the project."));
     }
 
     _log_page_event( $projectid, $imagefile, 'checkout', $pguser, $round, TRUE );
     _project_adjust_n_available_pages( $projectid, -1 );
-    $lpage = new LPage( $projectid, $imagefile, $new_state, 0 );
-    return $lpage;
+    return array('message' => '', 'imageID' => $imagefile, 'pageState' => $new_state);
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

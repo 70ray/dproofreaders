@@ -12,7 +12,6 @@ function v1_project_action($params)
     return project($projectID, $action);
 }
 
-// post because not idempotent - checks out a new page every time
 function v1_project_state_action($params)
 {
     check_login();
@@ -32,7 +31,6 @@ function v1_project_state_page_state_action($params)
     $action = $params[4];
     $project_page = new ProjectPage($projectID, $proj_state, $imageID, $page_state);
     return $project_page->return_data($action);
-//    return project_page_action($projectID, $proj_state, $imageID, $page_state, $action);
 }
 
 function v1_settings($params)
