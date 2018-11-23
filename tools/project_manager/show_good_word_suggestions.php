@@ -8,28 +8,114 @@ include_once($relPath.'misc.inc'); // get_integer_param(), get_enumerated_param(
 include_once('./post_files.inc');
 include_once("./word_freq_table.inc");
 
-//require_login();
+require_login();
 
-$projectid = array_get($_GET, 'projectid', null); // will get validated in AJAX call
+$datetime_format = "%A, %B %e, %Y %X";
+
+set_time_limit(0); // no time limit
+
+$projectid  = validate_projectID('projectid', @$_REQUEST['projectid']);
+$fileObject = get_project_word_file($projectid,"good");
+$timeCutoff = get_integer_param($_REQUEST, 'timeCutoff', $fileObject->mod_time, 0, null);
+$freqCutoff = get_integer_param($_REQUEST, 'freqCutoff', 5, 0, null);
+
+enforce_edit_authorization($projectid);
+
+if($timeCutoff==0)
+    $time_cutoff_text = _("<b>All proofreader suggestions</b> are included in the results.");
+else
+    $time_cutoff_text = sprintf(_("Only proofreader suggestions made <b>after %s</b> are included in the results."),strftime($datetime_format,$timeCutoff));
+
+
+// $format determines what is presented from this page:
+//   'html' - page is rendered with frequencies included
+//   'file' - all words and frequencies are presented as a
+//            downloaded file
+// 'update' - update the list
+$format = get_enumerated_param($_REQUEST, 'format', 'html', array('html', 'file', 'update'));
+
+if($format=="update") {
+    $postedWords = parse_posted_words($_POST);
+
+    $words = load_project_good_words($projectid);
+    $words = array_merge($words,$postedWords);
+    save_project_good_words($projectid,$words);
+
+    $format="html";
+}
+
+list($all_suggestions_w_freq,$all_suggestions_w_occurrences,$round_suggestions_w_freq,$round_suggestions_w_occurrences,$rounds,$round_page_count,$messages) =
+    _get_word_list($projectid,$timeCutoff);
 
 $title = _("Candidates for Good Words List from Proofreaders");
 $page_text = sprintf(_("Displayed below are the words that proofreaders have suggested (via the %s button) in the WordCheck interface that have not been already included in the project's Good Words List."),"<img src='$code_url/graphics/Book-Plus-Small.gif'>");
 $page_text .= " ";
 $page_text .= _("The results list also shows how many times each word occurs in the project text and how many times each word was suggested by proofreaders.");
 
-output_header($title, NO_STATSBAR);
-echo "<h1>$title</h1>";
+if($format == "file") {
+    $filename="${projectid}_proofer_suggestions.txt";
+    header("Content-type: text/plain");
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    // The cache-control and pragma is a hack for IE not accepting filenames
+    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+    header('Pragma: public');
 
-//echo_page_header($title,$projectid);
+    echo $title . "\r\n";
+    echo sprintf(_("Project: %s"),get_project_name($projectid)) . "\r\n";
+    echo "\r\n";
+    echo strip_tags($page_text) . "\r\n";
+    echo "\r\n";
+    echo_page_instruction_text( "good", $format );
+    echo "\r\n";
+    echo_download_text( $projectid, $format );
+    echo "\r\n";
+    echo strip_tags($time_cutoff_text) . "\r\n";
+    echo _("Format: [word] - [frequency in text] - [frequency suggested]") . "\r\n";
+    echo "\r\n";
+
+    // print out the complete list first
+    echo _("All rounds") . "\r\n";
+    foreach( $all_suggestions_w_freq as $word => $freq )
+        echo "$word - $freq - " . $all_suggestions_w_occurrences[$word] . "\r\n";
+    echo "\r\n";
+
+    // now per round
+    if(count($rounds)) {
+        foreach($rounds as $round) {
+            $round_string=sprintf(_("Round %s"),$round);
+            $page_num_string=sprintf(_("Number of pages with data: %d"), $round_page_count[$round]);
+            echo "$round_string\r\n";
+            echo "$page_num_string\r\n"; 
+            foreach( $round_suggestions_w_freq[$round] as $word => $freq)
+                echo "$word - $freq - " . $round_suggestions_w_occurrences[$round][$word] . "\r\n";
+            echo "\r\n";
+        }
+    }
+
+    // we're done here, exit
+    exit;
+} elseif($format == "html") {
+    // fall-through
+} else {
+    assert(false);
+}
+
+// how many instances (ie: frequency sections) are there?
+$instances = count( $rounds ) + 1;
+// what are the cutoff options?
+$cutoffOptions = array(1,2,3,4,5,10,25,50);
+
+output_header($title, NO_STATSBAR, array("js_data" => get_cutoff_script($cutoffOptions,$instances)));
+echo_page_header($title,$projectid);
 
 // what is the initial cutoff frequency?
-//$initialFreq=getInitialCutoff($freqCutoff,$cutoffOptions,$all_suggestions_w_freq);
+$initialFreq=getInitialCutoff($freqCutoff,$cutoffOptions,$all_suggestions_w_freq);
 
 echo "<p>$page_text</p>";
 
-//echo_page_instruction_text( "good", $format );
+echo_page_instruction_text( "good", $format );
 
-/*echo_any_warnings_errors( $messages );
+echo_any_warnings_errors( $messages );
 
 echo "<form action='show_good_word_suggestions.php' method='get'>";
 echo "<p>$time_cutoff_text ";
@@ -220,6 +306,6 @@ function _get_word_list($projectid,$timeCutoff) {
 
     return array($all_suggestions_w_freq, $all_suggestions_w_occurrences, $round_suggestions_w_freq, $round_suggestions_w_occurrences,$rounds, $round_page_count, $messages);
 }
-*/
+
 // vim: sw=4 ts=4 expandtab
 ?>
