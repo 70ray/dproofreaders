@@ -45,7 +45,7 @@ class ProofreadingToolbox
 
     function draw_tool_buttons()
     {
-        echo "<div>";
+        echo "<div class='proof-only'>";
         draw_tool_button('i', _('Italics'), '<i>i</i>', 'textControl.surroundSelection("<i>","</i>");', 'format-tool');
         draw_tool_button('b', _('Bold'), '<b>B</b>', 'textControl.surroundSelection("<b>","</b>");', 'format-tool');
         draw_tool_button('s', _('Small Caps markup'), '<span style="font-variant: small-caps;">Sc</span>', 'textControl.surroundSelection("<sc>","</sc>");', 'format-tool');

@@ -83,3 +83,30 @@ button:disabled {
 .nodisp {
     display: none;
 }
+
+#wordcheck-pre {
+    background-color: #FFF8DC;
+    margin: 0;
+    padding-left: 1em;
+    height:100%;
+    overflow:auto;
+}
+
+.transparent-button {
+    padding:0;
+    background-color: Transparent;
+}
+
+span.aw {
+    background-color: white;
+    color: black;
+}
+
+span.hl {
+    background-color: yellow;
+    color: black;
+}
+
+.WC-only {
+    display: none;
+}

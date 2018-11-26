@@ -9,12 +9,11 @@ include_once($relPath.'LPage.inc');
 include_once($relPath.'links.inc'); // private_message_link()
 include_once($relPath.'forum_interface.inc'); // get_forum_user_id()
 include_once($relPath.'wordcheck_engine.inc');
+include_once($relPath.'utils.inc'); // maybe_encode_array
 include_once('api_keydata.inc');
 
 function project($project_id, $action)
 {
-    global $utf8_site;
-
     switch($action)
     {
     case 'listdata':
@@ -24,10 +23,7 @@ function project($project_id, $action)
             $fields = ['nameofwork', 'projectid'];
         }
         $data = get_project_data($project_id, $fields);
-        if(!$utf8_site)
-        {
-            array_walk($data, function(&$item) { $item = utf8_decode($item);} );
-        }
+        maybe_decode_array($data);
         return array('project' => $data);
 
     case 'listpages':
@@ -50,10 +46,7 @@ function project($project_id, $action)
         authorise_edit($project_id);
         $good_words = array_get($_POST, 'words', json_encode(array()));
         $good_words = json_decode($good_words);
-        if(!$utf8_site)
-        {
-            array_walk($good_words, function(&$item) { $item = utf8_decode($item);} );
-        }
+        maybe_decode_array($good_words);
         project_add_good_words($project_id, $good_words);
         break;
 
@@ -88,6 +81,7 @@ class ProjectPage
         $this->lpage = get_indicated_LPage($projectID, $proj_state, $imageID, $page_state);
         $this->projectid = $projectID;
         $this->proj_state = $proj_state;
+        $this->imageID = $imageID;
     }
 
     const TEXT = 1;
@@ -120,7 +114,7 @@ class ProjectPage
         return $data;
     }
 
-    function return_data($action)
+    function get_text()
     {
         global $utf8_site;
 
@@ -129,6 +123,19 @@ class ProjectPage
         {
             $text_data = utf8_decode($text_data);
         }
+        return $text_data;
+    }
+
+    function get_array($label)
+    {
+        $the_array = json_decode(array_get($_POST, $label, ''));
+        maybe_decode_array($the_array);
+        return $the_array;
+    }
+
+    function return_data($action)
+    {
+        global $pguser;
 
         switch($action) {
         case 'checkoutpage':
@@ -139,26 +146,42 @@ class ProjectPage
             $this->lpage->returnToRound();
             break;
         case 'reverttoorig':
-            $this->lpage->saveAsInProgress($text_data);
+            $this->lpage->saveAsInProgress($this->get_text());
             $this->lpage->revertToOriginal();
             return $this->page_data(self::TEXT); // send text and state
         case 'reverttolastsave':
             $this->lpage->revertToSaved();
             return $this->page_data(self::TEXT);
         case 'saveasinprogress':
-            $this->lpage->saveAsInProgress($text_data);
+            $this->lpage->saveAsInProgress($this->get_text());
             return $this->page_data(0); // just state
         case 'saveasdone':
-            $this->lpage->saveAsDone($text_data);
+            $this->lpage->saveAsDone($this->get_text());
             break;
         case 'saveanddonext':
-            $this->lpage->saveAsDone($text_data);
+            $this->lpage->saveAsDone($this->get_text());
             $this->lpage = get_available_page($this->projectid, $this->proj_state);
             return $this->page_data(self::TEXT + self::INFO);
         case 'reportbad':
             $reason = array_get($_REQUEST, 'reason', 0);
             $project_bad = $this->lpage->markAsBad($reason);
             return array('projectBad' => $project_bad);
+        case 'wordcheck':
+            $text_data = $this->get_text();
+            $this->lpage->saveAsInProgress($text_data);
+            global $aspell_temp_dir;
+            if(!is_dir($aspell_temp_dir))
+            {
+                mkdir($aspell_temp_dir);
+            }
+
+            $aux_languages = $this->get_array('languages');
+            return make_wordcheck_data($text_data, $this->projectid, $this->imageID, $aux_languages);
+
+        case 'save_wordcheck_event':
+            save_wordcheck_event($this->projectid, $this->lpage->round->id, $this->imageID, $pguser, $this->get_array('accepted-words'), array());
+            break;
+
         default:
             throw new Exception("$action not implemented");
             break;
@@ -210,6 +233,81 @@ function project_state_action($project_id, $proj_state, $action)
     case 'checkoutnextpage':
         return get_available_page($project_id, $proj_state);
     }
+}
+
+function maybe_encode($text)
+{
+    global $utf8_site;
+
+    if(!$utf8_site)
+    {
+        $text = utf8_encode($text);
+    }
+    return $text;
+}
+
+
+define('WC_TEXT',   0);
+
+class WcChunks {
+    function __construct($text_data)
+    {
+        $this->text_data = $text_data;
+        $this->chunks = array();
+        $this->flags = array();
+        $this->text_index = 0;
+    }
+
+    function add_plain($word_index)
+    {
+        $length = $word_index - $this->text_index;
+        if($length)
+        {
+            $this->flags[] = WC_TEXT;
+            $this->chunks[] = maybe_encode(substr($this->text_data, $this->text_index, $length));
+            $this->text_index = $word_index;
+        }
+    }
+
+    function add_word($level, $word)
+    {
+        $this->flags[] = $level;
+        $this->chunks[] = maybe_encode($word);
+        $this->text_index += strlen($word);
+    }
+}
+
+function make_wordcheck_data($text_data, $projectid, $imagefile, $aux_languages)
+{
+    if(!$aux_languages)
+    {
+        $aux_languages = array_values(get_project_languages($projectid));
+    }
+    // make an array of chunks and flags:0 plain text 1,2,... bad word
+    $wc_chunks = new WcChunks($text_data);
+    
+    list($bad_word_with_level, $languages, $messages) =
+        get_bad_words_for_text( $text_data, $projectid, $imagefile, $aux_languages, array(), 'LEVELS' );
+    $badWords = array_keys($bad_word_with_level);
+
+    // find the index for each word in text
+    foreach(get_all_words_in_text($text_data,TRUE) as $word_index => $word)
+    {
+        if(in_array($word, $badWords)) {
+            // is there some plain text before bad word?
+            $wc_chunks->add_plain($word_index);
+            $wc_chunks->add_word($bad_word_with_level[$word], $word);
+        }
+    }
+    $wc_chunks->add_plain(strlen($text_data));
+    
+    maybe_encode_array($languages);
+    return array(
+        'flags' => $wc_chunks->flags,
+        'chunks' => $wc_chunks->chunks,
+        'languages' => $languages,
+        'messages' => $messages
+    );
 }
 
 function project_good_word_suggestions($projectid, $days)

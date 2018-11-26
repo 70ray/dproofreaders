@@ -1,6 +1,8 @@
 /*global $ document textControl keyTitles*/
 
 var picker;
+var focusedItem;
+
 $(function () {
     "use strict";
     var charSelector = $("#char-selector");
@@ -16,6 +18,11 @@ $(function () {
         $('#id_' + newCode, charSelector).addClass('selected-tab');
         largeChar.value = ''; // remove old character
         textControl.focusText();
+    }
+
+    function setCaret(cPos) {
+        focusedItem.selectionStart = cPos;
+        focusedItem.selectionEnd = cPos;
     }
 
     function loadKb(kbData) {

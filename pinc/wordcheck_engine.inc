@@ -4,6 +4,7 @@ include_once($relPath.'Project.inc');
 include_once($relPath.'languages.inc');
 include_once($relPath.'iso_lang_list.inc'); // langcode3_for_langname
 include_once($relPath.'misc.inc'); // str_contains
+include_once($relPath.'errors.inc'); // try_query()
 
 // regex of word characters
 // This is used when splitting a text into words.
@@ -41,7 +42,7 @@ define('WC_SITE',    2);
 define('WC_PROJECT', 3);
 define('WC_PAGE',    4);
 
-function get_bad_words_for_text( $text, $projectid, $imagefile, $aux_language, $adhoc_good_words, $which_result_values )
+function get_bad_words_for_text( $text, $projectid, $imagefile, $aux_languages, $adhoc_good_words, $which_result_values )
 // Arguments:
 //   text - the text for which bad words are sought
 //          This can be a string or an array of strings. If the latter, the
@@ -66,19 +67,7 @@ function get_bad_words_for_text( $text, $projectid, $imagefile, $aux_language, $
 //  -- an array: each value is a warning/error.
 {
     // Get the list of languages that we'll use.
-    {
-        $languages = array_values(get_project_languages($projectid));
-
-        // add the aux_language if supplied
-        if ($aux_language != "")
-        {
-            $languages[] = $aux_language;
-        }
-
-        // unique the array, no point in checking one language more than once
-        $languages = array_unique($languages);
-    }
-
+    $languages = $aux_languages;
     $input_words_w_freq = get_distinct_words_in_text( $text );
 
     $acc = new BadWordAccumulator();
@@ -514,14 +503,10 @@ function save_wordcheck_event($projectid,$round,$page,$proofer,$suggestions,$cor
 
     $time = time();
 
-    $sql = "INSERT INTO wordcheck_events SET
+    try_query("INSERT INTO wordcheck_events SET
             projectid='$projectid', timestamp=$time, image='$page',
             round_id='$round', username='$proofer', suggestions='$suggestion_list',
-            corrections='$correction_list'";
-
-    if(mysqli_query(DPDatabase::get_connection(), $sql) === FALSE) {
-        return sprintf(_("Error adding suggestions to wordcheck_events: %s"),mysqli_error(DPDatabase::get_connection()));
-    }
+            corrections='$correction_list'");
 }
 
 function count_wordcheck_suggestion_events($projectid, $start_time=0) 
@@ -804,17 +789,11 @@ function save_word_list( $path, $words )
 
 // Returns an associative array of all languages for a project
 //   $array[$langcode]=$language;
-function get_project_languages($projectid) {
+function get_project_languages($projectid)
+{
     $returnArray = array();
 
-    try
-    {
-        $project = new Project($projectid);
-    }
-    catch(NonexistentProjectException $exception)
-    {
-        return $returnArray;
-    }
+    $project = new Project($projectid);
     $languages = preg_split('/ with /', $project->language);
 
     foreach( $languages as $language ) {
@@ -974,7 +953,7 @@ function get_all_words_in_text( $text, $with_offsets=FALSE )
     $n_matches = preg_match_all( $word_pattern, $text, $matches, $flags );
     if ( $n_matches === FALSE )
     {
-        die("get_all_words_in_text: An error occurred.");
+        throw new Exception("get_all_words_in_text: An error occurred.");
     }
 
     if ( $with_offsets )

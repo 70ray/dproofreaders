@@ -42,16 +42,16 @@ function echo_controls()
 //    global $code_url, $userP;
 
     $proof_buttons = [
-        new ControlButton('proofControl.revertToOriginal();', _("Save & Revert to Original Document"), 'bt8.png'),
-        new ControlButton('proofControl.revertToLastSave();', _("Revert to Last Save"), 'bt7.png', 'revert_button'),
-        new ControlButton('proofControl.saveAsInProgress();', _("Save as 'In Progress'"), 'bt3.png'),
-        new ControlButton('proofControl.saveAndDoNext();', _("Save as 'Done' & Proofread Next Page"), 'bt2.png'),
-        new ControlButton('proofControl.saveAsDone();', _("Save as 'Done'"), 'bt13.png'),
-        new ControlButton('proofControl.stopProof();', _("Stop Proofreading"), 'bt1.png'),
-        new ControlButton('proofControl.returnPage();', _("Return Page to Round"), 'bt15.png'),
-//        new ControlButton('proofControl.wordCheck();', _("WordCheck"), 'bt16.png'),
+        new ControlButton('proofControl.revertToOriginal();', _("Save & Revert to Original Document"), 'bt8.png', 'proof-only'),
+        new ControlButton('proofControl.revertToLastSave();', _("Revert to Last Save"), 'bt7.png', 'revert_button proof-only'),
+        new ControlButton('proofControl.saveAsInProgress();', _("Save as 'In Progress'"), 'bt3.png', 'proof-only'),
+        new ControlButton('proofControl.saveAndDoNext();', _("Save as 'Done' & Proofread Next Page"), 'bt2.png', 'proof-only'),
+        new ControlButton('proofControl.saveAsDone();', _("Save as 'Done'"), 'bt13.png', 'proof-only'),
+        new ControlButton('proofControl.stopProof();', _("Stop Proofreading"), 'bt1.png', 'proof-only'),
+        new ControlButton('proofControl.returnPage();', _("Return Page to Round"), 'bt15.png', 'proof-only'),
+        new ControlButton('proofControl.wordCheck();', _("WordCheck"), 'bt16.png', 'proof-only'),
 //        new ControlButton('showNW();', _("Show All Text"), 'bt9.png'),
-        new ControlButton('proofControl.reportBadPage();', _("Report Bad Page"), 'bt14.png'),
+        new ControlButton('proofControl.reportBadPage();', _("Report Bad Page"), 'bt14.png', 'proof-only'),
 //        new ControlButton('proofControl.preview();', _("Preview"), 'bt20.png'),
          new ControlButton('proofControl.projectComments();', _("Project Comments"), 'bt12.png', '', _("View Project Comments in New Window")),
          new ControlButton('proofControl.viewImage();', _("Image"), 'bt10.png', '', _("View Image in New Window")),
@@ -64,18 +64,14 @@ function echo_controls()
     (new ControlButton('proofControl.setSplit(0);', _('Switch to Horizontal'), 'bt5.png', 'v_split'))->draw(true);
 
     // Image size control
-//    echo "<span class='ilb'>", html_safe(_("Image")), "&nbsp;";
     echo "<button type='button' onclick='proofControl.zoomImage(0.909)' title='", attr_safe(_('Zoom out')), "'>-</button>";
     echo "<button type='button' onclick='proofControl.zoomImage(1.1)' title='", attr_safe(_('Zoom in')), "'>+</button>";
     echo "<button type='button' onclick='proofControl.sizeImage(\"fit-width\")' title='", attr_safe(_('Fit Width')), "'>&harr;</button>";
     echo "<button type='button' onclick='proofControl.sizeImage(\"fit-height\")' title='", attr_safe(_('Fit Height')), "'>&varr;</button>";
     echo "<button type='button' onclick='proofControl.sizeImage(\"intrinsic\")' title='", attr_safe(_('Intrinsic Size')), "'>I</button>";
-    echo "</span>";
-
-    echo "<div id='proof_control' class='inline'>\n";
 
     // profile menu - close on click
-    echo "<div class='dropdown'><button type='button' class='dropdown_button' onclick='proofControl.showProfileMenu();'>", html_safe(_('Profile')), "&nbsp;^</button><div class='proof-menu-content nodisp setting-grid-wrapper' id='profile_menu'>\n";
+    echo "<div class='dropdown proof-only'><button type='button' class='dropdown_button' onclick='proofControl.showProfileMenu(this);'>", html_safe(_('Profile')), "&nbsp;^</button><div class='proof-menu-content nodisp setting-grid-wrapper'>\n";
     echo "<div class='box_2col center-align' id='profile-name'>Profile name</div>\n";
     echo "<div class='right-align'><button type='button' onclick='proofControl.selectProfile();'>", html_safe(_('Select Profile')), "</button></div><div><select id='list-select-profiles'></select></div>\n";
     echo "<div class='right-align'><button type='button' onclick='proofControl.saveProfile();'>", html_safe(_('Save')), "</button></div><div></div>\n";
@@ -85,7 +81,7 @@ function echo_controls()
     echo "</div></div>\n"; // end of profile dropdown
 
     // settings dropdown - do not close on any click or ms edge and ie color controls won't work
-    echo "<div class='dropdown'><button type='button' class='dropdown_button' onclick='proofControl.showMenu(\"proof_settings\", 1);'>", html_safe(_('Settings')), "&nbsp;^</button><div class='proof-menu-content nodisp setting-grid-wrapper' id='proof_settings'>\n";
+    echo "<div class='dropdown proof-only'><button type='button' class='dropdown_button' onclick='proofControl.showMenu(this, 1);'>", html_safe(_('Settings')), "&nbsp;^</button><div class='proof-menu-content nodisp setting-grid-wrapper'>\n";
     echo "<div class='right-align'><label for='image_back_color'>", html_safe(_('Image Background')), "</label></div><div><input type='color' id='image_back_color' onchange='proofControl.setImageBackColor(this)'></div>\n";
     echo "<div class='right-align'><label for='text_color'>", html_safe(_('Text Color')), "</label></div><div><input type='color' id='text_color' onchange='proofControl.setTextColor(this);'></div>\n";
     echo "<div class='right-align'><label for='back_color'>", html_safe(_('Text Background')), "</label></div><div><input type='color' id='back_color' onchange='proofControl.setBackColor(this)'></div>\n";
@@ -99,7 +95,7 @@ function echo_controls()
     echo "</div></div>\n"; // end of Settings dropdown
 
     // proofreading menu
-    echo "<div class='dropdown'><button type='button' class='dropdown_button' onclick='proofControl.showMenu(\"proof_menu\", 2);'>", html_safe(_('Menu')), "&nbsp;^</button><div class='proof-menu-content nodisp' id='proof_menu'>\n";
+    echo "<div class='dropdown'><button type='button' class='dropdown_button' onclick='proofControl.showMenu(this, 2);'>", html_safe(_('Menu')), "&nbsp;^</button><div class='proof-menu-content nodisp'>\n";
     foreach($proof_buttons as $button)
     {
         $button->draw(false);
@@ -108,8 +104,8 @@ function echo_controls()
     echo "</div></div>\n"; // end of menu dropdown
 
     // font controls
-    echo "<select id='font-select' title='", attr_safe(_("Change Font Face")), "' onChange='proofControl.changeFontFamily(this)'></select>\n";
-    echo "<select id='font-size-select' title='", attr_safe(_("Change Font Size")), "' onChange='proofControl.changeFontSize(this)'></select>\n";
+    echo "<select id='font-select' class='proof-only' title='", attr_safe(_("Change Font Face")), "' onChange='proofControl.changeFontFamily(this)'></select>\n";
+    echo "<select id='font-size-select' class='proof-only' title='", attr_safe(_("Change Font Size")), "' onChange='proofControl.changeFontSize(this)'></select>\n";
 
     // icons
     echo "<div id='icon_bar' class='inline'>";
@@ -118,8 +114,16 @@ function echo_controls()
         $button->draw(true);
     }
 
-    echo "</div>"; // end of icon_bar
-    echo "</div>"; // end of proof_control div
+    echo "</div>\n"; // end of icon_bar
+    echo "<button type='button' class='WC-only' onclick='wordCheck.quit();' title='", attr_safe(_("Abandon corrections and return to proofreading this page")), "'>", html_safe(_('Quit WordCheck')), "</button>\n";
+    echo "<button type='button' class='WC-only' onclick='wordCheck.applyCorrections();' title='", attr_safe(_("Keep corrections and return to proofreading this page")), "'>", html_safe(_('Submit Corrections')), "</button>\n";
+
+    echo "<div class='dropdown WC-only'><button type='button' class='dropdown_button' onclick='proofControl.showMenu(this, 1);'>", html_safe(_('Dictionaries')), "&nbsp;^</button><div class='proof-menu-content nodisp'>\n";
+    echo "<span id='lang-data' class='WC-only'></span>
+<select id='lang_select' class='WC-only' multiple></select>
+<button type='button' class='WC-only' onclick='wordCheck.rerunAuxLang();' title='", attr_safe(_("Check page against an additional language")), "'>", html_safe(_('Check')), "</button>";
+    echo "</div></div>\n"; // end of Dictionaries dropdown
+
     echo "&nbsp;<span id='page-info' class='small bold'></span>";
     echo "</div>"; // end of control div
 }

@@ -21,6 +21,7 @@ $header_args = [
         "$code_url/styles/toolbox.css",
     ],
     "js_files" => [
+        "$code_url/scripts/misc.js",
         "$code_url/scripts/api.js",
         "$code_url/scripts/proof_messages.php",
         "$code_url/scripts/login_message.php",
@@ -28,6 +29,7 @@ $header_args = [
         "$code_url/scripts/splitControl.js",
         "$code_url/scripts/requireLogin.js",
         "$code_url/scripts/proof.js",
+        "$code_url/scripts/word_check.js",
         "$code_url/scripts/text_tools.js",
         "$code_url/scripts/character_selector.js",
     ],
@@ -46,7 +48,7 @@ slim_header(_("Proofreading Interface"), $header_args);
 echo "<div id='topbar'></div>";
 echo "<div id='pane_1'><div class='center-align' id='imagedisplay'><img id='scanimage' class='middle-align' src='' alt=''></div></div>";
 echo "<div id='dragbar'></div>";
-echo "<div id='pane_2'><div id = 'proofdiv' class='center-align'><textarea id='text_area'></textarea></div></div>";
+echo "<div id='pane_2'><div id ='proofdiv'><pre id='wordcheck-pre'></pre><textarea id='text_area'></textarea></div></div>";
 echo "<div id='botbar'><div class='control-div'>";
 echo_controls();
 $toolbox = new ProofreadingToolbox();

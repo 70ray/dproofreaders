@@ -1,8 +1,11 @@
 <?php
+$relPath="../pinc/";
+
 include_once('api_project.inc');
 include_once('api_settings.inc');
 include_once('api_constants.inc');
 include_once('api_user.inc');
+include_once('api_languages.inc');
 // DP API v1
 function v1_project_action($params)
 {
@@ -44,6 +47,12 @@ function v1_constants($params)
 {
     check_login();
     return constants($params[0]);
+}
+
+function v1_langwithdict()
+{
+    check_login();
+    return languages();
 }
 
 function v1_user_action($params)

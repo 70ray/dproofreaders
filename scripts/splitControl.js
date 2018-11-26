@@ -110,7 +110,7 @@ $(function () {
         },
 
         reLayout: reLayout,
-        getRatio() {
+        getRatio: function () {
             return splitRatio;
         }
     };

@@ -1,6 +1,8 @@
 /*global document window projectsUrl alert codeUrl messages
  $ apiUrl projectID projState imageID pageState confirm textControl picker
- Element splitControl location */
+ Element splitControl focusedItem requireLogin wordCheck sprintf*/
+
+// pageState initially comes from the url and can be subsequently changed by ajax
 
 var proofControl;
 $(function () {
@@ -10,6 +12,7 @@ $(function () {
     var removeFontSelector = document.getElementById("font-remove");
     var textArea = $("#text_area");
     var imageDiv = $("#imagedisplay");
+    var wordCheckPre = $("#wordcheck-pre");
     var imageUrl;
     var profile = {};
 
@@ -42,10 +45,6 @@ $(function () {
         fontSize: '14px'
     };
 
-    function sprintf(string, p1) {
-        return string.replace("%s", p1);
-    }
-
     function setupToolbox(isFormatting) {
         if (!isFormatting) {
             $(".format-tool", '#tool_box').hide();
@@ -64,16 +63,19 @@ $(function () {
         setPageState(data);
     }
 
-    function loadText(data) {
-//    console.log(data);
-        setPageState(data);
-        textArea.val(data.text);
-        textArea.focus();
+    function focusProof() {
+        focusedItem = document.getElementById("text_area");
+        textControl.focusText();
         textControl.setCaret(0);
     }
 
+    function loadText(data) {
+        setPageState(data);
+        textArea.val(data.text);
+        focusProof();
+    }
+
     function loadImageText(data) {
-//  console.log(data);
         imageID = data.imageID;
         var pageInfo = sprintf(messages.pageNumber, imageID.slice(0, -4));
         if (data.prevLinks) {
@@ -84,6 +86,7 @@ $(function () {
         scanImage.alt = data.imageID;
         loadText(data);
         setupToolbox(data.isFormattingRound);
+        wordCheckPre.hide();
     }
 
     function toProjectPage() {
@@ -247,7 +250,6 @@ $(function () {
         profile.ratio = splitControl.getRatio();
         settings.profiles[newProfileName] = deepCopy(settings.profiles[newProfileName], profile);
         settings.profileName = newProfileName;
-//        setProfileName();
         saveSettings();
     }
 
@@ -303,16 +305,34 @@ $(function () {
         }
     }
 
+    function disableProof() {
+        $(".proof-only").hide();
+        textArea.hide();
+        focusedItem = null;
+    }
+
+    function showMenu(theButton, mode) {
+        closeDropDowns();
+        $(theButton).next().removeClass('nodisp');
+        switch (mode) {
+        case 1:
+            $(window).click(closeOnClickOutside);
+            break;
+        case 2:
+            $(window).click(closeOnClick);
+            break;
+        }
+        $(window).keydown(escapeDropDowns);
+    }
+
     function loadSettings(data) {
         settings = deepCopy(settings, JSON.parse(data.settings), true);
-//        console.log(settings);
         setupProfile();
         // check out a done or inprogress page
         $.get(apiUrl, {'q': projectPagePath() + "/action/checkoutpage"}, loadImageText);
     }
 
     function setupLangs(data) {
-//console.log(data);
         picker.loadKb(data.keyboards);
         textArea.attr("dir", data.langdir);
         $.get(apiUrl, {'q': 'v1/settings/get'}, loadSettings);
@@ -340,27 +360,12 @@ $(function () {
             splitControl.setSplit(mode, 0.5);
         },
 
-        showProfileMenu: function () {
-            closeDropDowns();
-            $("#profile_menu").removeClass('nodisp');
-            $(window).click(closeOnClickOutside);
-            $(window).keydown(escapeDropDowns);
+        showProfileMenu: function (theButton) {
+            showMenu(theButton, 1);
             drawProfileList();
         },
 
-        showMenu: function (id, mode) {
-            closeDropDowns();
-            $("#" + id).removeClass('nodisp');
-            switch (mode) {
-            case 1:
-                $(window).click(closeOnClickOutside);
-                break;
-            case 2:
-                $(window).click(closeOnClick);
-                break;
-            }
-            $(window).keydown(escapeDropDowns);
-        },
+        showMenu: showMenu,
 
         iconControl: function (control) {
             profile.showIcons = control.checked;
@@ -507,6 +512,19 @@ $(function () {
 
         viewImage: function () {
             window.open(codeUrl + "tools/project_manager/displayimage.php?project=" + projectID + "&imagefile=" + imageID);
-        }
+        },
+
+        wordCheck: function () {
+            disableProof();
+            wordCheck.enter();
+        },
+
+        enableProof: function () {
+            textArea.show();
+            focusProof();
+            $(".proof-only").show();
+        },
+
+        projectPagePath: projectPagePath
     };
 });

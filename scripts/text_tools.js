@@ -4,7 +4,6 @@ var textControl;
 
 $(function () {
     "use strict";
-    var textArea = document.getElementById("text_area");
     var startPos;
     var endPos;
     var scrollTop;
@@ -12,16 +11,16 @@ $(function () {
     var myText;
 
     function initialise() {
-        startPos = textArea.selectionStart;
-        endPos = textArea.selectionEnd;
-        scrollTop = textArea.scrollTop;
-        theText = textArea.value;
+        startPos = focusedItem.selectionStart;
+        endPos = focusedItem.selectionEnd;
+        scrollTop = focusedItem.scrollTop;
+        theText = focusedItem.value;
         myText = theText.substring(startPos, endPos);
     }
 
     function setCaret(cPos) {
-        textArea.selectionStart = cPos;
-        textArea.selectionEnd = cPos;
+        focusedItem.selectionStart = cPos;
+        focusedItem.selectionEnd = cPos;
     }
 
     function finalise(tagOpen, tagClose) {
@@ -31,11 +30,11 @@ $(function () {
         } else {
             subst = tagOpen + myText + tagClose;
         }
-        textArea.value = theText.slice(0, startPos) + subst + theText.slice(endPos);
-        textArea.focus();
+        focusedItem.value = theText.slice(0, startPos) + subst + theText.slice(endPos);
+        focusedItem.focus();
         var cPos = startPos + (tagOpen.length + myText.length + tagClose.length);
         setCaret(cPos);
-        textArea.scrollTop = scrollTop;
+        focusedItem.scrollTop = scrollTop;
     }
 
     function isFootnoteLabel(label) {
@@ -134,20 +133,35 @@ $(function () {
 
     textControl = {
         insertText: function (insertion) {
-            insertTags(insertion, '', true);
+            if (focusedItem) {
+                insertTags(insertion, '', true);
+                // for wordcheck input boxes
+                $(focusedItem).trigger("input");
+            }
         },
 
         focusText: function () {
-            textArea.focus();
+            if (focusedItem) {
+                focusedItem.focus();
+            }
         },
 
-        setCaret: setCaret,
+        setCaret: function (cPos) {
+            if (focusedItem) {
+                setCaret(cPos);
+            }
+        },
 
         surroundSelection: function (wOT, wCT) {
-            insertTags(wOT, wCT, false);
+            if (focusedItem) {
+                insertTags(wOT, wCT, false);
+            }
         },
 
         transformText: function (transformType) {
+            if (!focusedItem) {
+                return;
+            }
             initialise();
             switch (transformType) {
             case 'title-case':
@@ -169,7 +183,9 @@ $(function () {
         },
 
         replaceAllText: function (newText) {
-            textArea.value = newText;
+            if (focusedItem) {
+                focusedItem.value = newText;
+            }
         }
     };
 });
