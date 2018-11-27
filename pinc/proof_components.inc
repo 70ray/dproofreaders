@@ -70,7 +70,7 @@ function echo_controls()
     echo "<button type='button' onclick='proofControl.sizeImage(\"fit-width\")' title='", attr_safe(_('Fit Width')), "'>&harr;</button>";
     echo "<button type='button' onclick='proofControl.sizeImage(\"fit-height\")' title='", attr_safe(_('Fit Height')), "'>&varr;</button>";
     echo "<button type='button' onclick='proofControl.sizeImage(\"intrinsic\")' title='", attr_safe(_('Intrinsic Size')), "'>I</button>";
-    echo "</span>";
+//    echo "</span>";
 
     echo "<div id='proof_control' class='inline'>\n";
 
