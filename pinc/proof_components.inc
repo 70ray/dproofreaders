@@ -117,6 +117,7 @@ function echo_controls()
     echo "</div>\n"; // end of icon_bar
     echo "<button type='button' class='WC-only' onclick='wordCheck.quit();' title='", attr_safe(_("Abandon corrections and return to proofreading this page")), "'>", html_safe(_('Quit WordCheck')), "</button>\n";
     echo "<button type='button' class='WC-only' onclick='wordCheck.applyCorrections();' title='", attr_safe(_("Keep corrections and return to proofreading this page")), "'>", html_safe(_('Submit Corrections')), "</button>\n";
+    echo "<button type='button' class='WC-only' id='wcsaveandnext' onclick='wordCheck.saveAndNext();'>", html_safe(_("Save as 'Done' & Proofread Next Page")), "</button>\n";
 
     echo "<div class='dropdown WC-only'><button type='button' class='dropdown_button' onclick='proofControl.showMenu(this, 1);'>", html_safe(_('Dictionaries')), "&nbsp;^</button><div class='proof-menu-content nodisp'>\n";
     echo "<span id='lang-data' class='WC-only'></span>

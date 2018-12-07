@@ -59,10 +59,6 @@ $(function () {
         $(".revert_button").prop("disabled", disableButton);
     }
 
-    function loadState(data) {
-        setPageState(data);
-    }
-
     function focusProof() {
         focusedItem = document.getElementById("text_area");
         textControl.focusText();
@@ -325,21 +321,33 @@ $(function () {
         $(window).keydown(escapeDropDowns);
     }
 
+    function checkOutPage() {
+        $.getJSON(apiUrl, {'q': projectPagePath() + "/action/checkoutpage"}, loadImageText);
+    }
+
     function loadSettings(data) {
         settings = deepCopy(settings, JSON.parse(data.settings), true);
         setupProfile();
         // check out a done or inprogress page
-        $.get(apiUrl, {'q': projectPagePath() + "/action/checkoutpage"}, loadImageText);
+        checkOutPage();
     }
 
     function setupLangs(data) {
         picker.loadKb(data.keyboards);
         textArea.attr("dir", data.langdir);
-        $.get(apiUrl, {'q': 'v1/settings/get'}, loadSettings);
+        $.getJSON(apiUrl, {'q': 'v1/settings/get'}, loadSettings);
+    }
+
+    function saveAIP() {
+        return $.post(apiUrl, {'q': projectPagePath() + "/action/saveasinprogress", 'text-data': textArea.val()});
+    }
+
+    function saveAD() {
+        return $.post(apiUrl, {'q': projectPagePath() + "/action/saveasdone", 'text-data': textArea.val()});
     }
 
     requireLogin().then(function () {
-        $.get(apiUrl, {'q': 'v1/project/' + projectID + "/action/langdata"}, setupLangs);
+        $.getJSON(apiUrl, {'q': 'v1/project/' + projectID + "/action/langdata"}, setupLangs);
     });
 
     proofControl = {
@@ -474,25 +482,38 @@ $(function () {
 
         revertToLastSave: function () {
             if (confirm(messages.confirmRevertToLastSave)) {
-                $.get(apiUrl, {'q': projectPagePath() + "/action/reverttolastsave"}, loadText);
+                $.getJSON(apiUrl, {'q': projectPagePath() + "/action/reverttolastsave"}, loadText);
             }
         },
 
         saveAsInProgress: function () {
-            $.post(apiUrl, {'q': projectPagePath() + "/action/saveasinprogress", 'text-data': textArea.val()}, loadState);
+            saveAIP().done(function (data) {
+                setPageState(data);
+            });
         },
 
         saveAndDoNext: function () {
-            $.post(apiUrl, {'q': projectPagePath() + "/action/saveanddonext", 'text-data': textArea.val()}, loadImageText);
+            saveAD().then(function () {
+                return $.post(apiUrl, {'q': 'v1/project/' + projectID + "/state/" + projState + "/action/checkoutnextpage"});
+            }).then(function (data) {
+                if (data.message) {
+                    alert(data.message);
+                    toProjectPage();
+                } else {
+                    imageID = data.imageID;
+                    pageState = data.pageState;
+                    checkOutPage();
+                }
+            });
         },
 
         saveAsDone: function () {
-            $.post(apiUrl, {'q': projectPagePath() + "/action/saveasdone", 'text-data': textArea.val()}, toProjectPage);
+            saveAD().then(toProjectPage);
         },
 
         returnPage: function () {
             if (confirm(messages.confirmReturn)) {
-                $.get(apiUrl, {'q': projectPagePath() + "/action/returnpage"}, toProjectPage);
+                $.getJSON(apiUrl, {'q': projectPagePath() + "/action/returnpage"}, toProjectPage);
             }
         },
 
@@ -515,8 +536,11 @@ $(function () {
         },
 
         wordCheck: function () {
-            disableProof();
-            wordCheck.enter();
+            saveAIP().done(function (data) {
+                setPageState(data);
+                disableProof();
+                wordCheck.enter();
+            });
         },
 
         enableProof: function () {

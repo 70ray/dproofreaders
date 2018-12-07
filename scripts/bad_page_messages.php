@@ -1,6 +1,7 @@
 <?php
 $relPath="../pinc/";
 include_once($relPath.'base.inc');
+include_once($relPath.'utils.inc');
 
 $messages = [
     'markedAsBad' => _("The project has now been marked as bad. Click 'OK' to Return to the Activity Hub"),
@@ -8,8 +9,5 @@ $messages = [
     'selectReason' => _("Please select a reason."),
 ];
 
-if(!$utf8_site)
-{
-    array_walk($messages, function(&$item) { $item = utf8_encode($item);} );
-}
+maybe_encode_array($messages);
 echo "var messages = ",  json_encode($messages), ";\n";

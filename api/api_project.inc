@@ -10,6 +10,7 @@ include_once($relPath.'links.inc'); // private_message_link()
 include_once($relPath.'forum_interface.inc'); // get_forum_user_id()
 include_once($relPath.'wordcheck_engine.inc');
 include_once($relPath.'utils.inc'); // maybe_encode_array
+include_once($relPath.'log_message.inc');
 include_once('api_keydata.inc');
 
 function project($project_id, $action)
@@ -91,16 +92,11 @@ class ProjectPage
 
     function page_data($dataset)
     {
-        global $utf8_site;
-
         $data = array();
         if($dataset & self::TEXT)
         {
             $text = $this->lpage->get_text();
-            if(!$utf8_site)
-            {
-                $text = utf8_encode($text);
-            }
+            $text = maybe_encode($text);
             $data['text'] = $text;
             $data['imageID'] = $this->lpage->imagefile;
         }
@@ -114,7 +110,7 @@ class ProjectPage
         return $data;
     }
 
-    function get_text()
+    function get_post_text()
     {
         global $utf8_site;
 
@@ -146,29 +142,23 @@ class ProjectPage
             $this->lpage->returnToRound();
             break;
         case 'reverttoorig':
-            $this->lpage->saveAsInProgress($this->get_text());
+            $this->lpage->saveAsInProgress($this->get_post_text());
             $this->lpage->revertToOriginal();
             return $this->page_data(self::TEXT); // send text and state
         case 'reverttolastsave':
             $this->lpage->revertToSaved();
             return $this->page_data(self::TEXT);
         case 'saveasinprogress':
-            $this->lpage->saveAsInProgress($this->get_text());
+            $this->lpage->saveAsInProgress($this->get_post_text());
             return $this->page_data(0); // just state
         case 'saveasdone':
-            $this->lpage->saveAsDone($this->get_text());
+            $this->lpage->saveAsDone($this->get_post_text());
             break;
-        case 'saveanddonext':
-            $this->lpage->saveAsDone($this->get_text());
-            $this->lpage = get_available_page($this->projectid, $this->proj_state);
-            return $this->page_data(self::TEXT + self::INFO);
         case 'reportbad':
             $reason = array_get($_REQUEST, 'reason', 0);
             $project_bad = $this->lpage->markAsBad($reason);
             return array('projectBad' => $project_bad);
         case 'wordcheck':
-            $text_data = $this->get_text();
-            $this->lpage->saveAsInProgress($text_data);
             global $aspell_temp_dir;
             if(!is_dir($aspell_temp_dir))
             {
@@ -176,7 +166,7 @@ class ProjectPage
             }
 
             $aux_languages = $this->get_array('languages');
-            return make_wordcheck_data($text_data, $this->projectid, $this->imageID, $aux_languages);
+            return make_wordcheck_data($this->get_post_text(), $this->projectid, $this->imageID, $aux_languages);
 
         case 'save_wordcheck_event':
             save_wordcheck_event($this->projectid, $this->lpage->round->id, $this->imageID, $pguser, $this->get_array('accepted-words'), array());
@@ -312,8 +302,6 @@ function make_wordcheck_data($text_data, $projectid, $imagefile, $aux_languages)
 
 function project_good_word_suggestions($projectid, $days)
 {
-    global $utf8_site;
-
     $goodFileObject = get_project_word_file($projectid, "good");
     // set the timeCutoff
     if($days == -1)
@@ -380,10 +368,7 @@ function project_good_word_suggestions($projectid, $days)
         foreach($all_suggestions_w_freq as $word => $freq)
         {
             $occurences = $all_suggestions_w_occurrences[$word];
-            if(!$utf8_site)
-            {
-                $word = utf8_encode($word);
-            }
+            $word = maybe_encode($word);
             $suggestions_freq_occurences[] = array($word, $freq, $occurences);
         }
     }

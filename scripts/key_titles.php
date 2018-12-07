@@ -1,6 +1,7 @@
 <?php
 $relPath="../pinc/";
 include_once($relPath.'base.inc');
+include_once($relPath.'utils.inc');
 
 $key_titles = [
     '¶' => _('pilcrow'),
@@ -9,8 +10,5 @@ $key_titles = [
     '·' => _('mid-dot'),
 ];
 
-if(!$utf8_site)
-{
-    array_walk($key_titles, function(&$item) { $item = utf8_encode($item);} );
-}
+maybe_encode_array($key_titles);
 echo "var keyTitles = ",  json_encode($key_titles), ";\n";

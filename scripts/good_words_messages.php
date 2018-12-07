@@ -1,6 +1,7 @@
 <?php
 $relPath="../pinc/";
 include_once($relPath.'base.inc');
+include_once($relPath.'utils.inc');
 
 $messages = [
     'lastMod' => _("Suggestions since the project's Good Words List was last modified are included."),
@@ -16,8 +17,5 @@ $messages = [
     'unSelectAll' => _("Unselect all")
 ];
 
-if(!$utf8_site)
-{
-    array_walk($messages, function(&$item) { $item = utf8_encode($item);} );
-}
+maybe_encode_array($messages);
 echo "var messages = ",  json_encode($messages), ";\n";

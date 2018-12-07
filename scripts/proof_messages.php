@@ -13,7 +13,10 @@ $messages = [
     'confirmRemove' => _("Are you sure you want to remove %s?"),
     'confirmExit' => _("Changes have been made. OK to quit without saving?"),
     'unflag' => _("Unflag All &amp; Suggest Word"),
+    'disableAWLabel' => _("Word has been edited; unable to Suggest"),
     'dictionariesUsed' => _("Dictionaries used: <b>%s</b>."),
+    'pageChangedError' => _("Cannot save page from WordCheck. Words have been modified."),
+    'saveAndNext' => _("Save page as done and proofread the next available page"),
 ];
 
 maybe_encode_array($messages);

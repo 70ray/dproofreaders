@@ -2,7 +2,7 @@
 $relPath="../pinc/";
 include_once($relPath.'base.inc');
 
-function maybe_encode_array($the_array)
+function maybe_encode_array(&$the_array)
 {
     global $utf8_site;
 
@@ -12,7 +12,7 @@ function maybe_encode_array($the_array)
     }
 }
 
-function maybe_decode_array($the_array)
+function maybe_decode_array(&$the_array)
 {
     global $utf8_site;
 

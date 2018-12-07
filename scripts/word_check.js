@@ -18,6 +18,7 @@ $(function () {
     var chunks; // the raw text data from server
     var languages = [];  // array of languages used
     var langSelector = document.getElementById("lang_select");
+    var puncRegex = /[\.,;\:\?\!\*\/\(\)#@%\+\=\[\]\{\}\<\>\\"\$\|_¬¢£¥©®§°±¶·´¸º×¦¡¿\-»«¯÷¹²³¼½¾¤]/g;
 
     function attr_safe(string) {
         return string.replace(/'/g, "&#039;");
@@ -42,8 +43,7 @@ $(function () {
 //        console.log(data);
     }
 
-    function applyWordCheck(data) {
-        var puncRegex = /[\.,;\:\?\!\*\/\(\)#@%\+\=\[\]\{\}\<\>\\"\$\|_¬¢£¥©®§°±¶·´¸º×¦¡¿\-»«¯÷¹²³¼½¾¤]/g;
+    function drawWordCheck(data) {
         var badWordMessages = data.messages;
         if (badWordMessages.length) {
             var messageText = '';
@@ -92,19 +92,15 @@ $(function () {
         $.getJSON(apiUrl, {'q': 'v1/langwithdict'}, drawLangSelector);
     }
 
-    function quitWCDone() {
+    function quitWC() {
         wordCheckPre.hide();
         $(".WC-only").hide();
         proofControl.enableProof();
     }
 
-    function quitWC() {
+    function saveWCEvent() {
         // record that wordcheck has been done and any suggested words
-        $.post(apiUrl, {'q': proofControl.projectPagePath() + "/action/save_wordcheck_event", 'accepted-words': JSON.stringify(newAcceptedWords)}, quitWCDone);
-        // remember in case we enter wordcheck again
-        acceptedWords = acceptedWords.concat(newAcceptedWords);
-        // clear so we don't submit them again
-        newAcceptedWords = [];
+        return $.post(apiUrl, {'q': proofControl.projectPagePath() + "/action/save_wordcheck_event", 'accepted-words': JSON.stringify(newAcceptedWords)});
     }
 
     function wcApplyCorrections() {
@@ -119,13 +115,30 @@ $(function () {
     }
 
     function getWordCheckData() {
-        $.post(apiUrl, {'q': proofControl.projectPagePath() + "/action/wordcheck", 'text-data': origText, 'languages': JSON.stringify(languages)}, applyWordCheck);
+        $.post(apiUrl, {'q': proofControl.projectPagePath() + "/action/wordcheck", 'text-data': origText, 'languages': JSON.stringify(languages)}, drawWordCheck);
+    }
+
+    function setPageChanged(state) {
+        // state true if changed
+        pageChanged = state;
+        var title = state
+            ? messages.pageChangedError
+            : messages.saveAndNext;
+        $("#wcsaveandnext").prop("disabled", state).prop("title", title);
+    }
+
+    function wordChanged(theInput) {
+        return (theInput.value !== theInput.defaultValue);
     }
 
     wordCheck = {
         enter: function () {
+            // If we going in again use previously accepted words
+            acceptedWords = acceptedWords.concat(newAcceptedWords);
+            // clear so we don't submit them again
+            newAcceptedWords = [];
             origText = textArea.val();
-            pageChanged = false;
+            setPageChanged(false);
             $(".WC-only").css("display", "inline");
             // don't send accepted words, they will come back as bad again but we can mark them as aw
             getWordCheckData();
@@ -138,13 +151,18 @@ $(function () {
                     return;
                 }
             }
-            quitWC();
+            saveWCEvent().done(quitWC);
         },
 
         applyCorrections: function () {
             wcApplyCorrections();
             textArea.val(origText);
-            quitWC();
+            saveWCEvent().done(quitWC);
+        },
+
+        saveAndNext: function () {
+            // there cannot be any corrections if we get here since button disabled
+            saveWCEvent().done(quitWC, proofControl.saveAndDoNext());
         },
 
         rerunAuxLang: function () {
@@ -159,7 +177,9 @@ $(function () {
         acceptWord: function (theButton) {
             var word = $(theButton).prev().val();
             $("span").each(function () {
-                if ($("input", this).val() === word) {
+                // use default value, val could enable a changed word to be
+                // marked accepted but then the correction would not be submitted
+                if ($("input", this).prop("defaultValue") === word) {
                     $(this).html(word).addClass("aw");
                 }
             });
@@ -168,20 +188,21 @@ $(function () {
 
         disableAW: function (theInput) {
             var theButton = $(theInput).next();
-            // has it changed?
-            if (theInput.value !== theInput.defaultValue) {
-                pageChanged = true;
-                theButton.prop("disabled", true);
-                theButton.html("<img src='" + codeUrl + "graphics/Book-Plus-Small-Disabled.gif'>");
+            if (wordChanged(theInput)) {
+                setPageChanged(true);
+                theButton.prop("disabled", true)
+                    .prop("title", messages.disableAWLabel)
+                    .html("<img src='" + codeUrl + "graphics/Book-Plus-Small-Disabled.gif'>");
             } else {
-                theButton.prop("disabled", false);
-                theButton.html(acceptImage);
+                theButton.prop("disabled", false)
+                    .prop("title", messages.unflag)
+                    .html(acceptImage);
             }
         },
 
         evaluateWordChange: function (theInput) {
-            if (theInput.value !== theInput.defaultValue) {
-                pageChanged = true;
+            if (wordChanged(theInput)) {
+                setPageChanged(true);
             }
         },
 
