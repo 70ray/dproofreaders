@@ -95,6 +95,7 @@ do_update_pp_activity();
 $header_args = [
     "js_files" => [
         "$code_url/scripts/api.js",
+        "$code_url/scripts/misc.js",
         "$code_url/scripts/project.js",
     ],
     "js_data" => "

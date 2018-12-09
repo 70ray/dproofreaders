@@ -53,8 +53,8 @@ function echo_controls()
 //        new ControlButton('showNW();', _("Show All Text"), 'bt9.png'),
         new ControlButton('proofControl.reportBadPage();', _("Report Bad Page"), 'bt14.png', 'proof-only'),
 //        new ControlButton('proofControl.preview();', _("Preview"), 'bt20.png'),
-         new ControlButton('proofControl.projectComments();', _("Project Comments"), 'bt12.png', '', _("View Project Comments in New Window")),
-         new ControlButton('proofControl.viewImage();', _("Image"), 'bt10.png', '', _("View Image in New Window")),
+        new ControlButton('proofControl.projectComments();', _("Project Comments"), 'bt12.png', '', _("View Project Comments in New Window")),
+        new ControlButton('proofControl.viewImage();', _("Image"), 'bt10.png', '', _("View Image in New Window")),
     ];
 
     echo "<div id='control_div'>";

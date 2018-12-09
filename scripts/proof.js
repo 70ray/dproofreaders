@@ -53,6 +53,8 @@ $(function () {
 
     function setPageState(data) {
         pageState = data.pageState;
+        // make url agree so reload or back from report bad will work.
+        history.replaceState(null, null, makeProofURL(projectID, projState, imageID, pageState));
         // there could be a text button and an icon button
         // must end with 'temp' or 'out'
         var disableButton = (pageState.slice(-3) === "out");

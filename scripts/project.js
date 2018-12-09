@@ -10,7 +10,7 @@ $(function () {
                 if(data.message) {
                     alert(data.message);
                 } else {
-                    window.location = codeUrl + "tools/proofers/proof.php?projectid=" + projectID + "&proj_state=" + projState + "&imagefile=" + data.imageID + "&page_state=" + data.pageState;
+                    window.location = makeProofURL(projectID, projState, data.imageID, data.pageState);
                 }
             });
         }
