@@ -1,0 +1,75 @@
+body {
+    background-color: #CDC0B0;
+    margin: 0 0 0 2px;
+}
+
+.flexbox {
+    display: flex;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+/* default buttons have small text = 83% */
+.selector_button {
+    margin-top: 1px;
+    font-size: 90%;
+    padding: 0 0.3em 0 0.3em;
+    border: 1px solid black;
+    margin-right: 2px;
+    background-color: Bisque;
+}
+
+.tool-button {
+    padding: 0 4px;
+}
+
+.selected-tab {
+  background-color: Beige;
+}
+
+.key-block {
+  display: none;
+}
+
+.show {
+  display: block;
+}
+
+.char_box {
+  padding-top: 1px;
+}
+
+.big_text {
+    font-family: inherit;
+    font-size: 180%;
+    width: 1em;
+    background-color: #FFF8DC;
+    margin: 0.2em;
+}
+
+.picker {
+    font-family: inherit;
+    margin-top: 1px;
+    font-size: 90%;
+    background-color: Beige;
+    padding: 0;
+    width: 1.2em;
+    vertical-align: middle;
+}
+
+.invisible {
+    visibility: hidden;
+}
+
+/* adjust so tools do not jump around with differnt character pickers */
+#selector {
+    float: right;
+    min-width: 31em;
+    margin-left: 3px;
+}
+
+#tools {
+    flex: auto;
+}

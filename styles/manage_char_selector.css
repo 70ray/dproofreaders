@@ -1,0 +1,17 @@
+.container {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    grid-row-gap: 2px;
+    grid-column-gap: 0.5em;
+}
+
+/* use monospace and letter-spacing to see alignment between upper and lower
+  rows, Firefox increases size of input with letter-spacing but others do not */
+.mono-spaced {
+    font: 16px monospace;
+    letter-spacing: 0.3em;
+}
+
+button, select {
+    margin: 0.5em;
+}
