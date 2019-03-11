@@ -17,9 +17,12 @@ function slim_header($title="", $extra_args=array())
     global $code_url;
 
     // Include the slim_header stylesheet
+    $css_files = ["$code_url/styles/slim_header.css"];
     if(!isset($extra_args['css_files']))
-        $extra_args['css_files'] = array();
-    $extra_args['css_files'][] = "$code_url/styles/slim_header.css";
+    {
+        $extra_args['css_files'] = [];
+    }
+    $extra_args['css_files'] = array_merge($css_files, $extra_args['css_files']);
 
     output_html_header($title, $extra_args, False);
 
