@@ -27,7 +27,6 @@ function pickers($action)
             $where_clause = "WHERE code IN ($code_set)";
             $order_clause = "ORDER BY FIELD(code, $code_set)";
         }
-        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $result = mysqli_query(DPDatabase::get_connection(), "SELECT * FROM character_pickers $where_clause $order_clause");
         $pickers = mysqli_fetch_all($result, MYSQLI_ASSOC);
         maybe_utf8_encode_array($pickers);
@@ -36,7 +35,6 @@ function pickers($action)
     case 'list':
         // return array of all codes
         $codes = []; // initialise to empty array in case there is no data
-        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $result = mysqli_query(DPDatabase::get_connection(), "SELECT code FROM character_pickers");
         while($row = mysqli_fetch_assoc($result))
         {
@@ -53,7 +51,6 @@ function get_picker()
     check_login();
     $code = maybe_utf8_decode(array_get($_REQUEST, 'code', ''));
     $code = mysqli_real_escape_string(DPDatabase::get_connection(), $code);
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     $result = mysqli_query(DPDatabase::get_connection(), "SELECT * FROM character_pickers WHERE code='$code'");
     $picker = mysqli_fetch_assoc($result);
     maybe_utf8_encode_array($picker);
@@ -68,7 +65,6 @@ function put_picker($action)
     case 'delete':
         $code = maybe_utf8_decode(array_get($_REQUEST, 'code', ''));
         $code = mysqli_real_escape_string(DPDatabase::get_connection(), $code);
-        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         mysqli_query(DPDatabase::get_connection(), "DELETE FROM character_pickers WHERE code='$code'");
         break;
     case 'insert':
@@ -99,7 +95,6 @@ function ins_rep($method)
     }
     $upper = mysqli_real_escape_string($link, $new_picker['upper']);
     $lower = mysqli_real_escape_string($link, $new_picker['lower']);
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     mysqli_query(DPDatabase::get_connection(), "
         $method INTO character_pickers
         SET

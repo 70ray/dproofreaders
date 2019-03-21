@@ -3,8 +3,10 @@ $relPath="../pinc/";
 include_once($relPath.'base.inc');
 include_once('v1.inc');
 header('Content-Type: application/json');
+
+// can remove this if it is in base.inc
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $path = $_REQUEST["q"];
-$returnObject = null;
 
 // this is used for testing messages such as simulated emails
 $test_log = '';
