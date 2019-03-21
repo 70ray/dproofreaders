@@ -14,10 +14,10 @@ $(function () {
             upper: $("#upper-row").val(),
             lower: $("#lower-row").val()
         };
-        if (action === 'new') {
-            $.post(apiUrl, {'q': 'v1/picker/insert', 'data': JSON.stringify(pickerData)}, goBack);
+        if (action === "new") {
+            $.post(apiUrl, {"q": "v1/picker/insert", "data": JSON.stringify(pickerData)}, goBack);
         } else {
-            $.post(apiUrl, {'q': 'v1/picker/replace', 'data': JSON.stringify(pickerData)}, goBack);
+            $.post(apiUrl, {"q": "v1/picker/replace", "data": JSON.stringify(pickerData)}, goBack);
         }
     });
 
@@ -27,8 +27,8 @@ $(function () {
         $("#lower-row").val(picker.lower);
     }
 
-    if (action === 'edit') {
+    if (action === "edit") {
         $("#code").val(code);
-        $.getJSON(apiUrl, {'q': 'v1/picker', 'code': code}, fillForm);
+        $.getJSON(apiUrl, {"q": "v1/picker", "code": code}, fillForm);
     }
 });

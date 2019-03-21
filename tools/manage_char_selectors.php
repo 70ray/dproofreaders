@@ -26,7 +26,11 @@ $header_args = [
 
 output_header($title, NO_STATSBAR, $header_args);
 echo "<h1>", $title, "</h1>";
-echo "<select id='codes'></select>";
+echo "<div class='container'>";
+echo "<label for='codes'>", _("Code"), "</label><select id='codes'></select>";
+echo "<label for='upper-row'>", _("Upper row"), "</label><input type='text' class='mono-spaced' size='30' id='upper-row' readonly>\n";
+echo "<label for='lower-row'>", _("Lower row"), "</label><input type='text' class='mono-spaced' size='30' id='lower-row' readonly>\n";
+echo "</div>";
 echo "<button id='edit-button'>", _("Edit"), "</button>";
 echo "<button id='delete-button'>", _("Delete"), "</button><br>";
 echo "<button id='new-button'>", _("Add a new Character Selector"), "</button><br>";

@@ -7,13 +7,13 @@ $(function () {
 
     function enableBoard(newCode) {
         // hide the visible key block
-        $('.show', charSelector).removeClass('show');
+        $(".show", charSelector).removeClass("show");
         // show the new one
-        $('._' + newCode, charSelector).addClass('show');
+        $("._" + newCode, charSelector).addClass("show");
         // mark the new selected tab
-        $('.selected-tab', charSelector).removeClass('selected-tab');
-        $('#id_' + newCode, charSelector).addClass('selected-tab');
-        largeChar.value = ''; // remove old character
+        $(".selected-tab", charSelector).removeClass("selected-tab");
+        $("#id_" + newCode, charSelector).addClass("selected-tab");
+        largeChar.value = ""; // remove old character
         top.focusText();
     }
 
@@ -21,17 +21,17 @@ $(function () {
         var kbData = data.pickers;
         var initialSet = false;
         var initialCode;
-        var rowString = '';
+        var rowString = "";
         var selectorString = "<div id='selector_row'>";
         function drawRow(charRow) {
             rowString += "<div>";
-            var chars = charRow.split('');
+            var chars = charRow.split("");
             // this will fail for surrogate pairs
             // when utf8 implemented use following instead, doesn't work in IE
             // see https://stackoverflow.com/questions/4547609/how-do-you-get-a-string-to-a-character-array-in-javascript/34717402#34717402
             // var chars = charRow.split(/(?=.)/u);
             chars.forEach(function (character) {
-                if (' ' === character) {
+                if (" " === character) {
                     rowString += "<button type='button' class='picker invisible'></button>";
                 } else {
                     rowString += "<button type='button' class='picker'>" + character + "</button>";
@@ -72,8 +72,8 @@ $(function () {
 
     function getPickers(data) {
         // the code set could be overridden or modified by the project
-        $.getJSON(apiUrl, {'q': 'v1/pickers/get', 'code-set': data.string}, loadKb);
+        $.getJSON(apiUrl, {"q": "v1/pickers/get", "code-set": data.string}, loadKb);
     }
 
-    $.getJSON(apiUrl, {'q': 'v1/config/pickerset'}, getPickers);
+    $.getJSON(apiUrl, {"q": "v1/config/pickerset"}, getPickers);
 });

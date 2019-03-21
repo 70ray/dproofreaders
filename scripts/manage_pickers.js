@@ -4,6 +4,16 @@ $(function () {
     "use strict";
     var selector = document.getElementById("codes");
 
+    function fillForm(data) {
+        var picker = data.picker;
+        $("#upper-row").val(picker.upper);
+        $("#lower-row").val(picker.lower);
+    }
+
+    function getPicker() {
+        $.getJSON(apiUrl, {"q": "v1/picker", "code": selector.value}, fillForm);
+    }
+
     function drawSelector(data) {
         // populate selector
         // empty it first
@@ -16,6 +26,7 @@ $(function () {
             opt.text = code;
             selector.add(opt);
         });
+        getPicker();
     }
 
     function drawDefaultSet(data) {
@@ -23,11 +34,15 @@ $(function () {
     }
 
     function getCodes() {
-        $.get(apiUrl, {'q': 'v1/pickers/list'}, drawSelector);
+        $.get(apiUrl, {"q": "v1/pickers/list"}, drawSelector);
     }
 
     getCodes();
-    $.getJSON(apiUrl, {'q': 'v1/config/pickerset'}, drawDefaultSet);
+    $.getJSON(apiUrl, {"q": "v1/config/pickerset"}, drawDefaultSet);
+
+    $("#codes").change(function () {
+        getPicker();
+    });
 
     $("#edit-button").click(function () {
         window.location = codeUrl + "tools/edit_char_selector.php?action=edit&code=" + encodeURIComponent(selector.value);
@@ -35,7 +50,7 @@ $(function () {
 
     $("#delete-button").click(function () {
         if (confirm(sprintf(confirmDelete, selector.value))) {
-            $.post(apiUrl, {'q': 'v1/picker/delete', 'code': selector.value}, getCodes);
+            $.post(apiUrl, {"q": "v1/picker/delete", "code": selector.value}, getCodes);
         }
     });
 
@@ -44,7 +59,7 @@ $(function () {
     });
 
     $("#save-set").click(function () {
-        $.post(apiUrl, {'q': 'v1/config/pickerset', 'data': $("#def-set").val()});
+        $.post(apiUrl, {"q": "v1/config/pickerset", "data": $("#def-set").val()});
     });
 
 });
