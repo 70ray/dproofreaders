@@ -8,30 +8,6 @@ function pickers($action)
     check_login();
     switch($action)
     {
-    case 'get':
-        // return all (or a subset of) pickers
-        $code_set = array_get($_REQUEST, 'code-set', null);
-        if(!$code_set)
-        {
-            $where_clause = "";
-            $order_clause = "";
-        }
-        else
-        {
-            $code_set = mysqli_real_escape_string(DPDatabase::get_connection(), $code_set);
-            $code_set = explode(" ", $code_set);
-            // $code_set is now an array of codes
-            $code_set = surround_and_join($code_set, "'", "'", "," );
-            // now looks like 'A', 'E', 'U'
-            $code_set = maybe_utf8_decode($code_set);
-            $where_clause = "WHERE code IN ($code_set)";
-            $order_clause = "ORDER BY FIELD(code, $code_set)";
-        }
-        $result = mysqli_query(DPDatabase::get_connection(), "SELECT * FROM character_pickers $where_clause $order_clause");
-        $pickers = mysqli_fetch_all($result, MYSQLI_ASSOC);
-        maybe_utf8_encode_array($pickers);
-        return ['pickers' => $pickers];
-
     case 'list':
         // return array of all codes
         $codes = []; // initialise to empty array in case there is no data
@@ -43,6 +19,18 @@ function pickers($action)
         maybe_utf8_encode_array($codes);
         return ['codes' => $codes];
     }
+}
+
+// return pickers array from set of codes
+function get_pickers($picker_set)
+{
+    $picker_set = surround_and_join($picker_set, "'", "'", "," );
+    // now looks like 'A', 'E', 'U'
+    $result = mysqli_query(DPDatabase::get_connection(), "
+        SELECT * FROM character_pickers
+        WHERE code IN ($picker_set)
+        ORDER BY FIELD(code, $picker_set)");
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
 // actions for an single picker

@@ -1,8 +1,16 @@
 <?php
 include_once('api_keydata.inc');
 include_once('api_config_strings.inc');
+include_once('api_project.inc');
+include_once('api_user_settings.inc');
 
 // DP API v1
+function v1_project_picker_GET($params)
+{
+    $projectID = $params[0];
+    return project_picker($projectID);
+}
+
 function v1_pickers_GET($params)
 {
     return pickers($params[0]);
@@ -29,4 +37,16 @@ function v1_config_POST($params)
 {
     $id = $params[0];
     return put_config($id);
+}
+
+function v1_user_GET($params)
+{
+    $id = $params[0];
+    return get_user_setting($id);
+}
+
+function v1_user_POST($params)
+{
+    $id = $params[0];
+    return put_user_setting($id);
 }

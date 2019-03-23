@@ -7,8 +7,7 @@ function get_config($id)
 {
     check_login();
 
-    $result = mysqli_query(DPDatabase::get_connection(), "SELECT value FROM configuration_strings WHERE id='$id'");
-    return ['string' => maybe_utf8_encode(mysqli_fetch_assoc($result)["value"])];
+    return ['string' => maybe_utf8_encode(get_config_string($id))];
 }
 
 function put_config($id)
@@ -23,4 +22,10 @@ function put_config($id)
             id='$id',
             value='$data'
     ");
+}
+
+function get_config_string($id)
+{
+    $result = mysqli_query(DPDatabase::get_connection(), "SELECT value FROM configuration_strings WHERE id='$id'");
+    return mysqli_fetch_assoc($result)["value"];
 }

@@ -70,10 +70,5 @@ $(function () {
         });
     }
 
-    function getPickers(data) {
-        // the code set could be overridden or modified by the project
-        $.getJSON(apiUrl, {"q": "v1/pickers/get", "code-set": data.string}, loadKb);
-    }
-
-    $.getJSON(apiUrl, {"q": "v1/config/pickerset"}, getPickers);
+    $.getJSON(apiUrl, {"q": "v1/project/xx/picker"}, loadKb);
 });
