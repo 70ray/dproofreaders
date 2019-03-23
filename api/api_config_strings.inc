@@ -13,7 +13,7 @@ function get_config($id)
 function put_config($id)
 {
     check_login();
-
+    // should check if user is allowed to do this
     $data = maybe_utf8_decode(array_get($_REQUEST, 'data', ""));
     $data = mysqli_real_escape_string(DPDatabase::get_connection(), $data);
     mysqli_query(DPDatabase::get_connection(), "

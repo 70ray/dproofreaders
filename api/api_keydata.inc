@@ -48,6 +48,7 @@ function get_picker()
 function put_picker($action)
 {
     check_login();
+    // should check if user is allowed to do this
     switch($action)
     {
     case 'delete':

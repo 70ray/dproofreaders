@@ -2,8 +2,13 @@
 $relPath="./../pinc/";
 include_once($relPath.'base.inc');
 include_once($relPath.'theme.inc');
+include_once($relPath.'user_is.inc');
 
 require_login();
+if(!user_is_PM())
+{
+    die('permission denied');
+}
 
 $title = _("Manage Character Selectors");
 $confirm_delete = _("Are you sure you want to remove '%s'?");
