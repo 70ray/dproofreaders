@@ -23,8 +23,10 @@ $(function () {
 
     function fillForm(data) {
         var picker = data.picker;
-        $("#upper-row").val(picker.upper);
-        $("#lower-row").val(picker.lower);
+        if (picker) {
+            $("#upper-row").val(picker.upper);
+            $("#lower-row").val(picker.lower);
+        }
     }
 
     if (action === "edit") {

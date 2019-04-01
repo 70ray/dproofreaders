@@ -11,7 +11,11 @@ $(function () {
     }
 
     function getPicker() {
-        $.getJSON(apiUrl, {"q": "v1/picker", "code": selector.value}, fillForm);
+        var pickerCode = selector.value;
+        // if there are no pickers defined it will be null
+        if(pickerCode) {
+            $.getJSON(apiUrl, {"q": "v1/picker", "code": selector.value}, fillForm);
+        }
     }
 
     function drawSelector(data) {

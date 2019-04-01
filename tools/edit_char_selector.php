@@ -3,12 +3,12 @@ $relPath="./../pinc/";
 include_once($relPath.'base.inc');
 include_once($relPath.'theme.inc');
 include_once($relPath.'misc.inc'); // get_enumerated_param()
-include_once($relPath.'utf8_utils.inc'); // maybe_utf8_decode()
 
 require_login();
 
 $action = get_enumerated_param($_GET, 'action', null, ['new', 'edit']);
-$code = javascript_safe(maybe_utf8_decode(array_get($_GET, 'code', '')));
+$code = json_encode(array_get($_GET, 'code', ''));
+//var_dump(json_encode($code));
 
 if(!$action)
 {
@@ -37,7 +37,7 @@ $header_args = [
         var codeUrl = '$code_url/';
         var apiUrl = '$code_url/api/';
         var action = '$action';
-        var code = '$code';
+        var code = $code;
         "
 ];
 

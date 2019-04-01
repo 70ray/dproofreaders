@@ -1,6 +1,5 @@
 <?php
 include_once($relPath.'misc.inc'); // array_get() surround_and_join()
-include_once($relPath.'utf8_utils.inc'); // maybe_utf8_encode_array() maybe_utf8_decode()
 include_once($relPath.'api_utils.inc'); // check_login()
 
 function pickers($action)
@@ -16,7 +15,6 @@ function pickers($action)
         {
             $codes[] = $row["code"];
         }
-        maybe_utf8_encode_array($codes);
         return ['codes' => $codes];
     }
 }
@@ -37,11 +35,10 @@ function get_pickers($picker_set)
 function get_picker()
 {
     check_login();
-    $code = maybe_utf8_decode(array_get($_REQUEST, 'code', ''));
+    $code = array_get($_REQUEST, 'code', '');
     $code = mysqli_real_escape_string(DPDatabase::get_connection(), $code);
     $result = mysqli_query(DPDatabase::get_connection(), "SELECT * FROM character_pickers WHERE code='$code'");
     $picker = mysqli_fetch_assoc($result);
-    maybe_utf8_encode_array($picker);
     return ['picker' => $picker];
 }
 
@@ -52,7 +49,7 @@ function put_picker($action)
     switch($action)
     {
     case 'delete':
-        $code = maybe_utf8_decode(array_get($_REQUEST, 'code', ''));
+        $code = array_get($_REQUEST, 'code', '');
         $code = mysqli_real_escape_string(DPDatabase::get_connection(), $code);
         mysqli_query(DPDatabase::get_connection(), "DELETE FROM character_pickers WHERE code='$code'");
         break;
@@ -69,9 +66,10 @@ function put_picker($action)
 // insert or replace
 function ins_rep($method)
 {
+    global $test_log;
     // make an array rather than an object
     $new_picker = json_decode(array_get($_REQUEST, 'data', ""), true);
-    maybe_utf8_decode_array($new_picker);
+$test_log = bin2hex($new_picker['upper']);
     $link = DPDatabase::get_connection();
     $code = mysqli_real_escape_string($link, $new_picker['code']);
     if("" == $code)

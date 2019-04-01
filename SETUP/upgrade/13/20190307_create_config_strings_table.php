@@ -15,7 +15,7 @@ $sql = "
         value VARCHAR(256),
 
         PRIMARY KEY (id)
-    )
+    ) CHARACTER SET utf8mb4
 ";
 echo "$sql\n";
 mysqli_query(DPDatabase::get_connection(), $sql) or die( mysqli_error(DPDatabase::get_connection()) );
