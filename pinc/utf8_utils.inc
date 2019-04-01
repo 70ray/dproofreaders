@@ -1,6 +1,4 @@
 <?php
-$relPath="../pinc/";
-include_once($relPath.'base.inc');
 
 function maybe_utf8_decode($text)
 {
