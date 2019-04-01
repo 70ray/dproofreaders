@@ -282,13 +282,14 @@ function processText(tagOpen, tagClose, bodyText)
         if (tagOpen == '[Illustration: ') {
             tagOpen = '[Illustration';
         }
-        
-        if (tagOpen[0] == '<') {
+
+        // do not tag empty strings but insert a single '<'
+        if ((tagOpen[0] == '<') && (tagOpen.length > 1)) {
             tagOpen = '';
             tagClose = '';
         }
     }
-    
+
     // Handle footnote label substitution
     if (tagOpen == '[Footnote #: ') {
         // Split the selected text on the first space in the string.

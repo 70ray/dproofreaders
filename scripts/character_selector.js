@@ -96,12 +96,12 @@ $(function () {
         });
 
         $(".picker", charSelector).click(function () {
-            top.insertCharacter(translate(this.innerHTML));
+            top.insertCharacter(translate(this.innerText));
         }).mouseover(function () {
-            largeChar.value = this.innerHTML;
+            largeChar.value = this.innerText;
         }).each(function () {
-            if (keyTitles.hasOwnProperty(this.innerHTML)) {
-                this.title = keyTitles[this.innerHTML];
+            if (keyTitles.hasOwnProperty(this.innerText)) {
+                this.title = keyTitles[this.innerText];
             }
         });
     }
