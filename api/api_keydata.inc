@@ -66,10 +66,8 @@ function put_picker($action)
 // insert or replace
 function ins_rep($method)
 {
-    global $test_log;
     // make an array rather than an object
     $new_picker = json_decode(array_get($_REQUEST, 'data', ""), true);
-$test_log = bin2hex($new_picker['upper']);
     $link = DPDatabase::get_connection();
     $code = mysqli_real_escape_string($link, $new_picker['code']);
     if("" == $code)

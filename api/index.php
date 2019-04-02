@@ -8,12 +8,18 @@ header('Content-Type: application/json');
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $path = $_REQUEST["q"];
 
-// this is used for testing messages such as simulated emails
+// this is used for testing messages such as simulated emails and debugging
 $test_log = '';
+function apilog($message)
+{
+    global $test_log;
+    $test_log .= ", " . $message;
+}
+
 $data = api_router($path);
 $data['log'] = $test_log;
 
-$retval = json_encode($data, JSON_UNESCAPED_UNICODE);
+$retval = json_encode($data);
 if(!$retval)
 {
     $retval = json_encode(array("error" => "json error: " . json_last_error_msg()));

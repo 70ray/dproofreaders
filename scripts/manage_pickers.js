@@ -6,15 +6,17 @@ $(function () {
 
     function fillForm(data) {
         var picker = data.picker;
-        $("#upper-row").val(picker.upper);
-        $("#lower-row").val(picker.lower);
+        if(picker) {
+            $("#upper-row").val(picker.upper);
+            $("#lower-row").val(picker.lower);
+        }
     }
 
     function getPicker() {
         var pickerCode = selector.value;
         // if there are no pickers defined it will be null
         if(pickerCode) {
-            $.getJSON(apiUrl, {"q": "v1/picker", "code": selector.value}, fillForm);
+            $.getJSON(apiUrl, {"q": "v1/picker", "code": pickerCode}, fillForm);
         }
     }
 
