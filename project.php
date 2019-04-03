@@ -919,6 +919,9 @@ function do_edit_above()
         $links[] = "<a href='$code_url/tools/project_manager/edit_project_word_lists.php?projectid=$project->projectid&amp;return=" .
             // TRANSLATORS: "Edit" as in modify as opposed to correct
             urlencode($_SERVER["REQUEST_URI"]) . "'>" . _("Edit project word lists") ."</a>";
+        $links[] = "<a href='$code_url/tools/project_manager/project_char_selectors.php?projectid=$project->projectid&amp;return=" .
+            // TRANSLATORS: "Edit" as in modify as opposed to correct
+            urlencode($_SERVER["REQUEST_URI"]) . "'>" . _("Manage project character selectors") ."</a>";
     }
 
     if($project->user_can_do_quick_check())

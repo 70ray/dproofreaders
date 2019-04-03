@@ -1,4 +1,4 @@
-/*global $ document keyTitles top encodeWord apiUrl*/
+/*global $ document keyTitles top encodeWord apiUrl projectID*/
 
 $(function () {
     "use strict";
@@ -106,5 +106,5 @@ $(function () {
         });
     }
 
-    $.getJSON(apiUrl, {"q": "v1/project/xx/picker"}, loadKb);
+    $.getJSON(apiUrl, {"q": "v1/project/" + projectID + "/picker"}, loadKb);
 });

@@ -3,6 +3,7 @@ $relPath="./../pinc/";
 include_once($relPath.'base.inc');
 include_once($relPath.'theme.inc');
 include_once($relPath.'user_is.inc');
+include_once($relPath.'selector_common.inc');
 
 require_login();
 if(!user_is_PM())
@@ -20,6 +21,7 @@ $header_args = [
     "js_files" => [
         "$code_url/scripts/api.js",
         "$code_url/scripts/misc.js",
+        "$code_url/scripts/pickers_common.js",
         "$code_url/scripts/manage_pickers.js",
     ],
     "js_data" => "
@@ -31,16 +33,10 @@ $header_args = [
 
 output_header($title, NO_STATSBAR, $header_args);
 echo "<h1>", $title, "</h1>";
-echo "<div class='container'>";
-echo "<label for='codes'>", _("Code"), "</label><select id='codes'></select>";
-echo "<label for='upper-row'>", _("Upper row"), "</label><input type='text' class='mono-spaced' size='30' id='upper-row' readonly>\n";
-echo "<label for='lower-row'>", _("Lower row"), "</label><input type='text' class='mono-spaced' size='30' id='lower-row' readonly>\n";
-echo "</div>";
+draw_selectors();
 echo "<button id='edit-button'>", _("Edit"), "</button>";
 echo "<button id='delete-button'>", _("Delete"), "</button><br>";
 echo "<button id='new-button'>", _("Add a new Character Selector"), "</button><br>";
-echo "<label for='def-set'>", _("Default selectors"), "&nbsp;</label><input type='text' size='60' id='def-set'>\n";
-echo "<button id='save-set'>", _("Save"), "</button><br>";
-echo "<p>", _("This defines the default selectors in order. Codes should be separated by a space. The first one will be active initially"), "</p>";
+draw_selector_set();
 
 // vim: sw=4 ts=4 expandtab

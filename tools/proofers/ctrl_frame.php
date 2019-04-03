@@ -9,6 +9,7 @@ include_once($relPath.'key_titles.inc');
 
 $round_id = get_enumerated_param($_GET, 'round_id', null, array_keys($Round_for_round_id_));
 $round = get_Round_for_round_id($round_id);
+$projectid = array_get($_GET, "projectid", "");
 
 $header_args = [
     "css_files" => [
@@ -22,6 +23,7 @@ $header_args = [
     "js_data" => "
         var apiUrl = '$code_url/api/';
         var keyTitles = $key_titles;
+        var projectID = '$projectid';
     ",
 ];
 slim_header(_("Control Frame"), $header_args);
