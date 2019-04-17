@@ -2,6 +2,7 @@
 include_once($relPath.'misc.inc');
 include_once($relPath.'access_log.inc');
 include_once($relPath.'SettingsClass.inc');
+include_once($relPath.'UserProfile.inc');
 
 class NonexistentUserException extends Exception { }
 
@@ -68,6 +69,10 @@ class User
 
     public function __get($name)
     {
+        if($name == 'profile')
+        {
+            return new UserProfile($this->table_row['u_profile']);
+        }
         return $this->table_row[$name];
     }
 

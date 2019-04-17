@@ -34,6 +34,7 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
             throw new Exception("Unable to create test user profile");
 
         $this->PROFILE_ID = mysqli_insert_id(DPDatabase::get_connection());
+        $this->USER->u_profile = $this->PROFILE_ID;
     }
 
     protected function tearDown()
@@ -114,6 +115,15 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
         $this->assertEquals(
             $new_profilename,
             $verify_user_profile->profilename
+        );
+    }
+
+    public function testGetCurrentProfile()
+    {
+        $current_profile = $this->USER->profile;
+        $this->assertEquals(
+            $current_profile->u_ref,
+            $this->USER->u_id
         );
     }
 }
