@@ -9,7 +9,7 @@ class NonuniqueUserException extends Exception { }
 
 class User
 {
-    private $table_row;
+    private $table_row = array();
 
     // List of fields that when set for a user should never change
     private $immutable_fields = array(
@@ -24,10 +24,14 @@ class User
         "real_name",
         "username",
         "email",
-        "manager",
+        "referrer",
+        "http_referrer",
         "i_theme",
         "u_intlang",
     );
+
+    private $has_existing_db_row;
+    private $modified_values = array();
 
 
     public function __construct($username=NULL)
@@ -35,6 +39,14 @@ class User
         if($username !== NULL)
         {
             $this->load("username", $username);
+            $this->has_existing_db_row = true;
+        }
+        else
+        {
+            // override database defaults
+            $this->u_neigh = 10;
+            $this->date_created = time();
+            $this->has_existing_db_row = false;
         }
     }
 
@@ -51,6 +63,7 @@ class User
         }
 
         $this->table_row[$name] = $value;
+        $this->modified_values[] = $name;
     }
 
     public function __get($name)
@@ -71,7 +84,7 @@ class User
         }
         else
         {
-            $escaped_value = $value;
+            $escaped_value = (int)$value;
         }
 
         $sql = "
@@ -117,9 +130,77 @@ class User
         mysqli_free_result($result);
     }
 
+    private function create_initial_db_row()
+    {
+        if(!isset($this->username))
+            throw new UnexpectedValueException("'username' is a required field");
+        if(!isset($this->id))
+            throw new UnexpectedValueException("'id' is a required field");
+
+        $query = sprintf("
+            INSERT INTO users
+            SET
+                username = '%s',
+                id = '%s',
+                date_created = $this->date_created
+            ",  mysqli_real_escape_string(DPDatabase::get_connection(), $this->username),
+                mysqli_real_escape_string(DPDatabase::get_connection(), $this->id)
+        );
+
+        $result = mysqli_query(DPDatabase::get_connection(), $query);
+
+        if(!$result)
+        {
+            throw new UnexpectedValueException(mysqli_error(DPDatabase::get_connection()));
+        }
+
+        // now load the row to pick up any default values
+        $this->load("username", $this->username);
+    }
+
     public function save()
     {
-        throw new NotImplementedException();
+        if(!$this->has_existing_db_row)
+            $this->create_initial_db_row();
+
+        // Build the SQL updates for columns set in this object
+        $column_assignments = array();
+        foreach(array_unique($this->modified_values) as $name)
+        {
+            // These columns are handled in create_initial_db_row();
+            if(in_array($name, array("id", "username", "date_created")))
+                continue;
+
+            if(in_array($name, $this->string_fields))
+            {
+                $column_assignments[] = sprintf("$name= '%s'", mysqli_real_escape_string(DPDatabase::get_connection(), $this->$name));
+            }
+            else
+            {
+                $column_assignments[] = "$name = " . (int)$this->$name;
+            }
+        }
+
+        if($column_assignments)
+        {
+            $update_segment = implode(", ", $column_assignments);
+
+            $query = sprintf("
+                UPDATE users
+                SET $update_segment
+                WHERE username = '%s'
+            ",  mysqli_real_escape_string(DPDatabase::get_connection(), $this->username)
+            );
+
+            $result = mysqli_query(DPDatabase::get_connection(), $query);
+
+            if(!$result)
+            {
+                throw new UnexpectedValueException(mysqli_error(DPDatabase::get_connection()));
+            }
+        }
+
+        $this->modified_values = array();
     }
 
     //

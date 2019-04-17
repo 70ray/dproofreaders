@@ -45,7 +45,9 @@ class UserTest extends PHPUnit\Framework\TestCase
     {
         $sql = "
             DELETE FROM users
-            WHERE id = '$this->TEST_USERNAME' or id = '$this->TEST_USERNAME-2'
+            WHERE id = '$this->TEST_USERNAME' or
+                  id = '$this->TEST_USERNAME-2' or
+                  id = '$this->TEST_USERNAME-3'
         ";
         $result = mysqli_query(DPDatabase::get_connection(), $sql);
     }
@@ -167,11 +169,59 @@ class UserTest extends PHPUnit\Framework\TestCase
     }
 
     /**
-     * @expectedException NotImplementedException
+     * @expectedException UnexpectedValueException
      */
-    public function testSave()
+    public function testSaveNewUserWithoutUsernameOrID()
     {
         $user = new User();
         $user->save();
+    }
+
+    /**
+     * @expectedException UnexpectedValueException
+     */
+    public function testSaveNewUserWithoutID()
+    {
+        $user = new User();
+        $user->username = "$this->TEST_USERNAME-3";
+        $user->save();
+    }
+
+    /**
+     * @expectedException UnexpectedValueException
+     */
+    public function testSaveNewUserWithoutUsername()
+    {
+        $user = new User();
+        $user->id = "$this->TEST_USERNAME-3";
+        $user->save();
+    }
+
+    public function testSaveNewUser()
+    {
+        $user = new User();
+        $user->id = "$this->TEST_USERNAME-3";
+        $user->username = "$this->TEST_USERNAME-3";
+        $user->save();
+
+        $verify_user = new User("$this->TEST_USERNAME-3");
+        $this->assertEquals(
+            $user->id,
+            $verify_user->id
+        );
+    }
+
+    public function testSaveExistingUser()
+    {
+        $new_real_name = "updated real_name";
+        $user = new User($this->TEST_USERNAME);
+        $user->real_name = $new_real_name;
+        $user->save();
+
+        $verify_user = new User($this->TEST_USERNAME);
+        $this->assertEquals(
+            $new_real_name,
+            $verify_user->real_name
+        );
     }
 }
