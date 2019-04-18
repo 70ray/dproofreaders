@@ -31,9 +31,33 @@ class User
         "u_intlang",
     );
 
+    private $all_fields = array(
+        "id",
+        "real_name",
+        "username",
+        "email",
+        "referrer",
+        "http_referrer",
+        "i_theme",
+        "u_intlang",
+        "date_created",
+        "last_login",
+        "t_last_activity",
+        "email_updates",
+        "u_neigh",
+        "u_align",
+        "i_prefs",
+        "i_pmdefault",
+        "u_id",
+        "u_profile",
+        "u_privacy",
+        "team_1",
+        "team_2",
+        "team_3",
+    );
+
     private $has_existing_db_row;
     private $modified_values = array();
-
 
     public function __construct($username=NULL)
     {
@@ -69,11 +93,22 @@ class User
 
     public function __get($name)
     {
-        if($name == 'profile')
+        if(in_array($name, $this->all_fields))
         {
-            return new UserProfile($this->table_row['u_profile']);
+            return $this->table_row[$name];
         }
-        return $this->table_row[$name];
+        else
+        {
+            $profile = new UserProfile($this->table_row['u_profile']);
+            if($name == 'profile')
+            {
+                return $profile;
+            }
+            else
+            {
+                return $profile->$name;
+            }
+        }
     }
 
     public function __isset($name)

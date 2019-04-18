@@ -126,4 +126,13 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
             $this->USER->u_id
         );
     }
+
+    public function testGetProfileName()
+    {
+        $ref = $this->USER->u_ref;
+        $this->assertEquals(
+            $ref,
+            $this->USER->u_id
+        );
+    }
 }
