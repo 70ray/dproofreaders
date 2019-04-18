@@ -182,6 +182,18 @@ class UserProfile
         mysqli_free_result($result);
         return $user_profiles;
     }
+
+    public static function & get_user_profile($id)
+    {
+        static $profiles = array();
+        if(array_key_exists($id, $profiles))
+        {
+            return $profiles[$id];
+        }
+        $profile = new UserProfile($id);
+        $profiles[$id] =& $profile;
+        return $profile;
+    }
 }
 
 // vim: sw=4 ts=4 expandtab

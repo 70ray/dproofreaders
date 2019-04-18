@@ -87,8 +87,16 @@ class User
             );
         }
 
-        $this->table_row[$name] = $value;
-        $this->modified_values[] = $name;
+        if(in_array($name, $this->all_fields))
+        {
+            $this->table_row[$name] = $value;
+            $this->modified_values[] = $name;
+        }
+        else
+        {
+            $profile =& UserProfile::get_user_profile($this->table_row['u_profile']);
+            $profile->$name = $value;
+        }
     }
 
     public function __get($name)
@@ -99,7 +107,8 @@ class User
         }
         else
         {
-            $profile = new UserProfile($this->table_row['u_profile']);
+            $profile = UserProfile::get_user_profile($this->table_row['u_profile']);
+//            $profile = new UserProfile($this->table_row['u_profile']);
             if($name == 'profile')
             {
                 return $profile;
@@ -367,6 +376,18 @@ class User
             "ebook" => _("Within an E-book"),
             "other" => _("Other"),
         );
+    }
+
+    public static function & get_dp_user()
+    {
+        global $pguser;
+
+        static $user = NULL;
+        if(!$user)
+        {
+            $user = new User($pguser);
+        }
+        return $user;
     }
 }
 

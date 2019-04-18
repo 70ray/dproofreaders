@@ -6,6 +6,7 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
     private $USER;
     private $PROFILE_ID;
     private $NONEXISTENT_PROFILE_ID = 8675309;
+    private $TEST_PROFILENAME = "UserTestProfile";
 
     protected function setUp()
     {
@@ -127,12 +128,21 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
         );
     }
 
-    public function testGetProfileName()
+    public function testGetProfileValue()
     {
         $ref = $this->USER->u_ref;
         $this->assertEquals(
             $ref,
             $this->USER->u_id
+        );
+    }
+
+    public function testSetProfileValue()
+    {
+        $this->USER->profilename = $this->TEST_PROFILENAME;
+        $this->assertEquals(
+            $this->USER->profile->profilename,
+            $this->TEST_PROFILENAME
         );
     }
 }
