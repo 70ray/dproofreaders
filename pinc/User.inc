@@ -250,6 +250,8 @@ class User
         }
 
         $this->modified_values = array();
+        $profile = UserProfile::get_user_profile($this->table_row['u_profile']);
+        $profile->save();
     }
 
     //
