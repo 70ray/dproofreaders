@@ -128,12 +128,6 @@ function dpsession_set_preferences_from_db()
     prefs_cookie_send( $user_prefs_string );
 }
 
-function dpsession_set_preferences_temp( $user_prefs )
-{
-    $user_prefs_string = implode( "|", $user_prefs );
-    prefs_cookie_send( $user_prefs_string );
-}
-
 function dpsession_end()
 {
     user_cookie_disable();

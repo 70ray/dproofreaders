@@ -4,6 +4,7 @@ include_once($relPath.'base.inc');
 include_once($relPath.'slim_header.inc');
 include_once($relPath.'metarefresh.inc');
 include_once($relPath.'misc.inc'); // array_get()
+include_once($relPath.'User.inc'); // get_dp_user()
 include_once('PPage.inc');
 include_once('proof_frame.inc');
 include_once('text_frame_std.inc');
@@ -54,7 +55,8 @@ if (isset($_POST['spsaveandnext']))    {$tbutton=103;} // Save and do another fr
 if (isset($_POST['rerunauxlanguage'])) {$tbutton=104;} // Spellcheck against another language
 
 // set prefs
-if ($userP['i_type']==1)
+$dp_user =& User::get_dp_user();
+if ($dp_user->i_type==1)
 {
     if(isset($_POST['fntFace']))
         $fntFace = $_POST['fntFace'];
@@ -62,22 +64,20 @@ if ($userP['i_type']==1)
         $fntSize = $_POST['fntSize'];
     if(isset($_POST['zmSize']))
         $zmSize  = $_POST['zmSize'];
-    
-    $isChg=0;
-    if ($userP['i_layout']==1)
+
+    if ($dp_user->i_layout==1)
     {
-        if (isset($fntFace) && $userP['v_fntf']!=$fntFace) {$userP['v_fntf']=$fntFace;$isChg=1;}
-        if (isset($fntSize) && $userP['v_fnts']!=$fntSize) {$userP['v_fnts']=$fntSize;$isChg=1;}
-        if (isset($zmSize) && $userP['v_zoom']!=$zmSize) {$userP['v_zoom']=$zmSize;$isChg=1;}
+        if (isset($fntFace) && $dp_user->v_fntf != $fntFace) {$dp_user->v_fntf = $fntFace;}
+        if (isset($fntSize) && $dp_user->v_fnts != $fntSize) {$dp_user->v_fnts = $fntSize;}
+        if (isset($zmSize) && $dp_user->v_zoom != $zmSize) {$dp_user->v_zoom = $zmSize;}
     }
     else
     {
-        if (isset($fntFace) && $userP['h_fntf']!=$fntFace) {$userP['h_fntf']=$fntFace;$isChg=1;}
-        if (isset($fntSize) && $userP['h_fnts']!=$fntSize) {$userP['h_fnts']=$fntSize;$isChg=1;}
-        if (isset($zmSize) && $userP['h_zoom']!=$zmSize) {$userP['h_zoom']=$zmSize;$isChg=1;}
+        if (isset($fntFace) && $dp_user->h_fntf != $fntFace) {$dp_user->h_fntf = $fntFace;}
+        if (isset($fntSize) && $dp_user->h_fnts != $fntSize) {$dp_user->h_fnts = $fntSize;}
+        if (isset($zmSize) && $dp_user->h_zoom != $zmSize) {$dp_user->h_zoom = $zmSize;}
     }
-    $userP['prefschanged']=$isChg;
-    dpsession_set_preferences_temp( $userP );
+    $dp_user->save();
 }
 
 // If the user simply wants to leave the proofing interface,
@@ -274,21 +274,19 @@ switch( $tbutton )
 
 function switch_layout()
 {
-    global $userP;
-    $userP['i_layout'] = $userP['i_layout']==1 ? 0 : 1;
-    $userP['prefschanged'] = 1;
-    dpsession_set_preferences_temp( $userP );
+    $dp_user =& User::get_dp_user();
+    $dp_user->i_layout = ((int)$dp_user->i_layout == 1) ? 0 : 1;
+    $dp_user->save();
 }
 
 function leave_spellcheck_mode( $ppage )
 {
-    global $userP;
-
     // The user has requested a return from spellcheck mode.
     // The response that we send will replace the frame/document
     // containing the spellcheck form.
 
-    if ( $userP['i_type'] == 0 )
+    $dp_user =& User::get_dp_user();
+    if ((int)$dp_user->i_type == 0)
     {
         // standard interface:
         // The spellcheck document (containing text only) is in 'textframe'.

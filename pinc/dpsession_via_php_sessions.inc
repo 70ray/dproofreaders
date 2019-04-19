@@ -85,11 +85,6 @@ function dpsession_set_preferences_from_db()
     $_SESSION['userP'] = array_merge($users_data, $user_profiles_data, $prefsChanged_data);
 }
 
-function dpsession_set_preferences_temp( $user_prefs )
-{
-    $_SESSION['userP'] = $user_prefs;
-}
-
 function dpsession_end()
 {
     session_unset();

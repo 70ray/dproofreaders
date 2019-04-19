@@ -24,8 +24,10 @@ define('PREVIEW',                     'S');
 
 function echo_button( $button_id, $which_interface )
 {
-    global $userP;
     global $charset;
+
+    $dp_user =& User::get_dp_user();
+
     $CRLF = '\r\n';
     if ($which_interface == 's')
     {
@@ -43,7 +45,7 @@ function echo_button( $button_id, $which_interface )
     switch ($button_id)
     {
         case CHANGE_LAYOUT:
-            if ( $userP['i_layout']==1)
+            if ( $dp_user->i_layout==1)
             {
                 $horvert = _("Horizontal");
                 $n = "5";
@@ -183,7 +185,7 @@ function echo_button( $button_id, $which_interface )
                 'title'     => attr_safe(_("Run WordCheck")),
                 'src'       => "gfx/bt16.png",
             );
-            if ($userP['i_type']==0)
+            if ($dp_user->i_type==0)
             {
                 // standard interface:
                 // Direct the (text-only) spellcheck doc to 'textframe'

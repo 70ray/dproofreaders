@@ -1,29 +1,29 @@
 <?php
 // The following variables must be defined by the file that includes this one:
 // $relPath
-// $userP
 
 include_once($relPath.'http_headers.inc');
 include_once($relPath.'slim_header.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 
 function echo_proof_frame_std( $ppage )
 {
-    global $userP;
+    $dp_user =& User::get_dp_user();
 
-    if ($userP['i_layout']=='1')
+    if((int)$dp_user->i_layout == 1)
     {
-        $rows_or_cols = "COLS='*,{$userP['v_tframe']}%'";
+        $rows_or_cols = "COLS='*,{$dp_user->v_tframe}%'";
     }
     else
     {
-        $rows_or_cols = "ROWS='*,{$userP['h_tframe']}%'";
+        $rows_or_cols = "ROWS='*,{$dp_user->h_tframe}%'";
     }
 
     $params = $ppage->urlencoded(TRUE);
 
-    if ( ($userP['i_layout']=='1' && $userP['v_tscroll']==0)
+    if ( ($dp_user->i_layout == '1' && $dp_user->v_tscroll==0)
         ||
-         ($userP['i_layout']=='0' && $userP['h_tscroll']==0) )
+         ($dp_user->i_layout == '0' && $dp_user->h_tscroll==0) )
     {
         $text_scrolling = "SCROLLING='no'";
     }
