@@ -69,6 +69,7 @@ if (isset($_POST["swProfile"]))
         mysqli_real_escape_string(DPDatabase::get_connection(), $pguser))
     );*/
 //    dpsession_set_preferences_from_db();
+    $dp_user->save();
     $eURL="$code_url/userprefs.php?tab=$selected_tab&amp;origin=" . urlencode($origin);
     metarefresh(0,$eURL,_('Profile Selection'),_('Loading Selected Profile....'));
 }
@@ -117,7 +118,7 @@ if (array_get($_POST, "insertdb", "") != "") {
 
     // Get and delete currently selected profile.
     // Since profilename is not unique, identify by u_profile.
-    $del_target_profile_id =$userP['u_profile'];
+    $del_target_profile_id = $userP['u_profile'];
     $del_target_profile_name = $userP['profilename'];
     echo sprintf(_("Deleting usersettings profile: %1\$s (id=%2\$d)..."),$del_target_profile_name,$del_target_profile_id) . "\n<br>\n";
     mysqli_query(DPDatabase::get_connection(), "delete from user_profiles WHERE u_ref = '$uid' AND id = '$del_target_profile_id'");
@@ -358,22 +359,23 @@ function echo_general_tab() {
 }
 
 function save_general_tab() {
-    global $uid, $pguser;
-    global $userSettings;
+    global $userSettings, $dp_user;
 
     // set users values
     $input_string_fields = array("real_name", "email", "email_updates", "i_theme", "u_intlang");
     $input_numeric_fields = array("u_align", "u_neigh", "u_privacy");
 
-    $update_string = _create_mysql_update_string($_POST, $input_string_fields, $input_numeric_fields);
-    $update_string .= ", i_prefs=1";
+    update_user($_POST, $input_string_fields, $input_numeric_fields);
+    $dp_user->i_prefs = 1; // is this used?
+//    $update_string .= ", i_prefs=1";
+    $dp_user->save();
 
-    $users_query=sprintf("
+/*    $users_query=sprintf("
         UPDATE users
         SET $update_string
         WHERE u_id=$uid AND username='%s'",
         mysqli_real_escape_string(DPDatabase::get_connection(), $pguser));
-    mysqli_query(DPDatabase::get_connection(), $users_query);
+    mysqli_query(DPDatabase::get_connection(), $users_query);*/
 
     // Opt-out of credits when Content-Providing (deprecated), Image Preparing, 
     // Text Preparing, Project-Managing and/or Post-Processing.
@@ -387,8 +389,8 @@ function save_general_tab() {
     if (isset($_POST["credit_other"]))
         $userSettings->set_value('credit_other', $_POST["credit_other"]);
 
-    echo mysqli_error(DPDatabase::get_connection());
-    dpsession_set_preferences_from_db();
+//    echo mysqli_error(DPDatabase::get_connection());
+//    dpsession_set_preferences_from_db();
 
 }
 
@@ -663,14 +665,14 @@ function echo_proofreading_tab() {
 }
 
 function save_proofreading_tab() {
-    global $uid, $userP, $pguser;
+    global $uid, $userP, $pguser, $dp_user;
     global $userSettings;
 
     // set user_profiles values
     $input_string_fields = array("profilename");
     $input_numeric_fields = array("i_res", "i_type", "i_layout", "i_newwin", "i_toolbar", "i_statusbar", "v_fntf", "v_fnts", "v_zoom", "v_tframe", "v_tscroll", "v_tlines", "v_tchars", "v_twrap", "h_fntf", "h_fnts", "h_zoom", "h_tframe", "h_tscroll", "h_tlines", "h_tchars", "h_twrap");
 
-    $update_string = _create_mysql_update_string($_POST, $input_string_fields, $input_numeric_fields);
+//    $update_string = _create_mysql_update_string($_POST, $input_string_fields, $input_numeric_fields);
 
     $create_new_profile = FALSE;
     if(isset($_POST["mkProfile"]) || isset($_POST["mkProfileAndQuit"]))
@@ -681,18 +683,21 @@ function save_proofreading_tab() {
     // set/create user_profile values
     if ($create_new_profile)
     {
-        $prefs_query="INSERT INTO user_profiles SET u_ref='$uid', $update_string";
+        $dp_user->link_new_profile();
+//        $prefs_query="INSERT INTO user_profiles SET u_ref='$uid', $update_string";
     }
-    else
-    {
-        $prefs_query="UPDATE user_profiles SET $update_string WHERE u_ref='$uid' AND id='{$userP['u_profile']}'";
-    }
+//    else
+//    {
+//        $prefs_query="UPDATE user_profiles SET $update_string WHERE u_ref='$uid' AND id='{$userP['u_profile']}'";
+//    }
+    update_user($_POST, $input_string_fields, $input_numeric_fields);
+    $dp_user->save();
 
-    mysqli_query(DPDatabase::get_connection(), $prefs_query);
-    echo mysqli_error(DPDatabase::get_connection());
+//    mysqli_query(DPDatabase::get_connection(), $prefs_query);
+//    echo mysqli_error(DPDatabase::get_connection());
 
     // set users values
-    if ($create_new_profile)
+/*    if ($create_new_profile)
     {
         $users_query=sprintf("
             UPDATE users
@@ -701,11 +706,11 @@ function save_proofreading_tab() {
             mysqli_real_escape_string(DPDatabase::get_connection(), $pguser));
         mysqli_query(DPDatabase::get_connection(), $users_query);
         echo mysqli_error(DPDatabase::get_connection());
-    }
+    }*/
 
     $userSettings->set_boolean('hide_special_colors', $_POST["show_special_colors"]=='no');
 
-    dpsession_set_preferences_from_db();
+//    dpsession_set_preferences_from_db();
 }
 
 /*************** PM TAB ***************/
@@ -991,6 +996,25 @@ function td_pophelp( $pophelp_name )
 }
 
 // ---------------------------------------------------------
+function update_user($source_array, $string_fields = array(), $numeric_fields = array())
+// $source_array is an array such as $_REQUEST or $_POST.
+// $string_fields
+//    is a list of keys such that $source_array[$key] should be a string.
+// $numeric_fields
+//    is a list of keys such that $source_array[$key] should be a numeric value.
+// This function checks that those expectations are satisfied, and updates $dp_user
+{
+    global $dp_user;
+
+    foreach($string_fields as $field)
+    {
+        $dp_user->$field = array_get($source_array, $field, "");
+    }
+    foreach($numeric_fields as $field)
+    {
+        $dp_user->$field = get_integer_param($source_array, $field, 0, NULL, NULL);
+    }
+}
 
 function _create_mysql_update_string($source_array, $string_fields = array(), $numeric_fields = array())
 // $source_array is an array such as $_REQUEST or $_POST.

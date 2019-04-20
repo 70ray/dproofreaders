@@ -20,7 +20,7 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
             $this->USER = new User();
             $this->USER->id = $this->TEST_USERNAME;
             $this->USER->username = $this->TEST_USERNAME;
-            $this->USER->save(false);
+            $this->USER->save();
         }
 
         // Create a user profile to use
