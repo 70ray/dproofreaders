@@ -18,6 +18,34 @@ class UserProfile
         "profilename",
     );
 
+    private $all_fields = array(
+        "id",
+        "u_ref",
+        "profilename",
+        "i_res",
+        "i_type",
+        "i_layout",
+        "i_toolbar",
+        "i_statusbar",
+        "i_newwin",
+        "v_fnts",
+        "v_fntf",
+        "v_zoom",
+        "v_tframe",
+        "v_tlines",
+        "v_tchars",
+        "v_tscroll",
+        "v_twrap",
+        "h_fnts",
+        "h_fntf",
+        "h_zoom",
+        "h_tframe",
+        "h_tlines",
+        "h_tchars",
+        "h_tscroll",
+        "h_twrap",
+    );
+
     private $has_existing_db_row;
     private $modified_values = array();
 
@@ -35,6 +63,16 @@ class UserProfile
         }
     }
 
+    private function check_valid($name)
+    {
+        if(!in_array($name, $this->all_fields))
+        {
+            throw new UnexpectedValueException(sprintf(
+                _("%s is not a valid field"), $name)
+            );
+        }
+    }
+
     // The __set() and __get() methods allow access to user fields without
     // creating accessors for them all individually.
     // See the PHP docs for "magic methods".
@@ -47,12 +85,14 @@ class UserProfile
             );
         }
 
+        $this->check_valid($name);
         $this->table_row[$name] = $value;
         $this->modified_values[] = $name;
     }
 
     public function __get($name)
     {
+        $this->check_valid($name);
         return $this->table_row[$name];
     }
 

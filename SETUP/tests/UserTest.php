@@ -174,7 +174,7 @@ class UserTest extends PHPUnit\Framework\TestCase
     public function testSaveNewUserWithoutUsernameOrID()
     {
         $user = new User();
-        $user->save();
+        $user->save(false);
     }
 
     /**
@@ -184,7 +184,7 @@ class UserTest extends PHPUnit\Framework\TestCase
     {
         $user = new User();
         $user->username = "$this->TEST_USERNAME-3";
-        $user->save();
+        $user->save(false);
     }
 
     /**
@@ -194,7 +194,7 @@ class UserTest extends PHPUnit\Framework\TestCase
     {
         $user = new User();
         $user->id = "$this->TEST_USERNAME-3";
-        $user->save();
+        $user->save(false);
     }
 
     public function testSaveNewUser()
@@ -202,7 +202,7 @@ class UserTest extends PHPUnit\Framework\TestCase
         $user = new User();
         $user->id = "$this->TEST_USERNAME-3";
         $user->username = "$this->TEST_USERNAME-3";
-        $user->save();
+        $user->save(false);
 
         $verify_user = new User("$this->TEST_USERNAME-3");
         $this->assertEquals(
@@ -216,7 +216,7 @@ class UserTest extends PHPUnit\Framework\TestCase
         $new_real_name = "updated real_name";
         $user = new User($this->TEST_USERNAME);
         $user->real_name = $new_real_name;
-        $user->save();
+        $user->save(false);
 
         $verify_user = new User($this->TEST_USERNAME);
         $this->assertEquals(

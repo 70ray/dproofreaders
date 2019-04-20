@@ -108,7 +108,6 @@ class User
         else
         {
             $profile = UserProfile::get_user_profile($this->table_row['u_profile']);
-//            $profile = new UserProfile($this->table_row['u_profile']);
             if($name == 'profile')
             {
                 return $profile;
@@ -205,9 +204,13 @@ class User
 
         // now load the row to pick up any default values
         $this->load("username", $this->username);
+        $this->has_existing_db_row = true;
     }
 
-    public function save()
+    // we generally want to save the current profile also (if changed)
+    // but when creating a new User we do not have a profile and cannot
+    // create it without u_id which is set on User save
+    public function save($save_profile = true)
     {
         if(!$this->has_existing_db_row)
             $this->create_initial_db_row();
@@ -250,8 +253,11 @@ class User
         }
 
         $this->modified_values = array();
-        $profile = UserProfile::get_user_profile($this->table_row['u_profile']);
-        $profile->save();
+        if($save_profile)
+        {
+            $profile = UserProfile::get_user_profile($this->table_row['u_profile']);
+            $profile->save();
+        }
     }
 
     //
