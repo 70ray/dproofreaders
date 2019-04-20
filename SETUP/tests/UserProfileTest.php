@@ -20,7 +20,7 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
             $this->USER = new User();
             $this->USER->id = $this->TEST_USERNAME;
             $this->USER->username = $this->TEST_USERNAME;
-            $this->USER->save();
+            $this->USER->save(false);
         }
 
         // Create a user profile to use
@@ -36,6 +36,7 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
 
         $this->PROFILE_ID = mysqli_insert_id(DPDatabase::get_connection());
         $this->USER->u_profile = $this->PROFILE_ID;
+        $this->USER->save();
     }
 
     protected function tearDown()
@@ -143,6 +144,33 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
         $this->assertEquals(
             $this->USER->profile->profilename,
             $this->TEST_PROFILENAME
+        );
+    }
+
+    /**
+     * @expectedException UnexpectedValueException
+     */
+    public function testGetNonexistentValue()
+    {
+        $nonex = $this->USER->nonexistent;
+        $this->assertEquals(
+            $nonex,
+            13
+        );
+    }
+
+    /**
+     * @expectedException UnexpectedValueException
+     */
+    public function testSetNonexistentValue()
+    {
+        $this->USER->nonexistent = 13;
+        $this->USER->save();
+        $user = new User($TEST_USERNAME);
+        $nonex = $user->nonexistent;
+        $this->assertEquals(
+            $nonex,
+            13
         );
     }
 }
