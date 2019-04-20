@@ -20,7 +20,7 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
             $this->USER = new User();
             $this->USER->id = $this->TEST_USERNAME;
             $this->USER->username = $this->TEST_USERNAME;
-            $this->USER->save(false);
+            $this->USER->save();
         }
 
         // Create a user profile to use
@@ -171,6 +171,29 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
         $this->assertEquals(
             $nonex,
             13
+        );
+    }
+
+    public function testLoadUserProfiles()
+    {
+        $profiles = UserProfile::load_profiles_for_user($this->USER->u_id);
+        $this->assertEquals(
+            count($profiles),
+            1
+        );
+        $this->assertEquals(
+            $profiles[0]->u_ref,
+            $this->USER->u_id
+        );
+    }
+
+    public function testLinkNewProfile()
+    {
+        $this->USER->link_new_profile();
+        $profiles = UserProfile::load_profiles_for_user($this->USER->u_id);
+        $this->assertEquals(
+            count($profiles),
+            2
         );
     }
 }
