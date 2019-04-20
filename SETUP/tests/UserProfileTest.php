@@ -173,4 +173,17 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
             13
         );
     }
+
+    public function testLoadUserProfiles()
+    {
+        $profiles = UserProfile::load_profiles_for_user($this->USER->u_id);
+        $this->assertEquals(
+            count($profiles),
+            1
+        );
+        $this->assertEquals(
+            $profiles[0]->u_ref,
+            $this->USER->u_id
+        );
+    }
 }
