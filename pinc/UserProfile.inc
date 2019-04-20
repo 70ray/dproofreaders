@@ -216,7 +216,7 @@ class UserProfile
         $user_profiles = array();
         while($table_row = mysqli_fetch_assoc($result))
         {
-            $user_profiles[] = new UserProfile($table_row->id);
+            $user_profiles[] = new UserProfile($table_row["id"]);
         }
 
         mysqli_free_result($result);

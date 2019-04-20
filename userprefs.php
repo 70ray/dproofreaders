@@ -13,6 +13,7 @@ include_once($relPath.'js_newpophelp.inc');
 include_once($relPath.'misc.inc'); // get_integer_param()
 include_once($relPath.'forum_interface.inc'); // get_forum_user_details(), get_url_to_edit_profile()
 include_once($relPath.'User.inc');
+include_once($relPath.'UserProfile.inc');
 
 require_login();
 
@@ -50,7 +51,8 @@ if (user_is_PM())
 
 $selected_tab = get_integer_param($_REQUEST, "tab", 0, 0, max(array_keys($tabs)));
 
-$uid = $userP['u_id'];
+$dp_user =& User::get_dp_user();
+$uid = $dp_user->u_id;
 
 $userSettings =& Settings::get_Settings($pguser);
 
@@ -59,13 +61,14 @@ if (isset($_POST["swProfile"]))
     // User clicked "Switch profile"
     // get profile from database
     $c_profile=get_integer_param($_POST, "c_profile", NULL, 0, NULL);
-    mysqli_query(DPDatabase::get_connection(), sprintf("
+    $dp_user->u_profile = $c_profile;
+/*    mysqli_query(DPDatabase::get_connection(), sprintf("
         UPDATE users
         SET u_profile='$c_profile'
         WHERE u_id=$uid  AND username='%s'",
         mysqli_real_escape_string(DPDatabase::get_connection(), $pguser))
-    );
-    dpsession_set_preferences_from_db();
+    );*/
+//    dpsession_set_preferences_from_db();
     $eURL="$code_url/userprefs.php?tab=$selected_tab&amp;origin=" . urlencode($origin);
     metarefresh(0,$eURL,_('Profile Selection'),_('Loading Selected Profile....'));
 }
@@ -227,7 +230,7 @@ function echo_tabs($tab_names, $selected_tab) {
 /*************** GENERAL TAB ***************/
 
 function echo_general_tab() {
-    global $uid, $pguser, $userP;
+    global $pguser, $dp_user;
     global $u_n;
 
     $options = get_locale_translation_selection_options();
@@ -273,7 +276,7 @@ function echo_general_tab() {
     );
     show_preference(
         _('Interface Language'), 'u_intlang', 'intlang',
-        $userP['u_intlang'],
+        $dp_user->u_intlang,
         'dropdown',
         $u_intlang_options
     );
@@ -282,7 +285,7 @@ function echo_general_tab() {
     echo "<tr>\n";
     show_preference(
         _('E-mail Updates'), 'email_updates', 'updates',
-        $userP['email_updates'],
+        $dp_user->email_updates,
         'radio_group',
         array( 1 => _("Yes"), 0 => _("No") )
     );
@@ -295,7 +298,7 @@ function echo_general_tab() {
     }
     show_preference(
         _('Theme'), 'i_theme', 'theme',
-        $userP['i_theme'],
+        $dp_user->i_theme,
         'dropdown',
         $theme_options
     );
@@ -310,7 +313,7 @@ function echo_general_tab() {
     );
     show_preference(
         _('Statistics Bar Alignment'), 'u_align', 'align',
-        $userP['u_align'],
+        $dp_user->u_align,
         'radio_group',
         array( 1 => _("Left"), 0 => _("Right") )
     );
@@ -319,13 +322,13 @@ function echo_general_tab() {
     echo "<tr>\n";
     show_preference(
         _('Statistics'), 'u_privacy', 'privacy',
-        $userP['u_privacy'],
+        $dp_user->u_privacy,
         'dropdown',
         $i_stats_privacy
     );
     show_preference(
         _('Show Rank Neighbors'), 'u_neigh', 'neighbors',
-        $userP['u_neigh'],
+        $dp_user->u_neigh,
         'dropdown',
         $u_n
     );
@@ -392,14 +395,15 @@ function save_general_tab() {
 /*************** PROOFREADING TAB ***************/
 
 function echo_proofreading_tab() {
-    global $userP;
+    global $userP, $uid, $dp_user;
     global $i_resolutions;
     global $proofreading_font_faces, $proofreading_font_sizes;
     global $userSettings;
 
     // see if they already have 10 profiles, etc.
-    $pf_query=mysqli_query(DPDatabase::get_connection(), "SELECT profilename, id FROM user_profiles WHERE u_ref='{$userP['u_id']}' ORDER BY id ASC");
-    $pf_num=mysqli_num_rows($pf_query);
+    $profiles = UserProfile::load_profiles_for_user($uid);
+//    $pf_query=mysqli_query(DPDatabase::get_connection(), "SELECT profilename, id FROM user_profiles WHERE u_ref='{$userP['u_id']}' ORDER BY id ASC");
+    $pf_num = count($profiles);
 
     echo "<tr>\n";
     show_blank();
@@ -421,7 +425,7 @@ function echo_proofreading_tab() {
     echo "<tr>\n";
     show_preference(
         _('Current Profile'), 'profilename', 'profilename',
-        $userP['profilename'],
+        $dp_user->profilename,
         'textfield',
         array( '20', 'required', '' )
         // About 99.96% of pgdp.net's user_profiles have length(profilename) <= 20
@@ -429,12 +433,13 @@ function echo_proofreading_tab() {
     echo "<td colspan='2' class='center-align'>";
     // show all profiles
     echo "<select name='c_profile' ID='c_profile'>";
-    while ($row = mysqli_fetch_assoc($pf_query))
+//    while ($row = mysqli_fetch_assoc($pf_query))
+    foreach($profiles as $profile)
     {
-        $pf_Dex = $row["id"];
-        $pf_Val = $row["profilename"];
+        $pf_Dex = $profile->id;
+        $pf_Val = $profile->profilename;
         echo "<option value=\"$pf_Dex\"";
-        if ($pf_Dex == $userP['u_profile']) { echo " SELECTED"; }
+        if ($pf_Dex == $dp_user->u_profile) { echo " SELECTED"; }
         echo ">$pf_Val</option>";
     }
     echo "</select>";
@@ -446,13 +451,13 @@ function echo_proofreading_tab() {
     echo "<tr>\n";
     show_preference(
         _('Screen Resolution'), 'i_res', 'screenres',
-        $userP['i_res'],
+        $dp_user->i_res,
         'dropdown',
         $i_resolutions
     );
     show_preference(
         _('Launch in New Window'), 'i_newwin', 'newwindow',
-        $userP['i_newwin'],
+        $dp_user->i_newwin,
         'radio_group',
         array( 1 => _("Yes"), 0 => _("No") )
     );
@@ -461,13 +466,13 @@ function echo_proofreading_tab() {
     echo "<tr>\n";
     show_preference(
         _('Interface Type'), 'i_type', 'facetype',
-        $userP['i_type'],
+        $dp_user->i_type,
         'radio_group',
         array( 0 => _("Standard"), 1 => _("Enhanced") )
     );
     show_preference(
         _('Show Toolbar'), 'i_toolbar', 'toolbar',
-        $userP['i_toolbar'],
+        $dp_user->i_toolbar,
         'radio_group',
         array( 1 => _("Yes"), 0 => _("No") )
     );
@@ -476,7 +481,7 @@ function echo_proofreading_tab() {
     echo "<tr>\n";
     show_preference(
         _('Interface Layout'), 'i_layout', 'layout',
-        $userP['i_layout'],
+        $dp_user->i_layout,
         'radio_group',
         array(
             1 => '<img src="tools/proofers/gfx/bt4.png" width="26" alt="'.attr_safe(_("Vertical")).'">',
@@ -485,7 +490,7 @@ function echo_proofreading_tab() {
     );
     show_preference(
         _('Show Status Bar'), 'i_statusbar', 'statusbar',
-        $userP['i_statusbar'],
+        $dp_user->i_statusbar,
         'radio_group',
         array( 1 => _("Yes"), 0 => _("No") )
     );
@@ -504,13 +509,13 @@ function echo_proofreading_tab() {
     $proofreading_font_faces[0] = BROWSER_DEFAULT_STR;
     show_preference(
         _('Font Face'), 'v_fntf', 'v_fontface',
-        $userP['v_fntf'],
+        $dp_user->v_fntf,
         'dropdown',
         $proofreading_font_faces
     );
     show_preference(
         _('Font Face'), 'h_fntf', 'h_fontface',
-        $userP['h_fntf'],
+        $dp_user->h_fntf,
         'dropdown',
         $proofreading_font_faces
     );
@@ -520,13 +525,13 @@ function echo_proofreading_tab() {
     $proofreading_font_sizes[0] = BROWSER_DEFAULT_STR;
     show_preference(
         _('Font Size'), 'v_fnts', 'v_fontsize',
-        $userP['v_fnts'],
+        $dp_user->v_fnts,
         'dropdown',
         $proofreading_font_sizes
     );
     show_preference(
         _('Font Size'), 'h_fnts', 'h_fontsize',
-        $userP['h_fnts'],
+        $dp_user->h_fnts,
         'dropdown',
         $proofreading_font_sizes
     );
@@ -535,14 +540,14 @@ function echo_proofreading_tab() {
     echo "<tr>\n";
     show_preference(
         _('Image Zoom'), 'v_zoom', 'v_zoom',
-        $userP['v_zoom'],
+        $dp_user->v_zoom,
         'numberfield',
         # xgettext:no-php-format
         array( 3, 'required', _("% of 1000 pixels") )
     );
     show_preference(
         _('Image Zoom'), 'h_zoom', 'h_zoom',
-        $userP['h_zoom'],
+        $dp_user->h_zoom,
         'numberfield',
         # xgettext:no-php-format
         array( 3, 'required', _("% of 1000 pixels") )
@@ -552,14 +557,14 @@ function echo_proofreading_tab() {
     echo "<tr>\n";
     show_preference(
         _('Text Frame Size'), 'v_tframe', 'v_textsize',
-        $userP['v_tframe'],
+        $dp_user->v_tframe,
         'numberfield',
         # xgettext:no-php-format
         array( 3, 'required', _("% of browser width") )
     );
     show_preference(
         _('Text Frame Size'), 'h_tframe', 'h_textsize',
-        $userP['h_tframe'],
+        $dp_user->h_tframe,
         'numberfield',
         # xgettext:no-php-format
         array( 3, 'required', _("% of browser height") )
@@ -569,13 +574,13 @@ function echo_proofreading_tab() {
     echo "<tr>\n";
     show_preference(
         _('Scroll Text Frame'), 'v_tscroll', 'v_scroll',
-        $userP['v_tscroll'],
+        $dp_user->v_tscroll,
         'radio_group',
         array( 1 => _("Yes"), 0 => _("No") )
     );
     show_preference(
         _('Scroll Text Frame'), 'h_tscroll', 'h_scroll',
-        $userP['h_tscroll'],
+        $dp_user->h_tscroll,
         'radio_group',
         array( 1 => _("Yes"), 0 => _("No") )
     );
@@ -584,13 +589,13 @@ function echo_proofreading_tab() {
     echo "<tr>\n";
     show_preference(
         _('Number of Text Lines'), 'v_tlines', 'v_textlines',
-        $userP['v_tlines'],
+        $dp_user->v_tlines,
         'numberfield',
         array( 3, 'required', "" )
     );
     show_preference(
         _('Number of Text Lines'), 'h_tlines', 'h_textlines',
-        $userP['h_tlines'],
+        $dp_user->h_tlines,
         'numberfield',
         array( 3, 'required', "" )
     );
@@ -599,13 +604,13 @@ function echo_proofreading_tab() {
     echo "<tr>\n";
     show_preference(
         _('Length of Text Lines'), 'v_tchars', 'v_textlength',
-        $userP['v_tchars'],
+        $dp_user->v_tchars,
         'numberfield',
         array( 3, 'required', " "._("characters") )
     );
     show_preference(
         _('Length of Text Lines'), 'h_tchars', 'h_textlength',
-        $userP['h_tchars'],
+        $dp_user->h_tchars,
         'numberfield',
         array( 3, 'required', " "._("characters") )
     );
@@ -614,13 +619,13 @@ function echo_proofreading_tab() {
     echo "<tr>\n";
     show_preference(
         _('Wrap Text'), 'v_twrap', 'v_wrap',
-        $userP['v_twrap'],
+        $dp_user->v_twrap,
         'radio_group',
         array( 1 => _("Yes"), 0 => _("No") )
     );
     show_preference(
         _('Wrap Text'), 'h_twrap', 'h_wrap',
-        $userP['h_twrap'],
+        $dp_user->h_twrap,
         'radio_group',
         array( 1 => _("Yes"), 0 => _("No") )
     );
@@ -628,12 +633,12 @@ function echo_proofreading_tab() {
 
     // buttons
     echo "<tr><td colspan='6' class='center-align'>";
-    if ($userP['prefschanged']==1)
+/*    if ($userP['prefschanged']==1)
     {
         echo "<input type='submit' value='" 
             . attr_safe(_("Restore to Saved Preferences")) 
             . "' name='restorec'> &nbsp;";
-    }
+    }*/
     echo "<input type='submit' value='" . attr_safe(_("Save Preferences"))
         . "' name='change'> &nbsp;";
     echo "<input type='submit' value='" 
