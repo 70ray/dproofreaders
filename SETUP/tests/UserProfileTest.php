@@ -186,4 +186,14 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
             $this->USER->u_id
         );
     }
+
+    public function testLinkNewProfile()
+    {
+        $this->USER->link_new_profile();
+        $profiles = UserProfile::load_profiles_for_user($this->USER->u_id);
+        $this->assertEquals(
+            count($profiles),
+            2
+        );
+    }
 }
