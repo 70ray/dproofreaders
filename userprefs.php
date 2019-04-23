@@ -16,7 +16,6 @@ include_once($relPath.'User.inc');
 include_once($relPath.'UserProfile.inc');
 
 require_login();
-
 // The url the user viewed immediately before coming to the preferences.
 // Not all browsers provide this, though.
 // If the user came to userprefs.php by entering the URL manually,
@@ -62,18 +61,10 @@ if (isset($_POST["swProfile"]))
     // get profile from database
     $c_profile=get_integer_param($_POST, "c_profile", NULL, 0, NULL);
     $dp_user->u_profile = $c_profile;
-/*    mysqli_query(DPDatabase::get_connection(), sprintf("
-        UPDATE users
-        SET u_profile='$c_profile'
-        WHERE u_id=$uid  AND username='%s'",
-        mysqli_real_escape_string(DPDatabase::get_connection(), $pguser))
-    );*/
-//    dpsession_set_preferences_from_db();
     $dp_user->save();
     $eURL="$code_url/userprefs.php?tab=$selected_tab&amp;origin=" . urlencode($origin);
     metarefresh(0,$eURL,_('Profile Selection'),_('Loading Selected Profile....'));
 }
-
 
 $event_id = 0;
 $window_onload_event= '';
@@ -82,13 +73,6 @@ $window_onload_event= '';
 if (isset($_POST["quitnc"]))
 {
     metarefresh(0, $origin, _("Quit"), "");
-}
-
-// restore session values from db
-if (isset($_POST["restorec"]))
-{
-    dpsession_set_preferences_from_db();
-    metarefresh(0, $origin, _("Restore"), "");
 }
 
 if (array_get($_POST, "insertdb", "") != "") {
@@ -111,33 +95,13 @@ if (array_get($_POST, "insertdb", "") != "") {
     {
     // Delete the profile which was displayed on the previous screen.
     // This is slightly cumbersome because the user has to switch to a profile
-    // profile in order to be able to delete it, meaning the code has to handle
+    // in order to be able to delete it, meaning the code has to handle
     // the aftereffects by setting a new current profile once that has been done.
     // Deletion is prevented when the user has only one profile by disabling
     // the button in the options at the bottom of the proofreading tab.
 
     // Get and delete currently selected profile.
-    // Since profilename is not unique, identify by u_profile.
-    $del_target_profile_id = $userP['u_profile'];
-    $del_target_profile_name = $userP['profilename'];
-    echo sprintf(_("Deleting usersettings profile: %1\$s (id=%2\$d)..."),$del_target_profile_name,$del_target_profile_id) . "\n<br>\n";
-    mysqli_query(DPDatabase::get_connection(), "delete from user_profiles WHERE u_ref = '$uid' AND id = '$del_target_profile_id'");
-
-    // Set the first remaining available profile to be active.
-    $result=mysqli_query(DPDatabase::get_connection(), "SELECT * FROM user_profiles WHERE  u_ref=$uid");
-    $row = mysqli_fetch_assoc($result);
-    $new_profile_name = $row["profilename"];
-    $new_profile_id = $row["id"];
-    echo sprintf(_("Active usersettings profile is now: %s"),$new_profile_name) . "\n<br>\n";
-    
-    mysqli_query(DPDatabase::get_connection(), sprintf("
-        UPDATE users
-        SET u_profile='$new_profile_id'
-        WHERE u_id='$uid' AND username='%s'",
-        mysqli_real_escape_string(DPDatabase::get_connection(), $pguser))
-    );
-    // Reload preferences to reflect changed active profile.
-    dpsession_set_preferences_from_db();
+    $dp_user->delete_current_profile();
 
     // Bounce user back to the proofreading preferences tab.
     $selected_tab=1;
@@ -245,12 +209,10 @@ function echo_general_tab() {
         PRIVACY_PRIVATE   => _("Private"),
     );
 
-    $user = new User($pguser);
-
     echo "<tr>\n";
     show_preference(
         _('Name'), 'real_name', 'name',
-        $user->real_name,
+        $dp_user->real_name,
         'textfield',
         array( '20', 'required', '' )
         // About 98% of pgdp.net's users have length(real_name) <= 20
@@ -261,7 +223,7 @@ function echo_general_tab() {
     // Check for DP/forum email mismatch, warn user if not the same
     $bb_user_info = get_forum_user_details($pguser);
     $email_warning = '';
-    if ( $bb_user_info["email"] != $user->email) {
+    if ( $bb_user_info["email"] != $dp_user->email) {
         $edit_url = get_url_to_edit_profile();
         $email_warning = "<p><b>".sprintf(_("Warning: The email in your <a href='%s'>forum profile</a> is different."),$edit_url)."</b><br>";
         $email_warning .= _("Please update if necessary to ensure you receive messages as intended.")."</p>\n";
@@ -270,7 +232,7 @@ function echo_general_tab() {
     echo "<tr>\n";
     show_preference(
         _('E-mail'), 'email', 'email',
-        $user->email,
+        $dp_user->email,
         'emailfield',
         array( '26', 'required', $email_warning )
         // About 92% of pgdp.net's users have length(email) <= 26
@@ -367,15 +329,7 @@ function save_general_tab() {
 
     update_user($_POST, $input_string_fields, $input_numeric_fields);
     $dp_user->i_prefs = 1; // is this used?
-//    $update_string .= ", i_prefs=1";
     $dp_user->save();
-
-/*    $users_query=sprintf("
-        UPDATE users
-        SET $update_string
-        WHERE u_id=$uid AND username='%s'",
-        mysqli_real_escape_string(DPDatabase::get_connection(), $pguser));
-    mysqli_query(DPDatabase::get_connection(), $users_query);*/
 
     // Opt-out of credits when Content-Providing (deprecated), Image Preparing, 
     // Text Preparing, Project-Managing and/or Post-Processing.
@@ -388,24 +342,19 @@ function save_general_tab() {
     $userSettings->set_value('credit_name', $_POST["credit_name"]);
     if (isset($_POST["credit_other"]))
         $userSettings->set_value('credit_other', $_POST["credit_other"]);
-
-//    echo mysqli_error(DPDatabase::get_connection());
-//    dpsession_set_preferences_from_db();
-
 }
 
 /*************** PROOFREADING TAB ***************/
 
 function echo_proofreading_tab() {
-    global $userP, $uid, $dp_user;
+    global $dp_user;
     global $i_resolutions;
     global $proofreading_font_faces, $proofreading_font_sizes;
     global $userSettings;
 
     // see if they already have 10 profiles, etc.
-    $profiles = UserProfile::load_profiles_for_user($uid);
-//    $pf_query=mysqli_query(DPDatabase::get_connection(), "SELECT profilename, id FROM user_profiles WHERE u_ref='{$userP['u_id']}' ORDER BY id ASC");
-    $pf_num = count($profiles);
+    $profilenames = $dp_user->get_profilenames();
+    $pf_num = count($profilenames);
 
     echo "<tr>\n";
     show_blank();
@@ -435,11 +384,8 @@ function echo_proofreading_tab() {
     echo "<td colspan='2' class='center-align'>";
     // show all profiles
     echo "<select name='c_profile' ID='c_profile'>";
-//    while ($row = mysqli_fetch_assoc($pf_query))
-    foreach($profiles as $profile)
+    foreach($profilenames as $pf_Dex => $pf_Val)
     {
-        $pf_Dex = $profile->id;
-        $pf_Val = $profile->profilename;
         echo "<option value=\"$pf_Dex\"";
         if ($pf_Dex == $dp_user->u_profile) { echo " SELECTED"; }
         echo ">$pf_Val</option>";
@@ -635,12 +581,7 @@ function echo_proofreading_tab() {
 
     // buttons
     echo "<tr><td colspan='6' class='center-align'>";
-/*    if ($userP['prefschanged']==1)
-    {
-        echo "<input type='submit' value='" 
-            . attr_safe(_("Restore to Saved Preferences")) 
-            . "' name='restorec'> &nbsp;";
-    }*/
+
     echo "<input type='submit' value='" . attr_safe(_("Save Preferences"))
         . "' name='change'> &nbsp;";
     echo "<input type='submit' value='" 
@@ -665,14 +606,12 @@ function echo_proofreading_tab() {
 }
 
 function save_proofreading_tab() {
-    global $uid, $userP, $pguser, $dp_user;
+    global $dp_user;
     global $userSettings;
 
     // set user_profiles values
     $input_string_fields = array("profilename");
     $input_numeric_fields = array("i_res", "i_type", "i_layout", "i_newwin", "i_toolbar", "i_statusbar", "v_fntf", "v_fnts", "v_zoom", "v_tframe", "v_tscroll", "v_tlines", "v_tchars", "v_twrap", "h_fntf", "h_fnts", "h_zoom", "h_tframe", "h_tscroll", "h_tlines", "h_tchars", "h_twrap");
-
-//    $update_string = _create_mysql_update_string($_POST, $input_string_fields, $input_numeric_fields);
 
     $create_new_profile = FALSE;
     if(isset($_POST["mkProfile"]) || isset($_POST["mkProfileAndQuit"]))
@@ -684,41 +623,19 @@ function save_proofreading_tab() {
     if ($create_new_profile)
     {
         $dp_user->link_new_profile();
-//        $prefs_query="INSERT INTO user_profiles SET u_ref='$uid', $update_string";
     }
-//    else
-//    {
-//        $prefs_query="UPDATE user_profiles SET $update_string WHERE u_ref='$uid' AND id='{$userP['u_profile']}'";
-//    }
     update_user($_POST, $input_string_fields, $input_numeric_fields);
     $dp_user->save();
 
-//    mysqli_query(DPDatabase::get_connection(), $prefs_query);
-//    echo mysqli_error(DPDatabase::get_connection());
-
-    // set users values
-/*    if ($create_new_profile)
-    {
-        $users_query=sprintf("
-            UPDATE users
-            SET u_profile=".mysqli_insert_id(DPDatabase::get_connection())."
-            WHERE u_id=$uid AND username='%s'",
-            mysqli_real_escape_string(DPDatabase::get_connection(), $pguser));
-        mysqli_query(DPDatabase::get_connection(), $users_query);
-        echo mysqli_error(DPDatabase::get_connection());
-    }*/
-
     $userSettings->set_boolean('hide_special_colors', $_POST["show_special_colors"]=='no');
-
-//    dpsession_set_preferences_from_db();
 }
 
 /*************** PM TAB ***************/
 
 function echo_pm_tab() {
 
-    global $userP;
     global $userSettings;
+    global $dp_user;
 
     $i_pm= array(_("All Projects"), _("Active Projects"), _("Basic Page"));
 
@@ -726,7 +643,7 @@ function echo_pm_tab() {
     show_preference(
         // TRANSLATORS: PM = project manager
         _('Default PM Page'), 'i_pmdefault', 'pmdefault',
-        $userP['i_pmdefault'],
+        $dp_user->i_pmdefault,
         'dropdown',
         $i_pm
     );
@@ -758,35 +675,24 @@ function echo_pm_tab() {
 }
 
 function save_pm_tab() {
-    global $uid, $pguser;
     global $userSettings;
+    global $dp_user;
 
     // set users values
     $input_string_fields = array();
     //  i_pmdefault is "Default PM Page"
     $input_numeric_fields = array("i_pmdefault");
 
-    $update_string = _create_mysql_update_string($_POST, $input_string_fields, $input_numeric_fields);
-
-    $users_query=sprintf("
-        UPDATE users
-        SET $update_string
-        WHERE u_id=$uid AND username='%s'",
-        mysqli_real_escape_string(DPDatabase::get_connection(), $pguser));
-    mysqli_query(DPDatabase::get_connection(), $users_query);
-    echo mysqli_error(DPDatabase::get_connection());
+    update_user($_POST, $input_string_fields, $input_numeric_fields);
+    $dp_user->save();
 
     // remember if the PM wants to be automatically signed up for email notifications of
     // replies made to their project threads
-
     $userSettings->set_boolean('auto_proj_thread', $_POST["auto_proj_thread"] == 'yes');
  
     // remember if the PM wants to have their projects automatically assigned 
     // to them for PP 
-     
     $userSettings->set_boolean('send_to_post', $_POST["send_to_post"] == 'yes');
-
-    dpsession_set_preferences_from_db();
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -1014,39 +920,6 @@ function update_user($source_array, $string_fields = array(), $numeric_fields = 
     {
         $dp_user->$field = get_integer_param($source_array, $field, 0, NULL, NULL);
     }
-}
-
-function _create_mysql_update_string($source_array, $string_fields = array(), $numeric_fields = array())
-// $source_array is an array such as $_REQUEST or $_POST.
-// $string_fields
-//    is a list of keys such that $source_array[$key] should be a string.
-// $numeric_fields
-//    is a list of keys such that $source_array[$key] should be a numeric value.
-// This function checks that those expectations are satisfied, and constructs a
-// string of column=value 'assignments' that can be used in an SQL UPDATE
-// command (where each $key is assumed to be a column name). (String values
-// will be properly escaped in this string.)
-//
-// Currently this function will set default values ("" for strings, 0 for
-// numeric values) for all fields that are not within $source_array.
-{
-    $fields = array_merge($string_fields, $numeric_fields);
-
-    $update_fields = array();
-    foreach($fields as $field)
-    {
-        if(in_array($field, $string_fields))
-        {
-            $value = "'" . mysqli_real_escape_string(DPDatabase::get_connection(),  array_get( $source_array, $field, "" ) ) . "'";
-        }
-        else
-        {
-            $value = get_integer_param( $source_array, $field, 0, NULL, NULL );
-        }
-        array_push($update_fields, "$field = $value");
-    }
-
-    return implode(", ", $update_fields);
 }
 
 // vim: sw=4 ts=4 expandtab

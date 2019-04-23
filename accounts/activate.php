@@ -100,44 +100,30 @@ if($create_user_status !== TRUE) {
 }
 
 // Insert into 'real' table -- users
-$query = sprintf("
-    INSERT INTO users (id, real_name, username, email, date_created,
-                       email_updates, referrer, http_referrer, u_neigh, u_intlang)
-    VALUES ('%s', '%s', '%s', '%s', $user->date_created,
-            $user->email_updates, '%s', '%s', 10, '%s')
-    ",  mysqli_real_escape_string(DPDatabase::get_connection(), $ID),
-        mysqli_real_escape_string(DPDatabase::get_connection(), $user->real_name),
-        mysqli_real_escape_string(DPDatabase::get_connection(), $user->username),
-        mysqli_real_escape_string(DPDatabase::get_connection(), $user->email),
-        mysqli_real_escape_string(DPDatabase::get_connection(), $user->referrer),
-        mysqli_real_escape_string(DPDatabase::get_connection(), $user->http_referrer),
-        mysqli_real_escape_string(DPDatabase::get_connection(), $user->u_intlang)
-);
+$real_user = new User();
+$real_user->id = $ID;
+$real_user->username = $user->username;
+$real_user->save();
 
-$result = mysqli_query(DPDatabase::get_connection(), $query) or die(mysqli_error(DPDatabase::get_connection()));
-$u_id = mysqli_insert_id(DPDatabase::get_connection()); // auto-incremented users.u_id
+$real_user->real_name = $user->real_name;
+$real_user->email = $user->email;
+$real_user->email_updates = $user->email_updates;
+$real_user->referrer = $user->referrer;
+$real_user->http_referrer = $user->http_referrer;
+$real_user->u_intlang = $user->u_intlang;
 
 // Delete record in non_activated_users.
 $user->delete();
 
 // create profile
-$profileString="INSERT INTO user_profiles SET u_ref=$u_id";
-$makeProfile = mysqli_query(DPDatabase::get_connection(), $profileString);
-$profile_id = mysqli_insert_id(DPDatabase::get_connection()); // auto-incremented user_profiles.id
-
-// add ref to profile
-$refString=sprintf("
-    UPDATE users SET u_profile=$profile_id WHERE id='%s' AND username='%s'
-    ",  mysqli_real_escape_string(DPDatabase::get_connection(), $ID),
-        mysqli_real_escape_string(DPDatabase::get_connection(), $user->username)
-);
-$makeRef = mysqli_query(DPDatabase::get_connection(), $refString);
+$real_user->link_new_profile();
+$real_user->save();
 
 // Send them an introduction e-mail
 maybe_welcome_mail($user->email, $user->real_name, $user->username);
 
 printf(_("User %s activated successfully."), $user->username);
-echo " ";        
+echo " ";
 // TRANSLATORS: %s is the site name
 printf(_("Please check the e-mail being sent to you for further information about %s."),
         $site_name);

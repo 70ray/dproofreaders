@@ -197,30 +197,36 @@ class UserProfile
         $this->modified_values = array();
     }
 
-    // Load all profiles for a given u_ref
-    // e.g. $user_profiles = UserProfiles::load_profiles_for_user($u_ref)
-    public static function load_profiles_for_user($u_ref)
+    public function delete()
     {
-        $sql = sprintf("
-            SELECT id
-            FROM user_profiles
-            WHERE u_ref = %d
-        ", (int)$u_ref
+        $query = sprintf("
+            DELETE FROM user_profiles
+            WHERE id = %d
+        ",  (int)$this->id
         );
+        $result = mysqli_query(DPDatabase::get_connection(), $query);
 
+        if(!$result)
+        {
+            throw new UnexpectedValueException(mysqli_error(DPDatabase::get_connection()));
+        }
+    }
+
+    public static function get_profilenames_for_user($u_ref)
+    {
+        $sql = "SELECT profilename, id FROM user_profiles WHERE u_ref = $u_ref ORDER BY id ASC";
         $result = mysqli_query(DPDatabase::get_connection(), $sql);
         if(!$result)
         {
             throw new UnexpectedValueException(mysqli_error(DPDatabase::get_connection()));
         }
-        $user_profiles = array();
+        $user_profilenames = array();
         while($table_row = mysqli_fetch_assoc($result))
         {
-            $user_profiles[] = new UserProfile($table_row["id"]);
+            $user_profilenames[$table_row["id"]] = $table_row["profilename"];
         }
-
         mysqli_free_result($result);
-        return $user_profiles;
+        return $user_profilenames;
     }
 
     public static function & get_user_profile($id)
