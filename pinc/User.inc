@@ -107,7 +107,15 @@ class User
         }
         else
         {
-            $profile = UserProfile::get_user_profile($this->table_row['u_profile']);
+            try
+            {
+                $profile =& UserProfile::get_user_profile($this->table_row['u_profile']);
+            }
+            catch(NonexistentUserProfileException $e)
+            {
+                $this->link_first_profile();
+                $profile =& UserProfile::get_user_profile($this->table_row['u_profile']);
+            }
             if($name == 'profile')
             {
                 return $profile;
@@ -233,7 +241,6 @@ class User
         if($column_assignments)
         {
             $update_segment = implode(", ", $column_assignments);
-
             $query = sprintf("
                 UPDATE users
                 SET $update_segment
@@ -255,7 +262,7 @@ class User
         // create it without u_id which is set on User save
         if($this->u_profile)
         {
-            $profile = UserProfile::get_user_profile($this->u_profile);
+            $profile =& UserProfile::get_user_profile($this->u_profile);
             $profile->save();
         }
     }
@@ -266,6 +273,30 @@ class User
         $new_profile->u_ref = $this->u_id;
         $new_profile->save();
         $this->u_profile = $new_profile->id;
+    }
+
+    private function link_first_profile()
+    {
+        $profilenames = $this->get_profilenames();
+        if(count($profilenames) < 1)
+        {
+            $this->link_new_profile();
+            return;
+        }
+        $this->u_profile = array_keys($profilenames)[0];
+    }
+
+    public function delete_current_profile()
+    {
+        // and replace with another from the list
+        $profile =& UserProfile::get_user_profile($this->u_profile);
+        $profile->delete();
+        $this->link_first_profile();
+    }
+
+    public function get_profilenames()
+    {
+        return UserProfile::get_profilenames_for_user($this->u_id);
     }
 
     //
