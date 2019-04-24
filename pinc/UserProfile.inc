@@ -114,34 +114,9 @@ class UserProfile
 
         mysqli_free_result($result);
     }
-/*
-    private function create_initial_db_row($u_ref)
-    {
-        $query = sprintf("
-            INSERT INTO user_profiles
-            SET
-                u_ref = '%d'
-        ",  (int)$u_ref
-        );
-
-        $result = mysqli_query(DPDatabase::get_connection(), $query);
-
-        if(!$result)
-        {
-            throw new UnexpectedValueException(mysqli_error(DPDatabase::get_connection()));
-        }
-
-        $id = mysqli_insert_id(DPDatabase::get_connection());
-
-        // now load the row to pick up any default values
-        $this->load($id);
-    }*/
 
     public function save()
     {
-//        if(!$this->has_existing_db_row)
-  //          $this->create_initial_db_row();
-
         // Build the SQL updates for columns set in this object
         $column_assignments = array();
         foreach(array_unique($this->modified_values) as $name)
@@ -214,9 +189,8 @@ class UserProfile
         return $user_profilenames;
     }
 
-    public static function create_user_profile($u_id)
+    public static function create_user_profile($u_ref)
     {
-//        $profile = new UserProfile();
         $query = sprintf("
             INSERT INTO user_profiles
             SET
@@ -230,11 +204,7 @@ class UserProfile
         {
             throw new UnexpectedValueException(mysqli_error(DPDatabase::get_connection()));
         }
-//        return get_user_profile(mysqli_insert_id(DPDatabase::get_connection()));
         return mysqli_insert_id(DPDatabase::get_connection());
-
-        // now load the row to pick up any default values
-//        $profile->load($id);
     }
 
     public static function & get_user_profile($id)
