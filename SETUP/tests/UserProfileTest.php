@@ -54,27 +54,19 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
         $result = mysqli_query(DPDatabase::get_connection(), $sql);
     }
 
-    public function testSaveExistingUserProfile()
+    public function testGetUserProfile()
     {
-        $new_profilename = "new profile name";
         $user_profile =& UserProfile::get_user_profile($this->PROFILE_ID);
-        $user_profile->profilename = $new_profilename;
-        $user_profile->save();
-
-        $verify_user_profile =& UserProfile::get_user_profile($this->PROFILE_ID);
-        $this->assertEquals(
-            $new_profilename,
-            $verify_user_profile->profilename
-        );
+        $this->assertTrue(isset($user_profile->profilename));
     }
-/*
-    public function testGetCurrentProfile()
+
+    /**
+     * @expectedException DomainException
+     */
+    public function testSetImmutable()
     {
-        $current_profile = $this->USER->profile;
-        $this->assertEquals(
-            $current_profile->u_ref,
-            $this->USER->u_id
-        );
+        $user_profile =& UserProfile::get_user_profile($this->PROFILE_ID);
+        $user_profile->id = 42;
     }
 
     public function testGetProfileValue()
@@ -94,35 +86,49 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
             $this->TEST_PROFILENAME
         );
     }
-*/
-    /**
-     * @expectedException UnexpectedValueException
-     */
-/*    public function testGetNonexistentValue()
+
+    public function testGetCurrentProfile()
     {
-        $nonex = $this->USER->nonexistent;
+        $current_profile = $this->USER->profile;
         $this->assertEquals(
-            $nonex,
-            13
-        );
-    }
-*/
-    /**
-     * @expectedException UnexpectedValueException
-     */
-/*    public function testSetNonexistentValue()
-    {
-        $this->USER->nonexistent = 13;
-        $this->USER->save();
-        $user = new User($TEST_USERNAME);
-        $nonex = $user->nonexistent;
-        $this->assertEquals(
-            $nonex,
-            13
+            $current_profile->u_ref,
+            $this->USER->u_id
         );
     }
 
-    public function testLoadUserProfiles()
+    public function testSaveExistingUserProfile()
+    {
+        $new_profilename = "new profile name";
+        $user_profile =& UserProfile::get_user_profile($this->PROFILE_ID);
+        $user_profile->profilename = $new_profilename;
+        $user_profile->save();
+
+        $verify_user_profile =& UserProfile::get_user_profile($this->PROFILE_ID);
+        $this->assertEquals(
+            $new_profilename,
+            $verify_user_profile->profilename
+        );
+    }
+
+    /**
+     * @expectedException UnexpectedValueException
+     */
+    public function testGetNonexistentValue()
+    {
+        $nonex = $this->USER->nonexistent;
+        $this->assertTrue(1);
+    }
+
+    /**
+     * @expectedException UnexpectedValueException
+     */
+    public function testSetNonexistentValue()
+    {
+        $this->USER->nonexistent = 13;
+        $this->assertTrue(1);
+    }
+
+    public function testGetProfilenames()
     {
         $this->USER->profilename = $this->TEST_PROFILENAME;
         $this->USER->save();
@@ -145,5 +151,5 @@ class UserProfileTest extends PHPUnit\Framework\TestCase
             count($profilenames),
             2
         );
-    }*/
+    }
 }
