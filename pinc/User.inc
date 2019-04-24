@@ -269,10 +269,7 @@ class User
 
     public function link_new_profile()
     {
-        $new_profile = new UserProfile();
-        $new_profile->u_ref = $this->u_id;
-        $new_profile->save();
-        $this->u_profile = $new_profile->id;
+        $this->u_profile = create_user_profile($this->u_id);
     }
 
     private function link_first_profile()
