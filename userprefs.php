@@ -12,8 +12,7 @@ include_once($relPath.'misc.inc'); // startswith(...), attr_safe(), html_safe()
 include_once($relPath.'js_newpophelp.inc');
 include_once($relPath.'misc.inc'); // get_integer_param()
 include_once($relPath.'forum_interface.inc'); // get_forum_user_details(), get_url_to_edit_profile()
-include_once($relPath.'User.inc');
-include_once($relPath.'UserProfile.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 
 require_login();
 // The url the user viewed immediately before coming to the preferences.
