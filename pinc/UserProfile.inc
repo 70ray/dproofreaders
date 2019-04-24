@@ -49,19 +49,7 @@ class UserProfile
     private $has_existing_db_row;
     private $modified_values = array();
 
-
-    public function __construct($id=NULL)
-    {
-        if($id !== NULL)
-        {
-            $this->load($id);
-            $this->has_existing_db_row = true;
-        }
-        else
-        {
-            $this->has_existing_db_row = false;
-        }
-    }
+    private function __construct() {}
 
     private function check_valid($name)
     {
@@ -78,7 +66,7 @@ class UserProfile
     // See the PHP docs for "magic methods".
     public function __set($name, $value)
     {
-        if(isset($this->$name) && in_array($name, $this->immutable_fields))
+        if(in_array($name, $this->immutable_fields))
         {
             throw new DomainException(sprintf(
                 _("%s is an immutable field"), $name)
@@ -126,17 +114,14 @@ class UserProfile
 
         mysqli_free_result($result);
     }
-
-    private function create_initial_db_row()
+/*
+    private function create_initial_db_row($u_ref)
     {
-        if(!isset($this->u_ref))
-            throw new UnexpectedValueException("'u_ref' is a required field");
-
         $query = sprintf("
             INSERT INTO user_profiles
             SET
                 u_ref = '%d'
-        ",  (int)$this->u_ref
+        ",  (int)$u_ref
         );
 
         $result = mysqli_query(DPDatabase::get_connection(), $query);
@@ -146,22 +131,22 @@ class UserProfile
             throw new UnexpectedValueException(mysqli_error(DPDatabase::get_connection()));
         }
 
-        $this->id = mysqli_insert_id(DPDatabase::get_connection());
+        $id = mysqli_insert_id(DPDatabase::get_connection());
 
         // now load the row to pick up any default values
-        $this->load($this->id);
-    }
+        $this->load($id);
+    }*/
 
     public function save()
     {
-        if(!$this->has_existing_db_row)
-            $this->create_initial_db_row();
+//        if(!$this->has_existing_db_row)
+  //          $this->create_initial_db_row();
 
         // Build the SQL updates for columns set in this object
         $column_assignments = array();
         foreach(array_unique($this->modified_values) as $name)
         {
-            // These columns are handled in create_initial_db_row();
+            // These columns are immutable
             if(in_array($name, array("id", "u_ref")))
                 continue;
 
@@ -229,6 +214,29 @@ class UserProfile
         return $user_profilenames;
     }
 
+    public static function create_user_profile($u_id)
+    {
+//        $profile = new UserProfile();
+        $query = sprintf("
+            INSERT INTO user_profiles
+            SET
+                u_ref = '%d'
+        ",  (int)$u_ref
+        );
+
+        $result = mysqli_query(DPDatabase::get_connection(), $query);
+
+        if(!$result)
+        {
+            throw new UnexpectedValueException(mysqli_error(DPDatabase::get_connection()));
+        }
+//        return get_user_profile(mysqli_insert_id(DPDatabase::get_connection()));
+        return mysqli_insert_id(DPDatabase::get_connection());
+
+        // now load the row to pick up any default values
+//        $profile->load($id);
+    }
+
     public static function & get_user_profile($id)
     {
         static $profiles = array();
@@ -236,7 +244,8 @@ class UserProfile
         {
             return $profiles[$id];
         }
-        $profile = new UserProfile($id);
+        $profile = new UserProfile();
+        $profile->load($id);
         $profiles[$id] =& $profile;
         return $profile;
     }
