@@ -14,19 +14,19 @@ $dp_user =& User::get_dp_user();
 
 if ($dp_user->team_1 != $tid && $dp_user->team_2 != $tid && $dp_user->team_3 != $tid) {
     if ($dp_user->team_1 == 0 || $otid == 1) {
-        $teamResult = mysqli_query(DPDatabase::get_connection(), "UPDATE users SET team_1 = $tid WHERE username = '".$GLOBALS['pguser']."' AND u_id = ".$dp_user->u_id."");
         mysqli_query(DPDatabase::get_connection(), "UPDATE user_teams SET latestUser = ".$dp_user->u_id.", member_count = member_count+1, active_members = active_members+1 WHERE id = $tid");
         if ($otid != 0) { mysqli_query(DPDatabase::get_connection(), "UPDATE user_teams SET active_members = active_members-1 WHERE id = ".$dp_user->team_1.""); }
+        $dp_user->team_1 = $tid;
         $redirect_team = 1;
     } elseif ($dp_user->team_2 == 0 || $otid == 2) {
-        $teamResult = mysqli_query(DPDatabase::get_connection(), "UPDATE users SET team_2 = $tid WHERE username = '".$GLOBALS['pguser']."' AND u_id = ".$dp_user->u_id."");
         mysqli_query(DPDatabase::get_connection(), "UPDATE user_teams SET latestUser = ".$dp_user->u_id.", member_count = member_count+1, active_members = active_members+1 WHERE id = $tid");
         if ($otid != 0) { mysqli_query(DPDatabase::get_connection(), "UPDATE user_teams SET active_members = active_members-1 WHERE id = ".$dp_user->team_2.""); }
+        $dp_user->team_2 = $tid;
         $redirect_team = 1;
     } elseif ($dp_user->team_3 == 0 || $otid == 3) {
-        $teamResult = mysqli_query(DPDatabase::get_connection(), "UPDATE users SET team_3 = $tid WHERE username = '".$GLOBALS['pguser']."' AND u_id = ".$dp_user->u_id."");
         mysqli_query(DPDatabase::get_connection(), "UPDATE user_teams SET latestUser = ".$dp_user->u_id.", member_count = member_count+1, active_members = active_members+1 WHERE id = $tid");
         if ($otid != 0) { mysqli_query(DPDatabase::get_connection(), "UPDATE user_teams SET active_members = active_members-1 WHERE id = ".$dp_user->team_3.""); }
+        $dp_user->team_3 = $tid;
         $redirect_team = 1;
     } else {
         include_once($relPath.'theme.inc');
@@ -61,6 +61,7 @@ if ($dp_user->team_1 != $tid && $dp_user->team_2 != $tid && $dp_user->team_3 != 
 }
 
 if ($redirect_team == 1) {
+    $dp_user->save();
     dpsession_set_preferences_from_db();
     $title = _("Join the Team");
     $desc = _("Joining the team....");

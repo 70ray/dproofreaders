@@ -63,11 +63,12 @@ function showTeamInformation($curTeam, $tally_name)
 
 function showTeamProfile($curTeam, $preview=FALSE)
 {
-    global $userP;
+    global $user_is_logged_in;
     global $team_avatars_url;
     global $code_url;
 
     $team_id = $curTeam['id'];
+    $dp_user =& User::get_dp_user();
 
     if($team_id)
         $xml_doc_url = "$code_url/stats/teams/teams_xml.php?id=$team_id";
@@ -78,7 +79,7 @@ function showTeamProfile($curTeam, $preview=FALSE)
     $xml_button = "<a href='$xml_doc_url'>$xml_img_tag</a>";
 
     // Allow team owner and site administrators to edit the team
-    if (!$preview && (($userP['u_id'] == $curTeam['owner']) || user_is_a_sitemanager()))
+    if (!$preview && (($dp_user->u_id == $curTeam['owner']) || user_is_a_sitemanager()))
     {
         $op_url = "tedit.php?tid=$team_id";
         $text = _('Edit');
@@ -89,7 +90,7 @@ function showTeamProfile($curTeam, $preview=FALSE)
         $editlink = '';
     }
 
-    if ($preview || empty($userP))
+    if ($preview || !$user_is_logged_in)
     {
         // The requestor is not logged in,
         // so they can't join or quit the team.
@@ -97,7 +98,7 @@ function showTeamProfile($curTeam, $preview=FALSE)
     }
     else
     {
-        if ($userP['team_1'] != $team_id && $userP['team_2'] != $team_id && $userP['team_3'] != $team_id)
+        if ($dp_user->team_1 != $team_id && $dp_user->team_2 != $team_id && $dp_user->team_3 != $team_id)
         {
             $op = 'jointeam';
             $text = _('Join');
@@ -456,7 +457,8 @@ function unstripAllString($ttext) {
 
 function showEdit($tname,$ttext,$twebpage,$tedit,$tsid)
 {
-    global $teamimages, $userP;
+    global $teamimages;
+    $dp_user =& User::get_dp_user();
 
     echo "<form enctype='multipart/form-data' id='mkTeam' name='mkTeam' action='";
     if ($tedit == 1) { echo "new_team.php"; } else { echo "tedit.php"; }
@@ -506,10 +508,10 @@ function showEdit($tname,$ttext,$twebpage,$tedit,$tsid)
 
     echo "<tr>";
     echo "<td class='center-align' colspan='2'>";
-    if ($tedit == 1 && $userP['team_1'] != 0 && $userP['team_2'] != 0 && $userP['team_3'] != 0) {
+    if ($tedit == 1 && $dp_user->team_1 != 0 && $dp_user->team_2 != 0 && $dp_user->team_3 != 0) {
         echo "<tr><td style='text-align: center;' colspan='2'>"._("You must join the team to create it, which team space would you like to use?")."<br>";
         echo "<select name='tteams' title='".attr_safe(_("Team List"))."'>";
-        $teamQuery = mysqli_query(DPDatabase::get_connection(), "SELECT teamname, id FROM user_teams WHERE id IN ({$userP['team_1']}, {$userP['team_2']}, {$userP['team_3']})");
+        $teamQuery = mysqli_query(DPDatabase::get_connection(), "SELECT teamname, id FROM user_teams WHERE id IN ({$dp_user->team_1}, {$dp_user->team_2}, {$dp_user->team_3})");
         while ($row = mysqli_fetch_assoc($teamQuery)) {
             echo "<option value='".$row['id']."'>".html_safe($row['teamname'])."</option>";
         }

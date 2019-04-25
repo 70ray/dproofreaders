@@ -15,6 +15,8 @@ $texact = array_get($_REQUEST, 'texact', null);
 
 $tstart = get_integer_param( $_GET, 'tstart', 0, 0, null );
 
+$dp_user =& User::get_dp_user();
+
 if ($tname) {
     if ($texact == 'yes')
     {
@@ -66,7 +68,7 @@ if (!empty($tRows)) {
         echo "<td>", html_safe($row['teamname']), "</td>\n";
         echo "<td class='center-align'>".$row['member_count']."</td>\n";
         echo "<td class='center-align'><b><a href='tdetail.php?tid=".$row['id']."'>"._("View")."</a>&nbsp;";
-        if ($userP['team_1'] != $row['id'] && $userP['team_2'] != $row['id'] && $userP['team_3'] != $row['id']) {
+        if ($dp_user->team_1 != $row['id'] && $dp_user->team_2 != $row['id'] && $dp_user->team_3 != $row['id']) {
             echo "<a href='../members/jointeam.php?tid=".$row['id']."'>"._("Join")."</a></b></td>";
         } else {
             echo "<a href='../members/quitteam.php?tid=".$row['id']."'>"._("Quit")."</a></b></td>";

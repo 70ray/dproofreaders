@@ -9,6 +9,7 @@ include_once('../includes/team.inc');
 
 require_login();
 
+$dp_user =& User::get_dp_user();
 $theme_extra_args = array("js_data" => get_newHelpWin_javascript("$code_url/pophelp.php?category=teams&name=edit_"));
 
 // Either the parameter is $_POST['tsid'] when coming from the edit form,
@@ -22,7 +23,7 @@ $result = select_from_teams("id = $tid");
 $curTeam = mysqli_fetch_assoc($result);
 
 // Allow team owner and site administrators to edit the team
-if (($userP['u_id'] != $curTeam['owner']) && (!user_is_a_sitemanager()))
+if (($dp_user->u_id != $curTeam['owner']) && (!user_is_a_sitemanager()))
 {
     $title = _("Authorization Failed");
     $desc = _("You are not authorized to edit this team....");
