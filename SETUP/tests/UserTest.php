@@ -224,4 +224,13 @@ class UserTest extends PHPUnit\Framework\TestCase
             $verify_user->real_name
         );
     }
+
+    public function testGetDpUser()
+    {
+        $user = User::get_dp_user($this->TEST_USERNAME);
+        $this->assertEquals(
+            $this->TEST_USERNAME,
+            $user->real_name
+        );
+    }
 }
