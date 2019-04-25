@@ -422,15 +422,20 @@ class User
         );
     }
 
-    public static function & get_dp_user()
+    public static function & get_dp_user($username = NULL)
     {
         global $pguser;
-
-        static $user = NULL;
-        if(!$user)
+        if(!$username)
         {
-            $user = new User($pguser);
+            $username = $pguser;
         }
+        static $users = array();
+        if(array_key_exists($username, $users))
+        {
+            return $users[$username];
+        }
+        $user = new User($username);
+        $users[$username] =& $user;
         return $user;
     }
 }
