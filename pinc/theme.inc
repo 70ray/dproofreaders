@@ -32,10 +32,11 @@ function theme($nameofpage, $location, $extra_args = array())
 // to close the page after the caller finishes output.
 function output_header($nameofpage, $show_statsbar = True, $extra_args = array())
 {
-    global $pguser, $userP;
+    global $pguser;
+    $dp_user =& User::get_dp_user();
 
     // Display stats bar on left (1) or right (0)
-    $statsbar_align = isset($pguser) ? $userP['u_align'] : 0;
+    $statsbar_align = isset($pguser) ? $dp_user->u_align : 0;
 
     // The theme layout consists of:
     // * Two full width headers at the top,
@@ -78,10 +79,11 @@ function output_header($nameofpage, $show_statsbar = True, $extra_args = array()
 
 function output_footer($nameofpage, $show_statsbar = True) {
     global $code_url, $site_name, $PAGE_START_TIME;
-    global $pguser, $userP;
+    global $pguser;
+    $dp_user =& User::get_dp_user();
 
     // Display stats bar on left (1) or right (0)
-    $statsbar_align = isset($pguser) ? $userP['u_align'] : 0;
+    $statsbar_align = isset($pguser) ? $dp_user->u_align : 0;
 
     // The main page content has been emited so close the main page content column.
     echo "</div>\n";
@@ -497,7 +499,7 @@ function html_statsbar($nameofpage) {
 
 function maybe_show_language_selector()
 {
-    global $code_url, $userP, $user_is_logged_in;
+    global $code_url, $user_is_logged_in;
 
     // if user is logged in, return instead of showing the drop-down
     if($user_is_logged_in)
@@ -532,7 +534,7 @@ function get_activity_links()
 // return a list of round/stage links for the user
 // the returned links are in a format usable by headerbar_text_array
 {
-    global $Stage_for_id_, $pguser, $userP;
+    global $Stage_for_id_, $pguser;
 
     if (is_null($pguser)) return;
     // Should show links to stages that are accessible to people
@@ -575,7 +577,8 @@ function get_activity_links()
 
 function show_tally_specific_stats( $tally_name )
 {
-    global $code_url, $userP, $pguser;
+    global $code_url, $pguser;
+    $dp_user =& User::get_dp_user();
 
     // Put the whole thing in a div, just so we can put a box around it.
     echo "<div id='tally-stats'>\n";
@@ -626,7 +629,7 @@ function show_tally_specific_stats( $tally_name )
         //Get the personal statistics array
         $neighbors =
             user_get_page_tally_neighborhood(
-                $tally_name, $pguser, $userP['u_neigh']);
+                $tally_name, $pguser, $dp_user->u_neigh);
         $usern = $neighbors[0];
 
         //get rank
@@ -672,11 +675,11 @@ function show_tally_specific_stats( $tally_name )
         echo _("Current Rank") . ": ";
         echo "$rankname</p>\n";
         echo "<p class='more-link'><a href='$code_url/stats/members/mdetail.php?id=".$user->u_id."&amp;tally_name=".$tally_name."'>" . $tally_name . " " .  _("Details...") . "</a></p>\n";
-        echo "<" . "!-- " . $userP['u_id'] . " -->";
+        echo "<" . "!-- " . $dp_user->u_id . " -->";
 
         // -------------------------------------------------------------
         //Show the Neighbor table if the user has requested so
-        if ($userP['u_neigh']) {
+        if ($dp_user->u_neigh) {
             echo "<hr class='divider'>\n";
             echo "<h4>" . _("Your Neighborhood") . "</h4>\n";
             echo "<p>\n";
@@ -717,7 +720,8 @@ function show_tally_vs_goal($label_for_goal, $goal, $label_for_actual, $actual)
 
 function show_user_teams()
 {
-    global $code_url, $userP;
+    global $code_url;
+    $dp_user =& User::get_dp_user();
 
     echo "<div id='teams-nav'>\n";
     echo "<h2>" .  _("Your Teams") . "</h2>\n";
@@ -725,7 +729,7 @@ function show_user_teams()
     $teamRes=mysqli_query(DPDatabase::get_connection(), "
         SELECT teamname, id
         FROM user_teams
-        WHERE id IN ({$userP['team_1']}, {$userP['team_2']}, {$userP['team_3']})
+        WHERE id IN ({$dp_user->team_1}, {$dp_user->team_2}, {$dp_user->team_3})
     ");
     while($row = mysqli_fetch_assoc($teamRes))
     {
