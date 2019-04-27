@@ -1,6 +1,6 @@
 <?php
 include_once($relPath.'resolution.inc');
-include_once($relPath.'User.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 
 function get_newHelpWin_javascript($popHelpDir) {
     global $userP, $i_resolutions;

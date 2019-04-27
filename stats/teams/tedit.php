@@ -5,6 +5,7 @@ include_once($relPath.'theme.inc');
 include_once($relPath.'js_newpophelp.inc');
 include_once($relPath.'metarefresh.inc');
 include_once($relPath.'misc.inc'); // get_integer_param()
+include_once($relPath.'User.inc'); // get_dp_user()
 include_once('../includes/team.inc');
 
 require_login();

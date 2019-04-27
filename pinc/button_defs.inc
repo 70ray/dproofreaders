@@ -1,6 +1,7 @@
 <?php
 include_once($relPath.'site_vars.php');  // $charset for javascript_safe()
 include_once($relPath.'misc.inc');  // attr_safe(), javascript_safe()
+include_once($relPath.'User.inc'); // get_dp_user()
 
 define('CHANGE_LAYOUT',               'A');
 define('QUIT',                        'B');

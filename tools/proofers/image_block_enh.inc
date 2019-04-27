@@ -1,5 +1,6 @@
 <?php
 include_once($relPath.'misc.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 
 /*
 The "image block" comprises (at the top level) 3 divs,
@@ -29,21 +30,21 @@ function ibe_get_styles()
 // as percentages of its container box
 // (which is typically the "proofframe" of the proofing interface).
 {
-    global $userP;
+    $dp_user =& User::get_dp_user();
 
-    if ($userP['i_layout']=='1') {
-        $textWidth=$userP['v_tframe'];
-        $block_width_pc=(100-$userP['v_tframe'])-1;
+    if ($dp_user->i_layout=='1') {
+        $textWidth=$dp_user->v_tframe;
+        $block_width_pc=(100-$dp_user->v_tframe)-1;
         $textHeight=99;
         $block_height_pc=99;
         $textTop="0px";
-        $textLeft=(100-$userP['v_tframe'])."%";
+        $textLeft=(100-$dp_user->v_tframe)."%";
     } else {
         $textWidth=99;
         $block_width_pc=99;
-        $textHeight=$userP['h_tframe'];
-        $block_height_pc=(100-$userP['h_tframe'])-1;
-        $textTop=100-$userP['h_tframe']."%";
+        $textHeight=$dp_user->h_tframe;
+        $block_height_pc=(100-$dp_user->h_tframe)-1;
+        $textTop=100-$dp_user->h_tframe."%";
         $textLeft="1%";
     }
 

@@ -10,6 +10,7 @@ include_once($relPath.'misc.inc'); // html_safe()
 include_once($relPath.'links.inc'); // private_message_link()
 include_once($relPath.'forum_interface.inc'); // get_forum_user_id()
 include_once($relPath.'misc.inc'); // get_enumerated_param()
+include_once($relPath.'User.inc'); // get_dp_user()
 
 // Page-related code that's common to the standard and enhanced interfaces.
 
@@ -196,25 +197,25 @@ class PPage
 
     function echo_proofing_textarea()
     {
-        global $userP;
+        $dp_user =& User::get_dp_user();
 
         $page_text = $this->lpage->get_text();
 
         $lang = $this->lpage->get_language();
 
-        if ( $userP['i_layout']==1 )
+        if ( $dp_user->i_layout==1 )
         {
             // "vertical"
-            $n_cols      = $userP['v_tchars'];
-            $n_rows      = $userP['v_tlines'];
-            $line_wrap   = $userP['v_twrap'];
+            $n_cols      = $dp_user->v_tchars;
+            $n_rows      = $dp_user->v_tlines;
+            $line_wrap   = $dp_user->v_twrap;
         }
         else
         {
             // "horizontal"
-            $n_cols      = $userP['h_tchars'];
-            $n_rows      = $userP['h_tlines'];
-            $line_wrap   = $userP['h_twrap'];
+            $n_cols      = $dp_user->h_tchars;
+            $n_rows      = $dp_user->h_tlines;
+            $line_wrap   = $dp_user->h_twrap;
         }
 
         echo "<textarea

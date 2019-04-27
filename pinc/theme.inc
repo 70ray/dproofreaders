@@ -13,6 +13,7 @@ include_once($relPath.'forum_interface.inc');
 include_once($relPath.'languages.inc');
 include_once($relPath.'misc.inc'); // endswith(), get_enumerated_param(), attr_safe(), endswith()
 include_once($relPath.'faq.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 
 // Backwards compatibility function. To be removed once all
 // pages transition to output_header()

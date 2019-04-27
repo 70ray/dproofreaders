@@ -4,6 +4,7 @@ include_once($relPath.'base.inc');
 include_once($relPath.'misc.inc');
 include_once($relPath.'theme.inc');
 include_once($relPath.'metarefresh.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 include_once('../includes/team.inc');
 
 $order = get_enumerated_param(

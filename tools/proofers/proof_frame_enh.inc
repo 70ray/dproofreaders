@@ -2,6 +2,7 @@
 include_once($relPath.'http_headers.inc');
 include_once($relPath.'site_vars.php');
 include_once($relPath.'slim_header.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 include_once('PPage.inc');
 include_once('image_block_enh.inc');
 include_once('button_menu.inc');
@@ -10,7 +11,9 @@ include_once('preview.inc');
 
 function echo_proof_frame_enh( $ppage )
 {
-    global $code_url, $userP;
+    global $code_url;
+
+    $dp_user =& User::get_dp_user();
 
     $header_args = array(
         "css_files" => array("$code_url/styles/preview.css"),
@@ -26,10 +29,10 @@ function echo_proof_frame_enh( $ppage )
 
     slim_header(_("Proofreading Page"), $header_args);
 
-    if ($userP['i_layout']==1)
-        $iWidth=$userP['v_zoom'];
+    if ($dp_user->i_layout==1)
+        $iWidth=$dp_user->v_zoom;
     else
-        $iWidth=$userP['h_zoom'];
+        $iWidth=$dp_user->h_zoom;
     $iWidth=round((1000*$iWidth)/100);
 
     ibe_echo_block( $ppage->url_for_image(TRUE), $iWidth );

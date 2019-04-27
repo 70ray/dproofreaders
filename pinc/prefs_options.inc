@@ -1,4 +1,6 @@
 <?php
+include_once($relPath.'User.inc'); // get_dp_user()
+
 define( 'BROWSER_DEFAULT_STR', _("Browser default") );
 
 # $proofreading_font_faces and $proofreading_font_sizes are used to
@@ -49,17 +51,18 @@ $proofreading_font_sizes = array (
 // And a function to return user's current proofreading font
 function get_user_proofreading_font()
 {
-    global $userP, $proofreading_font_sizes, $proofreading_font_faces;
+    global $proofreading_font_sizes, $proofreading_font_faces;
+    $dp_user =& User::get_dp_user();
 
-    if ( $userP['i_layout']==1 )   // "vertical"
+    if ( $dp_user->i_layout==1 )   // "vertical"
     {
-        $font_size_i = $userP['v_fnts'];
-        $font_style_i = $userP['v_fntf'];
+        $font_size_i = $dp_user->v_fnts;
+        $font_style_i = $dp_user->v_fntf;
     }
     else   // "horizontal"
     {
-        $font_size_i = $userP['h_fnts'];
-        $font_style_i = $userP['h_fntf'];
+        $font_size_i = $dp_user->h_fnts;
+        $font_style_i = $dp_user->h_fntf;
     }
 
     $font_size = $proofreading_font_sizes[$font_size_i];

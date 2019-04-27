@@ -5,6 +5,7 @@ include_once($relPath.'Project.inc');
 include_once($relPath.'project_states.inc');
 include_once($relPath.'theme.inc');
 include_once($relPath.'metarefresh.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 
 require_login();
 
@@ -163,14 +164,15 @@ $md_groups = array(
 
 
 output_header(_("Image Frame"));
+$dp_user =& User::get_dp_user();
 
 //Start the outside table
 echo "<table cols ='2' border = '1'>";
 
 //Display image
-if ($userP['i_layout']==1)
-    {$iWidth=$userP['v_zoom'];}
-else {$iWidth=$userP['h_zoom'];}
+if ($dp_user->i_layout==1)
+    {$iWidth=$dp_user->v_zoom;}
+else {$iWidth=$dp_user->h_zoom;}
 $iWidth=round((1000*$iWidth)/100);
 
 // The outside table has a single row containing two cells.

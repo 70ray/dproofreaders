@@ -3,18 +3,20 @@ $relPath="./../../pinc/";
 include_once($relPath.'base.inc');
 include_once($relPath.'http_headers.inc');
 include_once($relPath.'slim_header.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 include_once('PPage.inc');
 
 require_login();
 
+$dp_user =& User::get_dp_user();
 $ppage = get_requested_PPage($_GET);
 
 slim_header("Image Frame", array('body_attributes' => 'id="standard_interface"'));
 
-if ($userP['i_layout']==1)
-    $iWidth=$userP['v_zoom'];
+if ($dp_user->i_layout==1)
+    $iWidth=$dp_user->v_zoom;
 else
-    $iWidth=$userP['h_zoom'];
+    $iWidth=$dp_user->h_zoom;
 $iWidth=round((1000*$iWidth)/100);
 ?>
 

@@ -3,12 +3,13 @@ include_once($relPath.'site_vars.php');
 include_once($relPath.'prefs_options.inc');
 include_once($relPath.'button_defs.inc');
 include_once($relPath.'misc.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 include_once('PPage.inc');
 
 function echo_button_menu( $ppage )
 {
-    global $userP;
     global $proofreading_font_faces, $proofreading_font_sizes;
+    $dp_user =& User::get_dp_user();
 ?>
 <script>
 function refuseNonNumeric(event) {
@@ -37,7 +38,7 @@ HREF="#" accesskey="/" onfocus="scrollImage('down')" onclick="scrollImage('down'
 name="fntFace" ID="fntFace"  class="dropsmall" title="<?php 
     echo attr_safe(_("Change Font Face"));
 ?>" onChange="top.changeFontFamily(this.options[this.selectedIndex].value, this.options[this.selectedIndex].text)"><?php
-    $current_font_i = $userP['i_layout']==1 ? $userP['v_fntf'] : $userP['h_fntf'];
+    $current_font_i = $dp_user->i_layout==1 ? $dp_user->v_fntf : $dp_user->h_fntf;
     foreach($proofreading_font_faces as $index => $font)
     {
         if($font == '')
@@ -53,7 +54,7 @@ name="fntFace" ID="fntFace"  class="dropsmall" title="<?php
 name="fntSize" ID="fntSize"  class="dropsmall" title="<?php 
     echo attr_safe(_("Change Font Size"));
 ?>" onChange="top.changeFontSize(this.options[this.selectedIndex].value, this.options[this.selectedIndex].text)"><?php
-    $current_size_i = $userP['i_layout']==1 ? $userP['v_fnts'] : $userP['h_fnts'];
+    $current_size_i = $dp_user->i_layout==1 ? $dp_user->v_fnts : $dp_user->h_fnts;
     foreach($proofreading_font_sizes as $index => $size)
     {
         if($size == '')
@@ -68,9 +69,9 @@ name="fntSize" ID="fntSize"  class="dropsmall" title="<?php
 ?></select>
 <input
 type="text" value="<?php
-  if ($userP['i_layout']==1)
-    {echo $userP['v_zoom'];}
-  else{echo $userP['h_zoom'];}
+  if ($dp_user->i_layout==1)
+    {echo $dp_user->v_zoom;}
+  else{echo $dp_user->h_zoom;}
 ?>" name="zmSize" ID="zmSize" class="boxnormal bottom-align" size="3" title="<?php 
     # xgettext:no-php-format
     echo attr_safe(_("Input Zoom %"));
