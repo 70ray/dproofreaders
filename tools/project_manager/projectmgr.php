@@ -11,11 +11,13 @@ include_once($relPath.'gradual.inc');
 include_once($relPath.'ProjectSearchForm.inc');
 include_once($relPath.'ProjectSearchResults.inc');
 include_once($relPath.'site_news.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 include_once('projectmgr.inc'); // echo_manager_links();
 
 require_login();
 
-switch ($userP['i_pmdefault'])
+$dp_user =& User::get_dp_user();
+switch ($dp_user->i_pmdefault)
 {
     case 0:
         $default_view = "user_all";
