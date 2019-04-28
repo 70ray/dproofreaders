@@ -6,6 +6,7 @@ include_once($relPath.'stages.inc');
 include_once($relPath.'slim_header.inc');
 include_once($relPath.'prefs_options.inc');
 include_once($relPath.'misc.inc'); // array_get(), get_enumerated_param(), attr_safe(), javascript_safe(), html_safe()
+include_once($relPath.'User.inc'); // get_dp_user()
 
 require_login();
 
@@ -233,25 +234,26 @@ elseif ($frame=="text") {
         $result = mysqli_query(DPDatabase::get_connection(), sprintf("SELECT $text_column_name FROM $projectid WHERE image = '%s'",mysqli_real_escape_string(DPDatabase::get_connection(), $page))); 
         $row = mysqli_fetch_assoc($result);
         $data = $row[$text_column_name];
+        $dp_user =& User::get_dp_user();
 
         // Use the font and wrap prefs for the user's default interface layout, 
         // since they're more likely to have set those prefs
-        if ( $userP['i_layout']==1 ) {
-            $font_face_i = $userP['v_fntf'];
-            $font_size_i = $userP['v_fnts'];
-            $line_wrap   = $userP['v_twrap'];
+        if ( $dp_user->i_layout==1 ) {
+            $font_face_i = $dp_user->v_fntf;
+            $font_size_i = $dp_user->v_fnts;
+            $line_wrap   = $dp_user->v_twrap;
         } else {
-            $font_face_i = $userP['h_fntf'];
-            $font_size_i = $userP['h_fnts'];
-            $line_wrap   = $userP['h_twrap'];
+            $font_face_i = $dp_user->h_fntf;
+            $font_size_i = $dp_user->h_fnts;
+            $line_wrap   = $dp_user->h_twrap;
         }
         $font_face = $proofreading_font_faces[$font_face_i];
         $font_size = $proofreading_font_sizes[$font_size_i];
 
         // Since this page doesn't have a vertical layout version, 
         // we'll use their horizontal prefs for textarea size
-        $n_cols = $userP['h_tchars'];
-        $n_rows = $userP['h_tlines'];
+        $n_cols = $dp_user->h_tchars;
+        $n_rows = $dp_user->h_tlines;
 
         echo "<textarea
             name='text_data'

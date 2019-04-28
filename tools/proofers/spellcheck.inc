@@ -5,10 +5,12 @@ include_once($relPath.'slim_header.inc');
 include_once($relPath.'links.inc'); // new_window_link
 include_once($relPath.'misc.inc'); // javascript_safe, attr_safe
 include_once($relPath.'faq.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 include_once('spellcheck_text.inc');
 include_once('PPage.inc');
 include_once('image_block_enh.inc');
 
+$dp_user =& User::get_dp_user();
 // text_data should be set before we get here -- should take place in processtext.php
 
 $revert_text=isset($_POST['revert_text']) ? $_POST['revert_text'] : $text_data;
@@ -16,11 +18,11 @@ $revert_text=isset($_POST['revert_text']) ? $_POST['revert_text'] : $text_data;
 $is_header_visible = array_get($_SESSION,"is_header_visible",1);
 
 $header_args = array(
-    "js_data" => spellcheck_get_js() . get_page_js($userP['i_type']==1 ? 2 : 3),
+    "js_data" => spellcheck_get_js() . get_page_js($dp_user->i_type==1 ? 2 : 3),
     "body_attributes" => 'id="wordcheck_interface" onload="ldAll()"',
 );
 
-if($userP['i_type']==1)
+if($dp_user->i_type==1)
 {
     $header_args["js_data"] .= ibe_get_js();
     $header_args["css_data"] = ibe_get_styles();
@@ -29,10 +31,10 @@ if($userP['i_type']==1)
 slim_header(_("WordCheck"), $header_args);
 
 // print basic image html
-if ($userP['i_type']==1) {
-    if ($userP['i_layout']==1)
-       { $iWidth = $userP['v_zoom']; }
-    else { $iWidth = $userP['h_zoom']; }
+if ($dp_user->i_type==1) {
+    if ($dp_user->i_layout==1)
+       { $iWidth = $dp_user->v_zoom; }
+    else { $iWidth = $dp_user->h_zoom; }
     $iWidth = round((1000*$iWidth)/100);
 
     ibe_echo_block( $ppage->url_for_image(TRUE), $iWidth );
@@ -95,7 +97,7 @@ if ($userP['i_type']==1) {
 
     // for the vertical layout, stick in a line break
     // for the horizontal one, stick in a space
-    if ($userP['i_layout']==1) echo "<br>";
+    if ($dp_user->i_layout==1) echo "<br>";
     else echo " ";
 
     // output the code allowing the user to select another language

@@ -2,15 +2,18 @@
 $relPath="../pinc/";
 include_once($relPath."base.inc");
 include_once($relPath."theme.inc");
+include_once($relPath.'User.inc'); // get_dp_user()
 
 // This page is intentionally not translated to facilitate debugging.
 
 $title = "UI Language Debugger";
 output_header($title, NO_STATSBAR);
 
+$dp_user =& User::get_dp_user();
+
 $detected_language = get_desired_language();
 $url_language = array_get($_GET, 'lang', "<i>not set</i>");
-$pref_language = array_get($userP, 'u_intlang', "<i>not set</i>");
+$pref_language = $dp_user->u_intlang;
 $user_logged_in = $pguser ? $pguser : "<i>not logged in</i>";
 if($pref_language == "") $pref_language = "<i>browser detect</i>";
 $cookie_language = array_get($_COOKIE, 'language', "<i>not set</i>");

@@ -5,12 +5,13 @@
 
 include_once('proof_frame_std.inc');
 include_once('proof_frame_enh.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 
 function echo_proof_frame( $ppage )
 {
-    global $userP;
+    $dp_user =& User::get_dp_user();
 
-    $interface_type = $userP['i_type'];
+    $interface_type = $dp_user->i_type;
     switch ($interface_type)
     {
         case 0:
