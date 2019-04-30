@@ -14,7 +14,7 @@ define('SHOW_STATSBAR', True);
 // page title, etc. eg:
 function output_html_header($nameofpage, $extra_args = array(), $show_statsbar = True)
 {
-    global $code_url, $site_abbreviation;
+    global $code_url, $site_abbreviation, $pguser;
     global $charset, $user_is_logged_in;
 
     $intlang = get_desired_language();
@@ -45,15 +45,7 @@ function output_html_header($nameofpage, $extra_args = array(), $show_statsbar =
     echo "</title>\n";
 
     // Global CSS
-    if($user_is_logged_in)
-    {
-        $dp_user =& User::get_dp_user();
-        $theme_name = $dp_user->i_theme;
-    }
-    else
-    {
-        $theme_name = "project_gutenberg";
-    }
+    $theme_name = $pguser ? User::get_dp_user()->i_theme : "project_gutenberg";
     $css_files = array(
         "$code_url/styles/themes/$theme_name.css",
         "$code_url/styles/layout.css",
