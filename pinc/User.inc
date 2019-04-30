@@ -429,6 +429,10 @@ class User
         {
             $username = $pguser;
         }
+        if(!$username)
+        {
+            throw new NonexistentUserException(_('No user name given'));
+        }
         static $users = array();
         if(array_key_exists($username, $users))
         {

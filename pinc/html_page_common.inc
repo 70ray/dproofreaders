@@ -1,6 +1,7 @@
 <?php
 include_once($relPath."languages.inc"); // html_lang_header();
 include_once($relPath."misc.inc"); // html_safe(), ends_with()
+include_once($relPath.'User.inc'); // get_dp_user()
 
 define('NO_STATSBAR',   False);
 define('SHOW_STATSBAR', True);
@@ -13,8 +14,8 @@ define('SHOW_STATSBAR', True);
 // page title, etc. eg:
 function output_html_header($nameofpage, $extra_args = array(), $show_statsbar = True)
 {
-    global $code_url, $site_abbreviation, $userP;
-    global $charset;
+    global $code_url, $site_abbreviation;
+    global $charset, $user_is_logged_in;
 
     $intlang = get_desired_language();
 
@@ -44,7 +45,15 @@ function output_html_header($nameofpage, $extra_args = array(), $show_statsbar =
     echo "</title>\n";
 
     // Global CSS
-    $theme_name = array_get($userP, 'i_theme', "project_gutenberg");
+    if($user_is_logged_in)
+    {
+        $dp_user =& User::get_dp_user();
+        $theme_name = $dp_user->i_theme;
+    }
+    else
+    {
+        $theme_name = "project_gutenberg";
+    }
     $css_files = array(
         "$code_url/styles/themes/$theme_name.css",
         "$code_url/styles/layout.css",

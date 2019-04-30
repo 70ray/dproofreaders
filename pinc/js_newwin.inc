@@ -1,14 +1,16 @@
 <?php
 
 // This file implements the "Launch in New Window" preference.
-// This should be the only code that uses $userP['i_newwin']
+// This should be the only code that uses $dp_user->i_newwin
 // (leaving aside code to save/restore/display/update it).
 
 include_once($relPath.'resolution.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 
 function prep_for_links_to_project_pages()
 {
-    global $userP, $i_resolutions;
+    global $i_resolutions;
+    $dp_user =& User::get_dp_user();
 
     // Ensure that the guts of this function are only done once,
     // because don't want to define newProofWin more than once.
@@ -16,9 +18,9 @@ function prep_for_links_to_project_pages()
     if ($this_func_has_been_called) return;
     $this_func_has_been_called = TRUE;
 
-    if ( $userP['i_newwin'] == 1 )
+    if ( $dp_user->i_newwin == 1 )
     {
-        $wSize = explode("x",$i_resolutions[$userP['i_res']*1]);
+        $wSize = explode("x",$i_resolutions[$dp_user->i_res*1]);
         $window_width  = $wSize[0] - 20;
         $window_height = $wSize[1] - 80;
 
@@ -26,7 +28,7 @@ function prep_for_links_to_project_pages()
             <script>
             function newProofWin(winURL)
             {
-                newFeatures='toolbar={$userP['i_toolbar']},status={$userP['i_statusbar']},location=0,directories=0,menubar=0,scrollbars=1,resizable=1,width=$window_width,height=$window_height,top=0,left=5';
+                newFeatures='toolbar={$dp_user->i_toolbar},status={$dp_user->i_statusbar},location=0,directories=0,menubar=0,scrollbars=1,resizable=1,width=$window_width,height=$window_height,top=0,left=5';
                 nwWin=window.open(winURL,'_blank',newFeatures);
             }
             </script>
@@ -38,8 +40,8 @@ function get_onclick_attr_for_link_to_project_page($url)
 // Get the 'onclick' attribute (if any) for an <a> element
 // that links to a project page.
 {
-    global $userP;
-    if ( $userP['i_newwin'] == 1 )
+    $dp_user =& User::get_dp_user();
+    if ( $dp_user->i_newwin == 1 )
     {
         $attr = "onclick=\"newProofWin('$url'); return false;\"";
     }

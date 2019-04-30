@@ -9,11 +9,9 @@ include_once($relPath.'User.inc'); // get_dp_user()
 $title = "UI Language Debugger";
 output_header($title, NO_STATSBAR);
 
-$dp_user =& User::get_dp_user();
-
 $detected_language = get_desired_language();
 $url_language = array_get($_GET, 'lang', "<i>not set</i>");
-$pref_language = $dp_user->u_intlang;
+$pref_language = $pguser ? User::get_dp_user()->u_intlang : "<i>not set</i>";
 $user_logged_in = $pguser ? $pguser : "<i>not logged in</i>";
 if($pref_language == "") $pref_language = "<i>browser detect</i>";
 $cookie_language = array_get($_COOKIE, 'language', "<i>not set</i>");

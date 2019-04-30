@@ -5,6 +5,7 @@
 
 include_once($relPath.'page_tally.inc');
 include_once($relPath.'SettingsClass.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 
 // This function returns the Settings object for $pguser.
 // It should work properly (by returning appropriate null-type values) if
@@ -196,9 +197,9 @@ function user_can_work_on_beginner_pages_in_round($round)
     {
         // Augment user's ELR count with their R* count,
         // so that old-timers don't do beginner projects.
-        global $userP;
+        $dp_user =& User::get_dp_user();
         $old_tallyboard = new TallyBoard( 'R*', 'U' );
-        $old_count = $old_tallyboard->get_current_tally( $userP['u_id'] );
+        $old_count = $old_tallyboard->get_current_tally($dp_user->u_id);
         $n_pages += $old_count;
     }
     if ($round_number == 1)

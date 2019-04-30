@@ -34,10 +34,9 @@ function theme($nameofpage, $location, $extra_args = array())
 function output_header($nameofpage, $show_statsbar = True, $extra_args = array())
 {
     global $pguser;
-    $dp_user =& User::get_dp_user();
 
     // Display stats bar on left (1) or right (0)
-    $statsbar_align = isset($pguser) ? $dp_user->u_align : 0;
+    $statsbar_align = isset($pguser) ? User::get_dp_user()->u_align : 0;
 
     // The theme layout consists of:
     // * Two full width headers at the top,
@@ -81,10 +80,9 @@ function output_header($nameofpage, $show_statsbar = True, $extra_args = array()
 function output_footer($nameofpage, $show_statsbar = True) {
     global $code_url, $site_name, $PAGE_START_TIME;
     global $pguser;
-    $dp_user =& User::get_dp_user();
 
     // Display stats bar on left (1) or right (0)
-    $statsbar_align = isset($pguser) ? $dp_user->u_align : 0;
+    $statsbar_align = isset($pguser) ? User::get_dp_user()->u_align : 0;
 
     // The main page content has been emited so close the main page content column.
     echo "</div>\n";
