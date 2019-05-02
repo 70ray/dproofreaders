@@ -1,6 +1,7 @@
 <?php
 // Localization setup
 include_once($relPath.'languages.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 
 // Return a locale that best matches the language that the user wants and
 // that we have a site translation for. "Best" is tricky, because there are
@@ -20,7 +21,7 @@ include_once($relPath.'languages.inc');
 // * If everything else fails, default to en_US.
 function get_desired_language()
 {
-    global $pguser, $userP, $use_secure_cookies;
+    global $pguser, $use_secure_cookies;
 
     // This function maybe called multiple times within a page load.
     // Only do the calculations to determine the locale once.
@@ -33,9 +34,12 @@ function get_desired_language()
         // User requested a specific language for this page
         $locale = lang_code($_GET['lang']);
         setcookie("language", $locale, time()+31536000, "/", "", $use_secure_cookies);
-    } else if (isset($userP)  && $userP['u_intlang']){
-        // User is logged in and has set their language preference
-        $locale = $userP['u_intlang'];
+    } else if (isset($pguser)) {
+        $user_locale = User::get_dp_user()->u_intlang;
+        if($user_locale) {
+            // User is logged in and has set their language preference
+            $locale = $user_locale;
+        }
     } else if (!$pguser &&
                isset($_COOKIE['language']) && $_COOKIE['language']) {
         // User is not logged in but we have a language cookie

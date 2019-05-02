@@ -3,10 +3,10 @@ include_once($relPath.'resolution.inc');
 include_once($relPath.'User.inc'); // get_dp_user()
 
 function get_newHelpWin_javascript($popHelpDir) {
-    global $userP, $i_resolutions;
+    global $i_resolutions;
 
     $dp_user =& User::get_dp_user();
-    $wSize=explode("x",$i_resolutions[$dp_user->i_res]);
+    $wSize=explode("x", $i_resolutions[$dp_user->i_res]);
     $top=($wSize[1]-300)/2;
     $left=($wSize[0]-400)/2;
 

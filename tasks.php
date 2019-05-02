@@ -12,12 +12,13 @@ include_once($relPath.'User.inc');
 include_once($relPath.'links.inc'); // private_message_link()
 include_once($relPath.'misc.inc'); // get_enumerated_param(), str_contains(), echo_html_comment()
 include_once($relPath.'metarefresh.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 
 require_login();
 
 $tasks_url = $code_url . "/" . basename(__FILE__);
 
-$requester_u_id = $userP['u_id'];
+$requester_u_id = User::get_dp_user()->u_id;
 
 $now_sse = time();
 // The current time, expressed as Seconds Since the (Unix) Epoch.

@@ -4,6 +4,7 @@ include_once($relPath.'page_tally.inc');
 include_once($relPath.'theme.inc');
 include_once($relPath.'forum_interface.inc');
 include_once($relPath.'misc.inc'); // get_integer_param()
+include_once($relPath.'User.inc'); // get_dp_user()
 
 // This file deals with the gradual revelation of site features,
 // based on the number of pages proofread by the user.
@@ -17,13 +18,13 @@ function get_pages_proofed_maybe_simulated()
 // to pretend to have a different number of pages,
 // as long as it's less than their actual number.
 {
-    global $pguser, $userP;
+    global $pguser;
 
     $pagesproofed = user_get_ELR_page_tally( $pguser );
     if ( TRUE )
     {
         $ru_tallyboard = new TallyBoard('R*', 'U');
-        $pagesproofed += $ru_tallyboard->get_current_tally( $userP['u_id'] );
+        $pagesproofed += $ru_tallyboard->get_current_tally(User::get_dp_user()->u_id);
     }
 
     $pagesproofed = get_integer_param($_GET, 'numofpages', $pagesproofed, 0, $pagesproofed);
