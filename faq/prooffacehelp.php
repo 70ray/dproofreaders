@@ -3,6 +3,7 @@ $relPath='../pinc/';
 include_once($relPath.'base.inc');
 include_once($relPath.'theme.inc');
 include_once($relPath.'faq.inc');
+include_once($relPath.'User.inc'); // get_dp_user()
 
 if ( isset($_GET['i_type']) )
 {
@@ -10,7 +11,7 @@ if ( isset($_GET['i_type']) )
 }
 else
 {
-    $i_type = $userP['i_type'];
+    $i_type = isset($pgUser) ? User::get_dp_user()->i_type : 0;
 }
 
 // -----------------------------------------------------------------------------

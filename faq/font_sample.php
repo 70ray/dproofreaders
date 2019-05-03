@@ -2,7 +2,7 @@
 $relPath='../pinc/';
 include_once($relPath.'base.inc');
 include_once($relPath.'theme.inc');
-include_once($relPath.'prefs_options.inc');
+include_once($relPath.'prefs_options.inc'); // get_user_proofreading_font()
 include_once($relPath.'misc.inc'); // get_enumerated_param()
 
 // Note: The text used for font sample images is stored in font_sample.txt
@@ -32,17 +32,7 @@ foreach($proofreading_font_faces as $index => $font)
 sort($selectable_fonts);
 
 // determine user's current proofreading font, if any and use that as the compare_font
-$proofreading_font="";
-if ($userP['i_layout']==1)
-{
-    $proofreading_fonti = $userP['v_fntf'];
-    $proofreading_font = $proofreading_font_faces[$proofreading_fonti];
-}
-else if ((count($userP) > 0) and ($userP['i_layout']==0))
-{
-    $proofreading_fonti = $userP['h_fntf'];
-    $proofreading_font = $proofreading_font_faces[$proofreading_fonti];
-}
+$proofreading_font = isset($pgUser) ? get_user_proofreading_font()[0] : "";
 
 // set the default compare_font to the user's proofreading font
 // if it is selectable
