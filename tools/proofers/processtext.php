@@ -78,7 +78,6 @@ if ($dp_user->i_type==1)
         if (isset($zmSize) && $dp_user->h_zoom != $zmSize) {$dp_user->h_zoom = $zmSize;}
     }
     $dp_user->save();
-    dpsession_set_preferences_from_db();
 }
 
 // If the user simply wants to leave the proofing interface,
@@ -278,7 +277,6 @@ function switch_layout()
     $dp_user =& User::get_dp_user();
     $dp_user->i_layout = ((int)$dp_user->i_layout == 1) ? 0 : 1;
     $dp_user->save();
-    dpsession_set_preferences_from_db();
 }
 
 function leave_spellcheck_mode( $ppage )

@@ -62,7 +62,6 @@ if ($dp_user->team_1 != $tid && $dp_user->team_2 != $tid && $dp_user->team_3 != 
 
 if ($redirect_team == 1) {
     $dp_user->save();
-    dpsession_set_preferences_from_db();
     $title = _("Join the Team");
     $desc = _("Joining the team....");
     metarefresh(0,"../teams/tdetail.php?tid=$tid",$title, $desc);

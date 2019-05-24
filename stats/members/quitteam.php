@@ -32,7 +32,6 @@ if($leaving)
 {
     mysqli_query(DPDatabase::get_connection(), "UPDATE user_teams SET active_members = active_members-1 WHERE id='".$tid."'");
     $dp_user->save();
-    dpsession_set_preferences_from_db();
     $title = _("Quit the Team");
     $desc = _("Quitting the team....");
     metarefresh(0,"../teams/tdetail.php?tid=".$tid."",$title,$desc);

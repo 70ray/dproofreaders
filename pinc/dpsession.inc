@@ -14,15 +14,6 @@
 //     and return TRUE.
 //     Otherwise, return FALSE.
 //
-// dpsession_set_preferences_from_db()
-//     Read the user's preferences from the database
-//     and install them for this session.
-//
-// dpsession_set_preferences_temp( $user_preferences )
-//     Install the given preferences for this session.
-//     (If the caller doesn't put them in the database too,
-//     they'll only last for this session.)
-//
 // dpsession_end()
 //     End a session. (The user has logged out.)
 //

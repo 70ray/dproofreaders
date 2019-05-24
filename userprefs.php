@@ -62,8 +62,6 @@ if (isset($_POST["swProfile"]))
     $dp_user->u_profile = $c_profile;
     $dp_user->save();
 
-// keep until all $userP gone
-    dpsession_set_preferences_from_db();
     $eURL="$code_url/userprefs.php?tab=$selected_tab&amp;origin=" . urlencode($origin);
     metarefresh(0,$eURL,_('Profile Selection'),_('Loading Selected Profile....'));
 }
@@ -104,7 +102,6 @@ if (array_get($_POST, "insertdb", "") != "") {
 
     // Get and delete currently selected profile.
     $dp_user->delete_current_profile();
-    dpsession_set_preferences_from_db();
 
     // Bounce user back to the proofreading preferences tab.
     $selected_tab=1;
@@ -345,7 +342,6 @@ function save_general_tab() {
     $userSettings->set_value('credit_name', $_POST["credit_name"]);
     if (isset($_POST["credit_other"]))
         $userSettings->set_value('credit_other', $_POST["credit_other"]);
-    dpsession_set_preferences_from_db();
 }
 
 /*************** PROOFREADING TAB ***************/
@@ -632,7 +628,6 @@ function save_proofreading_tab() {
     $dp_user->save();
 
     $userSettings->set_boolean('hide_special_colors', $_POST["show_special_colors"]=='no');
-    dpsession_set_preferences_from_db();
 }
 
 /*************** PM TAB ***************/
@@ -698,7 +693,6 @@ function save_pm_tab() {
     // remember if the PM wants to have their projects automatically assigned 
     // to them for PP 
     $userSettings->set_boolean('send_to_post', $_POST["send_to_post"] == 'yes');
-    dpsession_set_preferences_from_db();
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

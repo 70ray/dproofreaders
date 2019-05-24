@@ -110,8 +110,6 @@ else if (isset($_POST['mkMake']))
                 $otid=3;
             }
         }
-        dpsession_set_preferences_from_db();
-    
         $title = _("Join the Team");
         $desc = _("Creating the team....");
         metarefresh(0,"../members/jointeam.php?tid=$tid&otid=$otid",$title, $desc);
