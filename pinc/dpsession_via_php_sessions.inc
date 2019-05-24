@@ -21,11 +21,11 @@ function dpsession_begin_( $userID )
 
 function dpsession_resume_()
 {
-    global $pguser, $userP, $use_secure_cookies;
+    global $pguser, $use_secure_cookies;
 
     session_set_handlers_and_start();
 
-    if ( isset($_SESSION['userP']) && !empty($_SESSION['userP']) )
+    if ( isset($_SESSION['pguser']) && !empty($_SESSION['pguser']) )
     {
         // Refresh the cookie
         // (session_start() used to do this for us,
@@ -39,10 +39,8 @@ function dpsession_resume_()
             $use_secure_cookies
         );
 
-        // set global variables $pguser and $userP.
-        if (isset($_SESSION['pguser'])) 
-            $pguser = $_SESSION['pguser'];
-        $userP = $_SESSION['userP'];
+        // set global variable $pguser
+        $pguser = $_SESSION['pguser'];
         return TRUE;
     }
     else
@@ -55,7 +53,7 @@ function dpsession_resume_()
 
 function dpsession_set_preferences_from_db()
 {
-    global $pguser;
+/*    global $pguser;
 
     $users_res = mysqli_query(DPDatabase::get_connection(), "
         SELECT
@@ -82,7 +80,7 @@ function dpsession_set_preferences_from_db()
 
     $prefsChanged_data = array("prefschanged" => 0);
 
-    $_SESSION['userP'] = array_merge($users_data, $user_profiles_data, $prefsChanged_data);
+    $_SESSION['userP'] = array_merge($users_data, $user_profiles_data, $prefsChanged_data);*/
 }
 
 function dpsession_end()

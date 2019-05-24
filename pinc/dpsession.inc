@@ -4,14 +4,13 @@
 //
 // dpsession_begin( $userID )
 //     Start a session. (The user has logged in.)
-//     Record the session variables 'pguser' (from $userID)
-//     and 'userP'(via a call to dpsession_set_preferences_from_db).
+//     Record the session variable 'pguser' (from $userID)
 //
 // dpsession_resume()
 //     If the request claimed to belong to a session,
 //     and that session is valid/current/non-expired,
 //     then refresh the session,
-//     reinstate the global variables ($pguser and $userP) of that session,
+//     reinstate the global variable ($pguser) of that session,
 //     and return TRUE.
 //     Otherwise, return FALSE.
 //
@@ -34,7 +33,6 @@
 // dpsession_page_get()
 
 $pguser = NULL;
-$userP  = NULL;
 
 include_once($relPath.'site_vars.php');
 
