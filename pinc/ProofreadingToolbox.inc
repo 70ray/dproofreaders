@@ -29,7 +29,7 @@ function draw_popup_link($label, $url, $window_name, $width, $height )
 {
     $window_features = "width=$width,height=$height,directories=0,location=0,menubar=0,resizable,scrollbars,status=0,toolbar=0";
     $js = "window.open('$url','$window_name','$window_features'); return false;";
-    echo "<a href='#' onClick=\"$js\"\n>$label</a>\n";
+    echo "<a href='#' class='nowrap' onClick=\"$js\"\n>$label</a>\n";
 }
 
 function spacer_bar()
@@ -115,11 +115,11 @@ class ProofreadingToolbox
         draw_popup_link(_('Greek Transliterator'), 'greek2ascii.php', 'gkasciiWin', 640, 250);
 
         $url = get_faq_url($round->document);
-        echo "[<a href='$url' target='roundDoc'>", _('Guidelines'), "</a>]\n";
+        echo "[<a href='$url' class='nowrap' target='roundDoc'>", _('Guidelines'), "</a>]\n";
 
-        echo "[<a href='$code_url/faq/InterfaceDiagram.png' target='ifaceWin'>", _("Proofreading Diagram"), "</a>]\n";
+        echo "[<a href='$code_url/faq/InterfaceDiagram.png' class='nowrap' target='ifaceWin'>", _("Proofreading Diagram"), "</a>]\n";
 
-        echo "[<a href='$code_url/faq/prooffacehelp.php' accesskey='1' target='helpNewWin'>", _("Help"), "</a>]";
+        echo "[<a href='$code_url/faq/prooffacehelp.php' accesskey='1' class='nowrap' target='helpNewWin'>", _("Help"), "</a>]";
 
         echo "</div>";
     }

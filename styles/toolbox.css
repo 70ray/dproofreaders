@@ -65,7 +65,7 @@ body {
 
 /* adjust so tools do not jump around with differnt character pickers */
 #selector {
-    float: right;
+    float: left;
     min-width: 31em;
     margin-left: 3px;
 }
