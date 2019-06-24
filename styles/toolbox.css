@@ -7,15 +7,11 @@ body {
     display: flex;
 }
 
-.nowrap {
-    white-space: nowrap;
-}
-
 /* default buttons have small text = 83% */
 .selector_button {
     margin-top: 1px;
-    font-size: 90%;
-    padding: 0 0.3em 0 0.3em;
+    font-size: 16px;
+    padding: 0.1em 0.15em 0 0.15em;
     border: 1px solid black;
     margin-right: 2px;
     background-color: Bisque;
@@ -48,14 +44,14 @@ body {
     background-color: #FFF8DC;
     margin: 0.2em;
 }
-
+/* specify font-size in px so consistent in different browsers */
 .picker {
     font-family: inherit;
     margin-top: 1px;
-    font-size: 90%;
+    font-size: 16px;
     background-color: Beige;
     padding: 0;
-    width: 1.2em;
+    width: 1.05em;
     vertical-align: middle;
 }
 
@@ -66,8 +62,8 @@ body {
 /* adjust so tools do not jump around with differnt character pickers */
 #selector {
     float: left;
-    min-width: 31em;
-    margin-left: 3px;
+    min-width: 474px;
+    margin-left: 2px;
 }
 
 #tools {
