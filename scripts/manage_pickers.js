@@ -24,6 +24,11 @@ $(function () {
         window.location = codeUrl + "tools/edit_char_selector.php?action=new";
     });
 
+    $("#append").click(function () {
+        var selectorSet = $("#selector-set");
+        selectorSet.val(selectorSet.val() + " " + selector.value);
+    });
+
     $("#save-set").click(function () {
         $.post(apiUrl, {"q": "v1/config/pickerset", "data": $("#selector-set").val()});
     });

@@ -5,6 +5,10 @@
     grid-column-gap: 0.5em;
 }
 
+select {
+    width: min-content;
+}
+
 /* use monospace and letter-spacing to see alignment between upper and lower
   rows, Firefox increases size of input with letter-spacing but others do not */
 .mono-spaced {

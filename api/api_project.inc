@@ -1,5 +1,4 @@
 <?php
-include_once('api_user_settings.inc'); // get_user_string()
 include_once('api_config_strings.inc'); // get_config_string()
 include_once('api_keydata.inc'); // get_pickers()
 
@@ -18,13 +17,7 @@ function project_picker($projectID)
     $proj_set = get_project_picker_string($projectID);
     $proj_set = mysqli_real_escape_string(DPDatabase::get_connection(), $proj_set);
     $proj_set = explode(" ", $proj_set);
-    $picker_set = array_merge($picker_set, $proj_set);
-
-    // and the user's set
-    $user_set = get_user_string("pickerset");
-    $user_set = mysqli_real_escape_string(DPDatabase::get_connection(), $user_set);
-    $user_set = explode(" ", $user_set);
-    $picker_set = array_unique(array_merge($picker_set, $user_set));
+    $picker_set = array_unique(array_merge($picker_set, $proj_set));
 
     $pickers = get_pickers($picker_set);
     return ['pickers' => $pickers];

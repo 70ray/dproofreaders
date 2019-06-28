@@ -37,6 +37,6 @@ draw_selectors();
 echo "<button id='edit-button'>", _("Edit"), "</button>";
 echo "<button id='delete-button'>", _("Delete"), "</button><br>";
 echo "<button id='new-button'>", _("Add a new Character Selector"), "</button><br>";
-draw_selector_set();
+draw_selector_set(_("Default selectors"));
 
 // vim: sw=4 ts=4 expandtab

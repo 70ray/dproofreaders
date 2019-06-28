@@ -9,9 +9,10 @@ function draw_selectors()
     echo "</div>";
 }
 
-function draw_selector_set()
+function draw_selector_set($label)
 {
-    echo "<label for='selector-set'>", _("Selectors"), "&nbsp;</label><input type='text' size='60' id='selector-set'>\n";
+    echo "<label for='selector-set'>$label&nbsp;</label><input type='text' size='60' id='selector-set'><br>\n";
+    echo "<button id='append'>", _("Append current code"), "</button>";
     echo "<button id='save-set'>", _("Save"), "</button><br>";
     echo "<p>", _("This defines the selectors in order. Codes should be separated by a space."), "</p>";
 }

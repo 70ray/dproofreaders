@@ -41,6 +41,7 @@ $(function () {
 
     getCodes();
 
+    // used to redraw code selector after delete
     pickers = {drawCodes: getCodes};
 
     $("#codes").change(function () {

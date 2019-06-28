@@ -34,6 +34,7 @@ $header_args = [
 output_header($title, NO_STATSBAR, $header_args);
 echo "<h1>", $title, "</h1>";
 draw_selectors();
-draw_selector_set();
+echo "<br>";
+draw_selector_set(_("Extra  Selectors"));
 
 // vim: sw=4 ts=4 expandtab
