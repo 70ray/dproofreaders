@@ -39,10 +39,10 @@ body {
 
 .big_text {
     font-family: inherit;
-    font-size: 180%;
-    width: 1em;
+    font-size: 300%;
+    width: 0.9em;
     background-color: #FFF8DC;
-    margin: 0.2em;
+    margin: 0.1em;
 }
 /* specify font-size in px so consistent in different browsers */
 .picker {
