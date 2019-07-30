@@ -19,18 +19,6 @@ function pickers($action)
     }
 }
 
-// return pickers array from set of codes
-function get_pickers($picker_set)
-{
-    $picker_set = surround_and_join($picker_set, "'", "'", "," );
-    // now looks like 'A', 'E', 'U'
-    $result = mysqli_query(DPDatabase::get_connection(), "
-        SELECT * FROM character_pickers
-        WHERE code IN ($picker_set)
-        ORDER BY FIELD(code, $picker_set)");
-    return mysqli_fetch_all($result, MYSQLI_ASSOC);
-}
-
 // actions for an single picker
 function get_picker()
 {
