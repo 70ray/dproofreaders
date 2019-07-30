@@ -1,5 +1,4 @@
 <?php
-include_once($relPath.'site_vars.php'); // $wikihiero_dir $utf8_site
 include_once($relPath.'misc.inc'); // attr_safe(), html_safe()
 include_once($relPath.'faq.inc');
 include_once($relPath.'stages.inc');
