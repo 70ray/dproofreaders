@@ -401,6 +401,9 @@ function handle_file_upload($file_info)
         fatal_error( _("File is not a valid zip file: removing it.") );
     }
 
+    // remove unnecessary directories and files introduced by Mac OS
+    remove_macos($temporary_path);
+
     // if an antivirus scanner is installed and configured, scan the file
     if($antivirus_executable) {
         echo "<p>"._("Running a virus scan on the file, please wait...")."</p>\n";

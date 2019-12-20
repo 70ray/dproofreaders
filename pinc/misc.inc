@@ -767,6 +767,35 @@ function create_zip_from(array $files_to_zip, string $path_to_zip): bool
     return $zip->close();
 }
 
+// Remove __MACOSX directories and .DS_Store files from zip archive
+function remove_macos($path_to_zip)
+{
+    $zip = new ZipArchive();
+    $open_code = $zip->open($path_to_zip);
+    if(TRUE !== $open_code)
+    {
+        throw new Exception(sprintf(_("Failed to open '%1\$s' error code: %2\$d "), $path_to_zip, $open_code));
+    }
+    $files = [];
+    for ($i = 0; $i < $zip->numFiles; $i++) {
+        $files[] = $zip->getNameIndex($i);
+    }
+    foreach($files as $file)
+    {
+        if(1 == preg_match("/^__MACOSX|\.DS_Store$/", $file))
+        {
+            if(!$zip->deleteName($file))
+            {
+                throw new Exception(sprintf(_("Failed to delete '%1\$s' from '%2\$s'"), $file, $path_to_zip));
+            }
+        }
+    }
+    if(!$zip->close())
+    {
+        throw new Exception(sprintf(_("Failed to close '%s'"), $path_to_zip));
+    }
+}
+
 // -----------------------------------------------------------------------------
 
 function get_upload_err_msg($upload_error_code)

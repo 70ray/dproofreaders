@@ -272,6 +272,8 @@ if (isset($action))
         ensure_path_is_unused( $location );
         copy($uploaded_file, $location);
         unlink($uploaded_file);
+        // remove unnecessary directories and files introduced by Mac OS
+        remove_macos($location);
         $have_file = TRUE;
         if ($stage == 'smooth_avail')
         {
