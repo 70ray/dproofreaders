@@ -47,7 +47,17 @@ if ($next_image != "" && $preload == "next")
     $link_tags .= "<link rel=\"prefetch next\" href=\"$projects_url/$projectid/$next_image\">\n";
 
 $title = sprintf(_("Display Image: %s"),$imagefile);
-slim_header($title, array("head_data" => $link_tags));
+
+$header_args = [
+    "body_attributes" => 'class="no-margin"',
+    "head_data" => $link_tags,
+];
+
+slim_header($title, $header_args);
+
+echo "<div class='flex_container'>";
+echo "<div class='fixedbox control-form'>";
+
 ?>
 
 <form method="get" action="displayimage.php">
@@ -74,19 +84,15 @@ for ($row=0; $row<$num_rows; $row++)
 ?>
 </select>
 <?php
-function prevnext_buttons()
-{
-    global  $prev_image, $next_image;
-    echo "<input type='button' value='" . attr_safe(_("Previous")) . "' onClick=\"this.form.imagefile.value='$prev_image'; this.form.preload.value='prev'; this.form.submit();\"";
-    if ( $prev_image == "" ) echo " disabled";
-    echo ">\n";
-    echo "<input type='button' value='" . attr_safe(_("Next")) . "' onClick=\"this.form.imagefile.value='$next_image'; this.form.preload.value='next'; this.form.submit();\"";
-    if ( $next_image == "" ) echo " disabled";
-    echo ">\n";
-}
+echo "<input type='button' value='" . attr_safe(_("Previous")) . "' onClick=\"this.form.imagefile.value='$prev_image'; this.form.preload.value='prev'; this.form.submit();\"";
+if ( $prev_image == "" ) echo " disabled";
+echo ">\n";
+echo "<input type='button' value='" . attr_safe(_("Next")) . "' onClick=\"this.form.imagefile.value='$next_image'; this.form.preload.value='next'; this.form.submit();\"";
+if ( $next_image == "" ) echo " disabled";
+echo ">\n";
 
-prevnext_buttons();
-if($showreturnlink) {
+if($showreturnlink)
+{
     $project = new Project($projectid);
 
     $label = sprintf(_("Return to Project Page for %s"), html_safe($project->nameofwork));
@@ -94,11 +100,12 @@ if($showreturnlink) {
     echo "<br>\n";
     echo "<a href='$code_url/project.php?id=$projectid'>$label</a>";
 }
-echo "<br>\n";
-echo "<img src='$projects_url/$projectid/$imagefile' style='width: ${width}px; border: solid thin black;'>";
-
-echo "<p class='center-align'>";
-prevnext_buttons();
-echo "</p>";
 echo "</form>";
+echo "</div>\n"; // fixedbox
+
+echo "<div class='stretchbox overflow-auto'>\n";
+echo "<img src='$projects_url/$projectid/$imagefile' style='width: ${width}px; border: solid thin black;'>";
+echo "</div>\n"; // stretchbox
+echo "</div>\n"; // flex_container
+
 // vim: sw=4 ts=4 expandtab
