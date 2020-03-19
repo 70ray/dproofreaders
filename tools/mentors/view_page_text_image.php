@@ -9,11 +9,9 @@ include_once($relPath.'misc.inc'); // array_get(), get_enumerated_param(), attr_
 
 require_login();
 
-$project = $projectid = $page = $round_id = NULL;
-
+$project = $projectid = $page = $is_valid_page = NULL;
+$round_id='OCR';
 //See if the user input looks valid
-$error_messages = array();
-$is_valid_page = false;
 
 $projectid = trim(array_get($_GET,"projectid",""));
 
@@ -24,46 +22,8 @@ array_unshift($expanded_rounds, 'OCR');
 $round_id = get_enumerated_param($_GET, 'round_id', 'OCR', $expanded_rounds);
 
 if(isset($_GET["reset"])) {
-    $projectid="";
-    $page="";
+    $project = $projectid = $page = $is_valid_page = NULL;
     $round_id='OCR';
-}
-
-
-// If the projectID looks to be of roughly the right format, see if it exists.
-if($projectid=="")
-{
-    $error_messages[] = _("select a project");
-}
-else
-{
-    try
-    {
-        $projectid = validate_projectID('projectid', $projectid);
-        $project = new Project($projectid);
-    }
-    catch(Exception $exception)
-    {
-        $error_messages[] = html_safe($exception->getMessage());
-    }
-}
-
-// See if the requested page (if any) exists in the project table
-if(!count($error_messages)) {
-    if($page) {
-        $res2 = mysqli_query(DPDatabase::get_connection(), sprintf("SELECT 1 FROM $projectid WHERE image = '%s'", mysqli_real_escape_string(DPDatabase::get_connection(), $page))) or die(mysqli_error(DPDatabase::get_connection()));
-        if (mysqli_num_rows($res2) == 0) {
-            $error_messages[] = sprintf(_("no page '%1\$s' in project with projectID '%2\$s'"),
-                html_safe($page),
-                html_safe($projectid));
-        } else {
-            $is_valid_page = true;
-        }
-
-        mysqli_free_result($res2);
-    } else {
-        $error_messages[] = _("select a project page");
-    }
 }
 
 $js_files = [
@@ -81,22 +41,55 @@ slim_header(_("Image and text for page"), $header_args);
 echo "<div class='flex_container'>";
 echo "<div class='fixedbox control-form'>";
 
-// The form and any error messages
-if (!count($error_messages)) {
-    $project_name = $project->nameofwork;
-    echo "<h3>".sprintf(_("Viewing %1\$s text for %2\$s in '%3\$s'"),$round_id,$page,html_safe($project_name))."</h3>\n";
-} else {
-    echo "<h3>"._("Choose a page image/text to view");
-    echo " - " . implode("; ",$error_messages);
-    echo "</h3>\n";
+if($projectid=="")
+{
+    echo "<p>", _("Select a project"), "</p>";
+}
+else
+{
+    try
+    {
+        $projectid = validate_projectID('projectid', $projectid);
+        $project = new Project($projectid);
+
+        // See if the requested page (if any) exists in the project table
+        if($page)
+        {
+            $sql = sprintf("SELECT 1 FROM $projectid WHERE image = '%s'", mysqli_real_escape_string(DPDatabase::get_connection(), $page));
+            $res2 = mysqli_query(DPDatabase::get_connection(), $sql);
+            if(!$res2)
+            {
+                throw new Exception(html_safe(mysqli_error(DPDatabase::get_connection())));
+            }
+            if (mysqli_num_rows($res2) == 0)
+            {
+                throw new Exception(sprintf(_("no page '%1\$s' in project with projectID '%2\$s'"), html_safe($page), html_safe($projectid)));
+            }
+            $is_valid_page = true;
+            mysqli_free_result($res2);
+            echo "<p>", sprintf(_("Viewing %1\$s text for %2\$s in '%3\$s'"), $round_id, $page, html_safe($project->nameofwork)), "</p>";
+        }
+        else
+        {
+            echo "<p>", sprintf(_("Select a page in '%s'"), html_safe($project->nameofwork)), "</p>";
+        }
+    }
+    catch(Exception $exception)
+    {
+        echo "<p class='error'>", html_safe($exception->getMessage()), "</p>";
+    }
 }
 
 echo "<form method='get' action='view_page_text_image.php' target='_top'>\n";
-if(!$project) {
+
+if(!$project)
+{
     echo _("Project ID") . ":&nbsp;";
     echo "<input type='text' maxlength='25' name='projectid' size='25' value='" . attr_safe($projectid) . "' required> \n";
     echo "<input type='submit' value='"._("Select Project")."'> &nbsp; &nbsp;";
-} else {
+}
+else
+{
     echo "<input type='hidden' name='projectid' value='" . attr_safe($projectid) . "'>";
 }
 
@@ -174,13 +167,11 @@ if($project)
 echo "</form>";
 echo "</div>\n"; // fixedbox
 
-
-
 echo "<div id='pane_container' class='stretchbox'>\n";
 echo "<div class='pane_1 image-back'>\n";
 
 // Image div, the image and a little form to control the size
-if(!count($error_messages)) {
+if($is_valid_page) {
     $percent = get_integer_param($_GET, 'percent', 100, 1, 999);
     $width = 10*$percent;
 ?>
@@ -205,7 +196,7 @@ echo "<div class='pane_1'>"; // text pane
 
 //The text div, we show the saved text in a textarea
 //with some of the user's preferences from the proofreading interface
-if (!count($error_messages)) {
+if ($is_valid_page) {
     if ($round_id == "OCR") {
         $text_column_name = 'master_text';
     } else {
