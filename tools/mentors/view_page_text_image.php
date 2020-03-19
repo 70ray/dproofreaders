@@ -29,6 +29,7 @@ if(isset($_GET["reset"])) {
 $js_files = [
     "$code_url/scripts/splitControl.js",
     "$code_url/tools/mentors/page_text_image.js",
+    "$code_url/tools/mentors/image_size.js",
     ];
 
 $header_args = [
@@ -91,6 +92,14 @@ if(!$project)
 else
 {
     echo "<input type='hidden' name='projectid' value='" . attr_safe($projectid) . "'>";
+}
+
+if($is_valid_page)
+{
+    $percent = get_integer_param($_GET, 'percent', 100, 1, 999);
+    $width = 10*$percent;
+    echo "<input type='number' id='percent' name='percent' value='$percent' min='1' max='999' required>%\n";
+    echo "<button type='button' id='resize'>", _("Resize"), "</button>\n";
 }
 
 echo _("Page") . ":&nbsp;";
@@ -171,21 +180,10 @@ echo "<div id='pane_container' class='stretchbox'>\n";
 echo "<div class='pane_1 image-back'>\n";
 
 // Image div, the image and a little form to control the size
-if($is_valid_page) {
-    $percent = get_integer_param($_GET, 'percent', 100, 1, 999);
-    $width = 10*$percent;
-?>
-<form method="get" action="view_page_text_image.php">
-<input type="hidden" name="projectid" value="<?php echo $projectid; ?>">
-<input type="hidden" name="page" value="<?php echo $page; ?>">
-<input type="number" name="percent" value="<?php echo $percent; ?>" min="1" max="999" required>%
-<input type="hidden" name="round_id" value="<?php echo $round_id; ?>">
-<input type="submit" value="<?php echo _("Resize"); ?>" size="3">
-</form>
-<?php
-        echo "<img src='$projects_url/$projectid/$page' width='$width' border='1'>";
+if($is_valid_page)
+{
+    echo "<img id='image' src='$projects_url/$projectid/$page' width='$width'>";
 }
-
 echo "</div>\n"; // pane_1
 
 echo "<div class='dragbar'></div>";
