@@ -521,6 +521,7 @@ table.no-border th {
 /* PPV Report */
 p.inline_input {
   margin: 0;
+  overflow: hidden;
   padding: 0;
 }
 p.hanging_indent {
@@ -634,6 +635,7 @@ table.dirlist caption {
 #standard_interface {
   padding: 0;
   margin: 0;
+  overflow: hidden;
   background-color: #CDC0B0;
 }
 #standard_interface #imagedisplay {
@@ -957,6 +959,38 @@ table.search-column tr th {
 .list-head {
   margin-top: 0.5em;
   margin-bottom: 0.5em;
+}
+/* ------------------------------------------------------------------------ */
+/* View_page_text_image */
+.control-form input[type=number] {
+  width: 5em;
+}
+.flex_container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.fixedbox {
+  flex: 0 0 auto;
+}
+.stretchbox {
+  flex: 1 1 100vh;
+  min-height: 10px;
+}
+.pane_1 {
+  position: absolute;
+  overflow: auto;
+}
+.dragbar {
+  position: absolute;
+  background-color: gray;
+}
+.pane_2 {
+  position: absolute;
+}
+.no-margin {
+  margin: 0;
+  overflow: hidden;
 }
 /* vim: sw=4 ts=4 expandtab
 */

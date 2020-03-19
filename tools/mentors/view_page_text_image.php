@@ -66,209 +66,196 @@ if(!count($error_messages)) {
     }
 }
 
+$js_files = [
+    "$code_url/scripts/splitControl.js",
+    "$code_url/tools/mentors/page_text_image.js",
+    ];
 
-// $frame determines which frame we're operating from
-// 'master' - we're the master frame
-//    'top' - we're the top frame with the basic info
-//  'image' - frame with the image
-//   'text' - we're the bottom frame for the text
-$frame = get_enumerated_param($_GET,"frame","master",array("master","top","image","text"));
+$header_args = [
+    "js_files" => $js_files,
+    "body_attributes" => 'class="no-margin"',
+];
 
-if ($frame=="master") {
-    slim_header_frameset(_("Image and text for page"));
+slim_header(_("Image and text for page"), $header_args);
 
-    $projectid = urlencode($projectid);
-    $page = urlencode($page);
-    $round_id = urlencode($round_id);
+echo "<div class='flex_container'>";
+echo "<div class='fixedbox control-form'>";
 
-?>
-<frameset rows="15%,50%,35%">
-<frame name="topframe" src="view_page_text_image.php?projectid=<?php echo $projectid;?>&amp;page=<?php echo $page;?>&amp;round_id=<?php echo $round_id;?>&amp;frame=top">
-<frame name="imageframe" src="view_page_text_image.php?projectid=<?php echo $projectid;?>&amp;page=<?php echo $page;?>&amp;round_id=<?php echo $round_id;?>&amp;frame=image">
-<frame name="textframe" src="view_page_text_image.php?projectid=<?php echo $projectid;?>&amp;page=<?php echo $page;?>&amp;round_id=<?php echo $round_id;?>&amp;frame=text">
-</frameset>
-<noframes>
-<?php echo _("Your browser currently does not display frames!"); ?>
-</noframes>
-<?php
+// The form and any error messages
+if (!count($error_messages)) {
+    $project_name = $project->nameofwork;
+    echo "<h3>".sprintf(_("Viewing %1\$s text for %2\$s in '%3\$s'"),$round_id,$page,html_safe($project_name))."</h3>\n";
+} else {
+    echo "<h3>"._("Choose a page image/text to view");
+    echo " - " . implode("; ",$error_messages);
+    echo "</h3>\n";
 }
 
-
-// if we're in the top frame, load the form and any error messages
-elseif ($frame=="top") {
-    slim_header($page);
-
-    if (!count($error_messages)) {
-        $project_name = $project->nameofwork;
-        echo "<h3>".sprintf(_("Viewing %1\$s text for %2\$s in '%3\$s'"),$round_id,$page,html_safe($project_name))."</h3>\n";
-    } else {
-        echo "<h3>"._("Choose a page image/text to view");
-        echo " - " . implode("; ",$error_messages);
-        echo "</h3>\n";
-    }
-
-    echo "<form method='get' action='view_page_text_image.php' target='_top'>\n";
-    if(!$project) {
-        echo _("Project ID") . ":&nbsp;";
-        echo "<input type='text' maxlength='25' name='projectid' size='25' value='" . attr_safe($projectid) . "' required> \n";
-        echo "<input type='submit' value='"._("Select Project")."'> &nbsp; &nbsp;";
-    } else {
-        echo "<input type='hidden' name='projectid' value='" . attr_safe($projectid) . "'>";
-    }
-
-    echo _("Page") . ":&nbsp;";
-    if(!$project)
-    {
-        echo "<input type='text' name='page' size='8'> " . _("(optional)") . " &nbsp; &nbsp;\n";
-    }
-    else
-    {
-        $prev_image = "";
-        $next_image = "";
-        $res = mysqli_query(DPDatabase::get_connection(),  "SELECT image FROM $projectid ORDER BY image ASC") or die(mysqli_error(DPDatabase::get_connection()));
-        if($res) {
-            // load all images into an array
-            $images = array();
-            while($row = mysqli_fetch_assoc($res))
-            {
-                $images[] = $row["image"];
-            }
-            mysqli_free_result($res);
-
-            echo "<select name='page'>\n";
-            echo "<option value=''></option>\n";
-            $num_rows = count($images);
-            for ($row=0; $row<$num_rows; $row++)
-            {
-                $imagefile = $images[$row];
-                echo "<option value=\"$imagefile\"";
-                if ($page == $imagefile)
-                {
-                    echo " selected";
-                    if ( $row != 0 )           $prev_image = $images[$row - 1];
-                    if ( $row != $num_rows-1 ) $next_image = $images[$row + 1];
-                }
-                echo ">".$imagefile."</option>\n";
-            }
-            echo "</select> \n";
-        }
-
-        $prev_label    = attr_safe(_("Previous"));
-        $prev_image_js = javascript_safe($prev_image, $charset);
-        echo "<input type='button' value='$prev_label' onClick=\"this.form.page.value='$prev_image_js'; this.form.submit();\"";
-        if ($prev_image == "") {
-            echo " disabled";
-        }
-        echo ">\n";
-
-        $next_label    = attr_safe(_("Next"));
-        $next_image_js = javascript_safe($next_image, $charset);
-        echo "<input type='button' value='$next_label' onClick=\"this.form.page.value='$next_image_js'; this.form.submit();\"";
-        if ($next_image == "") {
-            echo " disabled";
-        }
-        echo ">";
-
-        echo " &nbsp; &nbsp;\n";
-    }
-    echo "<select name='round_id'>";
-
-    foreach ($expanded_rounds as $round) {
-        echo "<option value='$round'";
-        if($round_id && $round == $round_id) echo " selected";
-        echo ">$round</option>\n";
-    }
-    echo "</select>";
-
-    if(!$project)
-        echo " " . _("(optional)");
-
-    echo " &nbsp; &nbsp;<input type='submit' value='" . attr_safe(_("View")) . "'>";
-
-    if($project)
-        echo " &nbsp; <input type='submit' name='reset' value='" . attr_safe(_("Reset")) . "'>";
-    echo "</form>";
-    exit();
+echo "<form method='get' action='view_page_text_image.php' target='_top'>\n";
+if(!$project) {
+    echo _("Project ID") . ":&nbsp;";
+    echo "<input type='text' maxlength='25' name='projectid' size='25' value='" . attr_safe($projectid) . "' required> \n";
+    echo "<input type='submit' value='"._("Select Project")."'> &nbsp; &nbsp;";
+} else {
+    echo "<input type='hidden' name='projectid' value='" . attr_safe($projectid) . "'>";
 }
 
-//If we're loading the image frame, load the image and a little form to control the size
-elseif ($frame=="image") {
-    slim_header(_("Image Frame"));
-    if(!count($error_messages)) {
-        $percent = get_integer_param($_GET, 'percent', 100, 1, 999);
-        $width = 10*$percent;
+echo _("Page") . ":&nbsp;";
+if(!$project)
+{
+    echo "<input type='text' name='page' size='8'> " . _("(optional)") . " &nbsp; &nbsp;\n";
+}
+else
+{
+    $prev_image = "";
+    $next_image = "";
+    $res = mysqli_query(DPDatabase::get_connection(),  "SELECT image FROM $projectid ORDER BY image ASC") or die(mysqli_error(DPDatabase::get_connection()));
+    if($res) {
+        // load all images into an array
+        $images = array();
+        while($row = mysqli_fetch_assoc($res))
+        {
+            $images[] = $row["image"];
+        }
+        mysqli_free_result($res);
+
+        echo "<select name='page'>\n";
+        echo "<option value=''></option>\n";
+        $num_rows = count($images);
+        for ($row=0; $row<$num_rows; $row++)
+        {
+            $imagefile = $images[$row];
+            echo "<option value=\"$imagefile\"";
+            if ($page == $imagefile)
+            {
+                echo " selected";
+                if ( $row != 0 )           $prev_image = $images[$row - 1];
+                if ( $row != $num_rows-1 ) $next_image = $images[$row + 1];
+            }
+            echo ">".$imagefile."</option>\n";
+        }
+        echo "</select> \n";
+    }
+
+    $prev_label    = attr_safe(_("Previous"));
+    $prev_image_js = javascript_safe($prev_image, $charset);
+    echo "<input type='button' value='$prev_label' onClick=\"this.form.page.value='$prev_image_js'; this.form.submit();\"";
+    if ($prev_image == "") {
+        echo " disabled";
+    }
+    echo ">\n";
+
+    $next_label    = attr_safe(_("Next"));
+    $next_image_js = javascript_safe($next_image, $charset);
+    echo "<input type='button' value='$next_label' onClick=\"this.form.page.value='$next_image_js'; this.form.submit();\"";
+    if ($next_image == "") {
+        echo " disabled";
+    }
+    echo ">";
+
+    echo " &nbsp; &nbsp;\n";
+}
+echo "<select name='round_id'>";
+
+foreach ($expanded_rounds as $round) {
+    echo "<option value='$round'";
+    if($round_id && $round == $round_id) echo " selected";
+    echo ">$round</option>\n";
+}
+echo "</select>";
+
+if(!$project)
+    echo " " . _("(optional)");
+
+echo " &nbsp; &nbsp;<input type='submit' value='" . attr_safe(_("View")) . "'>";
+
+if($project)
+    echo " &nbsp; <input type='submit' name='reset' value='" . attr_safe(_("Reset")) . "'>";
+echo "</form>";
+echo "</div>\n"; // fixedbox
+
+
+
+echo "<div id='pane_container' class='stretchbox'>\n";
+echo "<div class='pane_1 image-back'>\n";
+
+// Image div, the image and a little form to control the size
+if(!count($error_messages)) {
+    $percent = get_integer_param($_GET, 'percent', 100, 1, 999);
+    $width = 10*$percent;
 ?>
 <form method="get" action="view_page_text_image.php">
 <input type="hidden" name="projectid" value="<?php echo $projectid; ?>">
 <input type="hidden" name="page" value="<?php echo $page; ?>">
 <input type="number" name="percent" value="<?php echo $percent; ?>" min="1" max="999" required>%
 <input type="hidden" name="round_id" value="<?php echo $round_id; ?>">
-<input type="hidden" name="frame" value="image">
 <input type="submit" value="<?php echo _("Resize"); ?>" size="3">
 </form>
 <?php
         echo "<img src='$projects_url/$projectid/$page' width='$width' border='1'>";
-    }
-    exit();
 }
 
-//If it's the text frame, we show the saved text in a textarea 
+echo "</div>\n"; // pane_1
+
+echo "<div class='dragbar'></div>";
+
+echo "<div id='text_pane' class='pane_2'>";
+echo "<div class='pane_1'>"; // text pane
+
+
+//The text div, we show the saved text in a textarea
 //with some of the user's preferences from the proofreading interface
-elseif ($frame=="text") {
-    slim_header(_("Text Frame"));
-    if (!count($error_messages)) {
-        if ($round_id == "OCR") {
-            $text_column_name = 'master_text';
-        } else {
-            $round = get_Round_for_round_id($round_id);
-            if ( is_null($round) )
-            {
-                die("unexpected parameter round_id = '$round_id'");
-            }
-            $text_column_name = $round->text_column_name;
-        }
-
-        $result = mysqli_query(DPDatabase::get_connection(), sprintf("SELECT $text_column_name FROM $projectid WHERE image = '%s'",mysqli_real_escape_string(DPDatabase::get_connection(), $page))); 
-        $row = mysqli_fetch_assoc($result);
-        $data = $row[$text_column_name];
-
-        // Use the font and wrap prefs for the user's default interface layout, 
-        // since they're more likely to have set those prefs
-        if ( $userP['i_layout']==1 ) {
-            $line_wrap   = $userP['v_twrap'];
-        } else {
-            $line_wrap   = $userP['h_twrap'];
-        }
-        list($font_face, $font_size) = get_user_proofreading_font();
-
-        // Since this page doesn't have a vertical layout version, 
-        // we'll use their horizontal prefs for textarea size
-        $n_cols = $userP['h_tchars'];
-        $n_rows = $userP['h_tlines'];
-
-        list( , $font_size, $font_family) = get_user_proofreading_font();
-        $font_size_string = '';
-        if ( $font_size != '' )
+if (!count($error_messages)) {
+    if ($round_id == "OCR") {
+        $text_column_name = 'master_text';
+    } else {
+        $round = get_Round_for_round_id($round_id);
+        if ( is_null($round) )
         {
-            $font_size_string = "font-size: $font_size;";
+            die("unexpected parameter round_id = '$round_id'");
         }
-        echo "<textarea
-            name='text_data'
-            id='text_data'
-            cols='$n_cols'
-            rows='$n_rows'
-            style=\"font-family: $font_family; $font_size_string padding-left: 0.25em;\" ";
-
-        if ( !$line_wrap )
-        {
-            echo "wrap='off' ";
-        }
-
-        echo ">\n";
-        echo html_safe($data);
-        echo "</textarea>";
+        $text_column_name = $round->text_column_name;
     }
-    exit();
+
+    $result = mysqli_query(DPDatabase::get_connection(), sprintf("SELECT $text_column_name FROM $projectid WHERE image = '%s'",mysqli_real_escape_string(DPDatabase::get_connection(), $page)));
+    $row = mysqli_fetch_assoc($result);
+    $data = $row[$text_column_name];
+
+    // Use the font and wrap prefs for the user's default interface layout,
+    // since they're more likely to have set those prefs
+    if ( $userP['i_layout']==1 ) {
+        $line_wrap   = $userP['v_twrap'];
+    } else {
+        $line_wrap   = $userP['h_twrap'];
+    }
+    list($font_face, $font_size) = get_user_proofreading_font();
+
+    // Since this page doesn't have a vertical layout version,
+    // we'll use their horizontal prefs for textarea size
+    $n_cols = $userP['h_tchars'];
+    $n_rows = $userP['h_tlines'];
+
+    list( , $font_size, $font_family) = get_user_proofreading_font();
+    $font_size_string = '';
+    if ( $font_size != '' )
+    {
+        $font_size_string = "font-size: $font_size;";
+    }
+    echo "<textarea
+        name='text_data'
+        id='text_data'
+        cols='$n_cols'
+        rows='$n_rows'
+        style=\"font-family: $font_family; $font_size_string padding-left: 0.25em;\" ";
+
+    if ( !$line_wrap )
+    {
+        echo "wrap='off' ";
+    }
+
+    echo ">\n";
+    echo html_safe($data);
+    echo "</textarea>";
 }
 
 // vim: sw=4 ts=4 expandtab
