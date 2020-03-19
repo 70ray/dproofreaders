@@ -189,8 +189,6 @@ echo "</div>\n"; // pane_1
 echo "<div class='dragbar'></div>";
 
 echo "<div id='text_pane' class='pane_2'>";
-echo "<div class='pane_1'>"; // text pane
-
 
 //The text div, we show the saved text in a textarea
 //with some of the user's preferences from the proofreading interface
@@ -246,5 +244,9 @@ if ($is_valid_page) {
     echo html_safe($data);
     echo "</textarea>";
 }
+
+echo "</div>\n"; // pane_2
+echo "</div>\n"; // pane_container
+echo "</div>\n"; // flex_container
 
 // vim: sw=4 ts=4 expandtab
