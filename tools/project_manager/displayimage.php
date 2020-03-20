@@ -13,49 +13,22 @@ $default_percent = array_get( @$_SESSION["displayimage"], 'percent', 100 );
 $projectid      = validate_projectID('project', @$_GET['project']);
 $imagefile      = validate_page_image_filename('imagefile', @$_GET['imagefile'], true);
 $percent        = get_integer_param($_GET, 'percent', $default_percent, 1, 999);
-$showreturnlink = get_integer_param($_GET, 'showreturnlink', 1, 0, 1);
-$preload        = get_enumerated_param($_GET, 'preload', '', array('', 'prev', 'next'));
 
 $width = 10 * $percent;
 
 $_SESSION["displayimage"]["percent"]=$percent;
 
-// Get a list of images in the project so we can populate the prev and
-// next <link rel=... href=...> tags in <head> if needed.
-// NB The query results are used later to populate a popup menu too.
-$images = array();
-$res = mysqli_query(DPDatabase::get_connection(),  "SELECT image FROM $projectid ORDER BY image ASC") or die(mysqli_error(DPDatabase::get_connection()));
-while($row = mysqli_fetch_assoc($res))
-{
-    $images[] = $row["image"];
-}
-$prev_image = "";
-$next_image = "";
-$num_rows = count($images);
-for ($row=0; $row<$num_rows; $row++)
-{
-    $this_val = $images[$row];
-    if ($this_val == $imagefile) {
-        if ( $row != 0 ) $prev_image = $images[$row-1];
-        if ( $row != $num_rows-1 ) $next_image = $images[$row+1];
-    }
-}
-$link_tags = "";
-if ($prev_image != "" && $preload == "prev")
-    $link_tags .= "<link rel=\"prefetch prev\" href=\"$projects_url/$projectid/$prev_image\">\n";
-if ($next_image != "" && $preload == "next")
-    $link_tags .= "<link rel=\"prefetch next\" href=\"$projects_url/$projectid/$next_image\">\n";
-
 $title = sprintf(_("Display Image: %s"),$imagefile);
 
 $js_files = [
     "$code_url/tools/mentors/image_size.js",
+    "$code_url/tools/project_manager/pageJump.js",
     ];
 
 $header_args = [
     "js_files" => $js_files,
+    "js_data" => "var imageUrl = '$projects_url/$projectid/';",
     "body_attributes" => 'class="no-margin"',
-    "head_data" => $link_tags,
 ];
 
 slim_header($title, $header_args);
@@ -63,53 +36,32 @@ slim_header($title, $header_args);
 echo "<div class='flex_container'>";
 echo "<div class='fixedbox control-form'>";
 
-?>
+$project = new Project($projectid);
 
-<form method="get" action="displayimage.php">
-<input type="hidden" name="project" value="<?php echo $projectid; ?>">
-<input type="hidden" name="imagefile" value="<?php echo $imagefile; ?>">
-<input type="hidden" name="showreturnlink" value="<?php echo $showreturnlink; ?>">
-<input type="hidden" name="preload" value="<?php echo $preload; ?>">
-
-<?php
+echo "<p>" . html_safe($project->nameofwork) . "&nbsp;<a href='$code_url/project.php?id=$projectid'>" . _("Go to Project Page") . "</a></p>";
 echo "<input type='number' id='percent' name='percent' min='1' max='999' value='$percent'>%\n";
 echo "<button type='button' id='resize'>", _("Resize"), "</button>\n";
 
-echo _("Page"); ?>:
-<select name="jumpto" onChange="this.form.imagefile.value=this.form.jumpto[this.form.jumpto.selectedIndex].value; this.form.submit();">
-<?php
-// Populate the options in the popup menu based on the database query earlier
-for ($row=0; $row<$num_rows; $row++)
+echo _("Page");
+echo "<select name='jumpto' id='page-select'>";
+// Populate the options in the popup menu based on the database query
+$res = mysqli_query(DPDatabase::get_connection(),  "SELECT image FROM $projectid ORDER BY image ASC") or die(mysqli_error(DPDatabase::get_connection()));
+while($row = mysqli_fetch_assoc($res))
 {
-    $this_val = $images[$row];
+    $this_val = $row["image"];
     echo "<option value=\"$this_val\"";
     if ($this_val == $imagefile) echo " selected";
     echo ">".$this_val."</option>\n";
 }
-?>
-</select>
-<?php
-echo "<input type='button' value='" . attr_safe(_("Previous")) . "' onClick=\"this.form.imagefile.value='$prev_image'; this.form.preload.value='prev'; this.form.submit();\"";
-if ( $prev_image == "" ) echo " disabled";
-echo ">\n";
-echo "<input type='button' value='" . attr_safe(_("Next")) . "' onClick=\"this.form.imagefile.value='$next_image'; this.form.preload.value='next'; this.form.submit();\"";
-if ( $next_image == "" ) echo " disabled";
-echo ">\n";
+echo "</select>&nbsp;";
 
-if($showreturnlink)
-{
-    $project = new Project($projectid);
+echo "<input type='button' id='prev-button' value='" . attr_safe(_("Previous")) . "'>\n";
+echo "<input type='button' id='next-button' value='" . attr_safe(_("Next")) . "'>\n";
 
-    $label = sprintf(_("Return to Project Page for %s"), html_safe($project->nameofwork));
-
-    echo "<br>\n";
-    echo "<a href='$code_url/project.php?id=$projectid'>$label</a>";
-}
-echo "</form>";
 echo "</div>\n"; // fixedbox
 
 echo "<div class='stretchbox overflow-auto image-back'>\n";
-echo "<img src='$projects_url/$projectid/$imagefile' id='image' width='width'>";
+echo "<img id='image' width='width'>";
 echo "</div>\n"; // stretchbox
 echo "</div>\n"; // flex_container
 
