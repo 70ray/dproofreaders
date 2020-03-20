@@ -7,16 +7,9 @@ include_once($relPath.'Project.inc');
 
 require_login();
 
-$default_percent = array_get( @$_SESSION["displayimage"], 'percent', 100 );
-
 // get variables passed into page
 $projectid      = validate_projectID('project', @$_GET['project']);
 $imagefile      = validate_page_image_filename('imagefile', @$_GET['imagefile'], true);
-$percent        = get_integer_param($_GET, 'percent', $default_percent, 1, 999);
-
-$width = 10 * $percent;
-
-$_SESSION["displayimage"]["percent"]=$percent;
 
 $title = sprintf(_("Display Image: %s"),$imagefile);
 
@@ -39,7 +32,7 @@ echo "<div class='fixedbox control-form'>";
 $project = new Project($projectid);
 
 echo "<p>" . html_safe($project->nameofwork) . "&nbsp;<a href='$code_url/project.php?id=$projectid'>" . _("Go to Project Page") . "</a></p>";
-echo "<input type='number' id='percent' name='percent' min='1' max='999' value='$percent'>%\n";
+echo "<input type='number' id='percent' name='percent' min='1' max='999' value='100'>%\n";
 echo "<button type='button' id='resize'>", _("Resize"), "</button>\n";
 
 echo _("Page");
@@ -49,9 +42,8 @@ $res = mysqli_query(DPDatabase::get_connection(),  "SELECT image FROM $projectid
 while($row = mysqli_fetch_assoc($res))
 {
     $this_val = $row["image"];
-    echo "<option value=\"$this_val\"";
-    if ($this_val == $imagefile) echo " selected";
-    echo ">".$this_val."</option>\n";
+    $selected = ($this_val == $imagefile) ? " selected" : "";
+    echo "<option value='$this_val'$selected>$this_val</option>\n";
 }
 echo "</select>&nbsp;";
 
@@ -61,7 +53,7 @@ echo "<input type='button' id='next-button' value='" . attr_safe(_("Next")) . "'
 echo "</div>\n"; // fixedbox
 
 echo "<div class='stretchbox overflow-auto image-back'>\n";
-echo "<img id='image' width='width'>";
+echo "<img id='image'>";
 echo "</div>\n"; // stretchbox
 echo "</div>\n"; // flex_container
 

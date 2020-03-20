@@ -30,6 +30,7 @@ $js_files = [
     "$code_url/scripts/splitControl.js",
     "$code_url/tools/mentors/page_text_image.js",
     "$code_url/tools/mentors/image_size.js",
+    "$code_url/tools/mentors/pageChange.js",
     ];
 
 $header_args = [
@@ -96,9 +97,7 @@ else
 
 if($is_valid_page)
 {
-    $percent = get_integer_param($_GET, 'percent', 100, 1, 999);
-    $width = 10*$percent;
-    echo "<input type='number' id='percent' name='percent' value='$percent' min='1' max='999' required>%\n";
+    echo "<input type='number' id='percent' name='percent' value='100' min='1' max='999' required>%\n";
     echo "<button type='button' id='resize'>", _("Resize"), "</button>\n";
 }
 
@@ -109,56 +108,24 @@ if(!$project)
 }
 else
 {
-    $prev_image = "";
-    $next_image = "";
+    echo "<select name='page' id='page-select'>";
+    // Populate the options in the popup menu based on the database query
     $res = mysqli_query(DPDatabase::get_connection(),  "SELECT image FROM $projectid ORDER BY image ASC") or die(mysqli_error(DPDatabase::get_connection()));
-    if($res) {
-        // load all images into an array
-        $images = array();
-        while($row = mysqli_fetch_assoc($res))
-        {
-            $images[] = $row["image"];
-        }
-        mysqli_free_result($res);
-
-        echo "<select name='page'>\n";
-        echo "<option value=''></option>\n";
-        $num_rows = count($images);
-        for ($row=0; $row<$num_rows; $row++)
-        {
-            $imagefile = $images[$row];
-            echo "<option value=\"$imagefile\"";
-            if ($page == $imagefile)
-            {
-                echo " selected";
-                if ( $row != 0 )           $prev_image = $images[$row - 1];
-                if ( $row != $num_rows-1 ) $next_image = $images[$row + 1];
-            }
-            echo ">".$imagefile."</option>\n";
-        }
-        echo "</select> \n";
+    while($row = mysqli_fetch_assoc($res))
+    {
+        $this_val = $row["image"];
+        $selected = ($this_val == $page) ? " selected" : "";
+        echo "<option value='$this_val'$selected>$this_val</option>\n";
     }
+    echo "</select>&nbsp;";
 
-    $prev_label    = attr_safe(_("Previous"));
-    $prev_image_js = javascript_safe($prev_image, $charset);
-    echo "<input type='button' value='$prev_label' onClick=\"this.form.page.value='$prev_image_js'; this.form.submit();\"";
-    if ($prev_image == "") {
-        echo " disabled";
-    }
-    echo ">\n";
-
-    $next_label    = attr_safe(_("Next"));
-    $next_image_js = javascript_safe($next_image, $charset);
-    echo "<input type='button' value='$next_label' onClick=\"this.form.page.value='$next_image_js'; this.form.submit();\"";
-    if ($next_image == "") {
-        echo " disabled";
-    }
-    echo ">";
+    echo "<input type='button' id='prev-button' value='" . attr_safe(_("Previous")) . "'>\n";
+    echo "<input type='button' id='next-button' value='" . attr_safe(_("Next")) . "'>\n";
 
     echo " &nbsp; &nbsp;\n";
 }
-echo "<select name='round_id'>";
 
+echo "<select name='round_id'>";
 foreach ($expanded_rounds as $round) {
     echo "<option value='$round'";
     if($round_id && $round == $round_id) echo " selected";
@@ -177,12 +144,11 @@ echo "</form>";
 echo "</div>\n"; // fixedbox
 
 echo "<div id='pane_container' class='stretchbox'>\n";
-echo "<div class='pane_1 image-back'>\n";
 
-// Image div, the image and a little form to control the size
+echo "<div class='pane_1 image-back'>\n";
 if($is_valid_page)
 {
-    echo "<img id='image' src='$projects_url/$projectid/$page' width='$width'>";
+    echo "<img id='image' src='$projects_url/$projectid/$page'>";
 }
 echo "</div>\n"; // pane_1
 
