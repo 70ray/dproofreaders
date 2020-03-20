@@ -48,7 +48,12 @@ if ($next_image != "" && $preload == "next")
 
 $title = sprintf(_("Display Image: %s"),$imagefile);
 
+$js_files = [
+    "$code_url/tools/mentors/image_size.js",
+    ];
+
 $header_args = [
+    "js_files" => $js_files,
     "body_attributes" => 'class="no-margin"',
     "head_data" => $link_tags,
 ];
@@ -66,11 +71,11 @@ echo "<div class='fixedbox control-form'>";
 <input type="hidden" name="showreturnlink" value="<?php echo $showreturnlink; ?>">
 <input type="hidden" name="preload" value="<?php echo $preload; ?>">
 
-<?php echo _("Resize"); ?>:
-<input type="number" name="percent" min="1" max="999" value="<?php echo $percent; ?>">%
-<input type="submit" value="<?php echo attr_safe(_("Resize")); ?>" size="3">
+<?php
+echo "<input type='number' id='percent' name='percent' min='1' max='999' value='$percent'>%\n";
+echo "<button type='button' id='resize'>", _("Resize"), "</button>\n";
 
-<?php echo _("Jump to"); ?>:
+echo _("Page"); ?>:
 <select name="jumpto" onChange="this.form.imagefile.value=this.form.jumpto[this.form.jumpto.selectedIndex].value; this.form.submit();">
 <?php
 // Populate the options in the popup menu based on the database query earlier
@@ -103,8 +108,8 @@ if($showreturnlink)
 echo "</form>";
 echo "</div>\n"; // fixedbox
 
-echo "<div class='stretchbox overflow-auto'>\n";
-echo "<img src='$projects_url/$projectid/$imagefile' style='width: ${width}px; border: solid thin black;'>";
+echo "<div class='stretchbox overflow-auto image-back'>\n";
+echo "<img src='$projects_url/$projectid/$imagefile' id='image' width='width'>";
 echo "</div>\n"; // stretchbox
 echo "</div>\n"; // flex_container
 
