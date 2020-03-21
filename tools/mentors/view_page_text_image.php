@@ -6,6 +6,7 @@ include_once($relPath.'stages.inc');
 include_once($relPath.'slim_header.inc');
 include_once($relPath.'prefs_options.inc');
 include_once($relPath.'misc.inc'); // array_get(), get_enumerated_param(), attr_safe(), javascript_safe(), html_safe()
+include_once($relPath.'page_controls.inc'); // draw_size_controls()
 
 require_login();
 
@@ -53,28 +54,23 @@ else
     {
         $projectid = validate_projectID('projectid', $projectid);
         $project = new Project($projectid);
-
+        $images = get_images($projectid);
+        if(!$images)
+        {
+            throw new Exception(sprintf(_("There are no images in '%s'"), html_safe($project->nameofwork)));
+        }
         // See if the requested page (if any) exists in the project table
-        if($page)
+        if(!$page)
         {
-            $sql = sprintf("SELECT 1 FROM $projectid WHERE image = '%s'", mysqli_real_escape_string(DPDatabase::get_connection(), $page));
-            $res2 = mysqli_query(DPDatabase::get_connection(), $sql);
-            if(!$res2)
-            {
-                throw new Exception(html_safe(mysqli_error(DPDatabase::get_connection())));
-            }
-            if (mysqli_num_rows($res2) == 0)
-            {
-                throw new Exception(sprintf(_("no page '%1\$s' in project with projectID '%2\$s'"), html_safe($page), html_safe($projectid)));
-            }
-            $is_valid_page = true;
-            mysqli_free_result($res2);
-            echo "<p>", sprintf(_("Viewing %1\$s text for %2\$s in '%3\$s'"), $round_id, $page, html_safe($project->nameofwork)), "</p>";
+            $page = $images[0];
         }
-        else
+        elseif(!in_array($page, $images))
         {
-            echo "<p>", sprintf(_("Select a page in '%s'"), html_safe($project->nameofwork)), "</p>";
+            echo "<p class='error'>", sprintf(_("There is no page '%s'"), html_safe($page)), "</p>";
+            $page = $images[0];
         }
+        echo "<p>", sprintf(_("Viewing %1\$s text for %2\$s in '%3\$s'"), $round_id, $page, html_safe($project->nameofwork)), "</p>";
+        $is_valid_page = true;
     }
     catch(Exception $exception)
     {
@@ -82,46 +78,20 @@ else
     }
 }
 
-echo "<form method='get' action='view_page_text_image.php' target='_top'>\n";
+echo "<form method='get' action='view_page_text_image.php'>\n";
 
-if(!$project)
+if(!$is_valid_page)
 {
     echo _("Project ID") . ":&nbsp;";
     echo "<input type='text' maxlength='25' name='projectid' size='25' value='" . attr_safe($projectid) . "' required> \n";
     echo "<input type='submit' value='"._("Select Project")."'> &nbsp; &nbsp;";
+    echo _("Page") . ":&nbsp;<input type='text' name='page' size='8'> " . _("(optional)") . " &nbsp; &nbsp;\n";
 }
 else
 {
     echo "<input type='hidden' name='projectid' value='" . attr_safe($projectid) . "'>";
-}
-
-if($is_valid_page)
-{
-    echo "<input type='number' id='percent' name='percent' value='100' min='1' max='999' required>%\n";
-    echo "<button type='button' id='resize'>", _("Resize"), "</button>\n";
-}
-
-echo _("Page") . ":&nbsp;";
-if(!$project)
-{
-    echo "<input type='text' name='page' size='8'> " . _("(optional)") . " &nbsp; &nbsp;\n";
-}
-else
-{
-    echo "<select name='page' id='page-select'>";
-    // Populate the options in the popup menu based on the database query
-    $res = mysqli_query(DPDatabase::get_connection(),  "SELECT image FROM $projectid ORDER BY image ASC") or die(mysqli_error(DPDatabase::get_connection()));
-    while($row = mysqli_fetch_assoc($res))
-    {
-        $this_val = $row["image"];
-        $selected = ($this_val == $page) ? " selected" : "";
-        echo "<option value='$this_val'$selected>$this_val</option>\n";
-    }
-    echo "</select>&nbsp;";
-
-    echo "<input type='button' id='prev-button' value='" . attr_safe(_("Previous")) . "'>\n";
-    echo "<input type='button' id='next-button' value='" . attr_safe(_("Next")) . "'>\n";
-
+    draw_size_controls();
+    draw_page_selector($images, $page);
     echo " &nbsp; &nbsp;\n";
 }
 
@@ -133,13 +103,15 @@ foreach ($expanded_rounds as $round) {
 }
 echo "</select>";
 
-if(!$project)
+if(!$is_valid_page)
     echo " " . _("(optional)");
 
 echo " &nbsp; &nbsp;<input type='submit' value='" . attr_safe(_("View")) . "'>";
 
-if($project)
+if($is_valid_page)
+{
     echo " &nbsp; <input type='submit' name='reset' value='" . attr_safe(_("Reset")) . "'>";
+}
 echo "</form>";
 echo "</div>\n"; // fixedbox
 

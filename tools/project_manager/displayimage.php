@@ -4,6 +4,7 @@ include_once($relPath.'base.inc');
 include_once($relPath.'misc.inc');
 include_once($relPath.'slim_header.inc');
 include_once($relPath.'Project.inc');
+include_once($relPath.'page_controls.inc'); // draw_size_controls()
 
 require_login();
 
@@ -32,24 +33,9 @@ echo "<div class='fixedbox control-form'>";
 $project = new Project($projectid);
 
 echo "<p>" . html_safe($project->nameofwork) . "&nbsp;<a href='$code_url/project.php?id=$projectid'>" . _("Go to Project Page") . "</a></p>";
-echo "<input type='number' id='percent' name='percent' min='1' max='999' value='100'>%\n";
-echo "<button type='button' id='resize'>", _("Resize"), "</button>\n";
+draw_size_controls();
 
-echo _("Page");
-echo "<select name='jumpto' id='page-select'>";
-// Populate the options in the popup menu based on the database query
-$res = mysqli_query(DPDatabase::get_connection(),  "SELECT image FROM $projectid ORDER BY image ASC") or die(mysqli_error(DPDatabase::get_connection()));
-while($row = mysqli_fetch_assoc($res))
-{
-    $this_val = $row["image"];
-    $selected = ($this_val == $imagefile) ? " selected" : "";
-    echo "<option value='$this_val'$selected>$this_val</option>\n";
-}
-echo "</select>&nbsp;";
-
-echo "<input type='button' id='prev-button' value='" . attr_safe(_("Previous")) . "'>\n";
-echo "<input type='button' id='next-button' value='" . attr_safe(_("Next")) . "'>\n";
-
+draw_page_selector(get_images($projectid), $imagefile);
 echo "</div>\n"; // fixedbox
 
 echo "<div class='stretchbox overflow-auto image-back'>\n";
