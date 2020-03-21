@@ -20,7 +20,7 @@ function get_images($projectid)
 function draw_page_selector($images, $selected_page)
 {
     echo _("Page") . ":&nbsp;<select name='page' id='page-select'>";
-    foreach($images as $image)//while($row = mysqli_fetch_assoc($res))
+    foreach($images as $image)
     {
         $selected = ($image == $selected_page) ? " selected" : "";
         echo "<option value='$image'$selected>$image</option>\n";
@@ -29,4 +29,15 @@ function draw_page_selector($images, $selected_page)
 
     echo "<input type='button' id='prev-button' value='" . attr_safe(_("Previous")) . "'>\n";
     echo "<input type='button' id='next-button' value='" . attr_safe(_("Next")) . "'>\n";
+}
+
+function draw_round_selector($expanded_rounds, $round_id)
+{
+    echo _("Round") . ":&nbsp;<select name='round_id' id='round'>";
+    foreach ($expanded_rounds as $round)
+    {
+        $selected = ($round == $round_id) ? " selected" : "";
+        echo "<option value='$round'$selected>$round</option>\n";
+    }
+    echo "</select>";
 }

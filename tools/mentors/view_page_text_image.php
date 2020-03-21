@@ -44,6 +44,9 @@ slim_header(_("Image and text for page"), $header_args);
 echo "<div class='flex_container'>";
 echo "<div class='fixedbox control-form'>";
 
+// if a project is defined and it is valid and exists and has a page, show
+// image-size controls, a form with page selector and round selector. Else
+// show a form with inputs for project and page and the round selector
 if($projectid=="")
 {
     echo "<p>", _("Select a project"), "</p>";
@@ -59,7 +62,8 @@ else
         {
             throw new Exception(sprintf(_("There are no images in '%s'"), html_safe($project->nameofwork)));
         }
-        // See if the requested page (if any) exists in the project table
+        // See if the requested page (if any) exists in the project table.
+        // If not show the first page.
         if(!$page)
         {
             $page = $images[0];
@@ -86,6 +90,9 @@ if(!$is_valid_page)
     echo "<input type='text' maxlength='25' name='projectid' size='25' value='" . attr_safe($projectid) . "' required> \n";
     echo "<input type='submit' value='"._("Select Project")."'> &nbsp; &nbsp;";
     echo _("Page") . ":&nbsp;<input type='text' name='page' size='8'> " . _("(optional)") . " &nbsp; &nbsp;\n";
+    draw_round_selector($expanded_rounds, $round_id);
+    echo " " . _("(optional)");
+
 }
 else
 {
@@ -93,25 +100,10 @@ else
     draw_size_controls();
     draw_page_selector($images, $page);
     echo " &nbsp; &nbsp;\n";
+    draw_round_selector($expanded_rounds, $round_id);
+    echo " &nbsp; <input type='submit' name='reset' value='" . attr_safe(_("Select a Different Project")) . "'>";
 }
 
-echo "<select name='round_id'>";
-foreach ($expanded_rounds as $round) {
-    echo "<option value='$round'";
-    if($round_id && $round == $round_id) echo " selected";
-    echo ">$round</option>\n";
-}
-echo "</select>";
-
-if(!$is_valid_page)
-    echo " " . _("(optional)");
-
-echo " &nbsp; &nbsp;<input type='submit' value='" . attr_safe(_("View")) . "'>";
-
-if($is_valid_page)
-{
-    echo " &nbsp; <input type='submit' name='reset' value='" . attr_safe(_("Reset")) . "'>";
-}
 echo "</form>";
 echo "</div>\n"; // fixedbox
 

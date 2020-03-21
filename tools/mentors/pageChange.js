@@ -24,4 +24,8 @@ $(function () {
         prevButton.disabled = (currentIndex <= 0);
         nextButton.disabled = (currentIndex >= (selector.length - 1));
     }
+
+    $("#round").change(function() {
+        this.form.submit();
+    });
 });
