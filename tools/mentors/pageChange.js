@@ -1,4 +1,4 @@
-/*global $ */
+/*global $ viewImageUrl */
 $(function () {
     "use strict";
     var selector = document.getElementById("page-select");
@@ -23,6 +23,11 @@ $(function () {
         var currentIndex = selector.selectedIndex;
         prevButton.disabled = (currentIndex <= 0);
         nextButton.disabled = (currentIndex >= (selector.length - 1));
+
+        $("#hide-text").click(function () {
+            window.location.assign(viewImageUrl + selector.value);
+        });
+
     }
 
     $("#round").change(function() {

@@ -1,4 +1,4 @@
-/*global $ imageUrl */
+/*global $ imageUrl viewImageTextUrl*/
 $(function () {
 
     var selector = document.getElementById("page-select");
@@ -24,5 +24,9 @@ $(function () {
     $(nextButton).click(function () {
         selector.selectedIndex += 1;
         showPage();
+    });
+
+    $("#show-text").click(function () {
+        window.location.assign(viewImageTextUrl + selector.value);
     });
 });

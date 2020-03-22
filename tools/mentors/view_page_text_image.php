@@ -36,6 +36,7 @@ $js_files = [
 
 $header_args = [
     "js_files" => $js_files,
+    "js_data" => "var viewImageUrl = '$code_url/tools/project_manager/displayimage.php?project=$projectid&imagefile='",
     "body_attributes" => 'class="no-margin"',
 ];
 
@@ -73,7 +74,9 @@ else
             echo "<p class='error'>", sprintf(_("There is no page '%s'"), html_safe($page)), "</p>";
             $page = $images[0];
         }
-        echo "<p>", sprintf(_("Viewing %1\$s text for %2\$s in '%3\$s'"), $round_id, $page, html_safe($project->nameofwork)), "</p>";
+        echo "<p>", html_safe($project->nameofwork),
+            " &nbsp;<a href='$code_url/project.php?id=$projectid'>", _("Go to Project Page"), "</a></p>";
+//            &nbsp;<a href='$code_url/tools/project_manager/displayimage.php?project=$projectid&imagefile=$page'>", _("Hide Text"), "</a></p>";
         $is_valid_page = true;
     }
     catch(Exception $exception)
@@ -89,7 +92,7 @@ if(!$is_valid_page)
     echo _("Project ID") . ":&nbsp;";
     echo "<input type='text' maxlength='25' name='projectid' size='25' value='" . attr_safe($projectid) . "' required> \n";
     echo "<input type='submit' value='"._("Select Project")."'> &nbsp; &nbsp;";
-    echo _("Page") . ":&nbsp;<input type='text' name='page' size='8'> " . _("(optional)") . " &nbsp; &nbsp;\n";
+    echo _("Page") . ":&nbsp;<input type='text' name='page' size='8'> " . _("(optional)") . " &nbsp; \n";
     draw_round_selector($expanded_rounds, $round_id);
     echo " " . _("(optional)");
 
@@ -99,8 +102,9 @@ else
     echo "<input type='hidden' name='projectid' value='" . attr_safe($projectid) . "'>";
     draw_size_controls();
     draw_page_selector($images, $page);
-    echo " &nbsp; &nbsp;\n";
+    echo " &nbsp; \n";
     draw_round_selector($expanded_rounds, $round_id);
+    echo "&nbsp;<input type='button' id='hide-text' value='", attr_safe(_("Hide Text")), "'>\n";
     echo " &nbsp; <input type='submit' name='reset' value='" . attr_safe(_("Select a Different Project")) . "'>";
 }
 

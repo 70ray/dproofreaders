@@ -21,7 +21,10 @@ $js_files = [
 
 $header_args = [
     "js_files" => $js_files,
-    "js_data" => "var imageUrl = '$projects_url/$projectid/';",
+    "js_data" => "
+        var imageUrl = '$projects_url/$projectid/';
+        var viewImageTextUrl = '$code_url/tools/mentors/view_page_text_image.php?projectid=$projectid&page=';
+    ",
     "body_attributes" => 'class="no-margin"',
 ];
 
@@ -32,10 +35,13 @@ echo "<div class='fixedbox control-form'>";
 
 $project = new Project($projectid);
 
-echo "<p>" . html_safe($project->nameofwork) . "&nbsp;<a href='$code_url/project.php?id=$projectid'>" . _("Go to Project Page") . "</a></p>";
+echo "<p>" . html_safe($project->nameofwork), "&nbsp;<a href='$code_url/project.php?id=$projectid'>", _("Go to Project Page"), "</a></p>";
 draw_size_controls();
 
 draw_page_selector(get_images($projectid), $imagefile);
+
+echo "&nbsp;<input type='button' id='show-text' value='", attr_safe(_("Show Text")), "'>\n";
+
 echo "</div>\n"; // fixedbox
 
 echo "<div class='stretchbox overflow-auto image-back'>\n";
