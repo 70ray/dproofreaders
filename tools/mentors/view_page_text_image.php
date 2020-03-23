@@ -30,8 +30,8 @@ if(isset($_GET["reset"])) {
 $js_files = [
     "$code_url/scripts/splitControl.js",
     "$code_url/tools/mentors/page_text_image.js",
-    "$code_url/tools/mentors/image_size.js",
-    "$code_url/tools/mentors/pageChange.js",
+    "$code_url/scripts/image_size.js",
+    "$code_url/tools/mentors/page_change.js",
     ];
 
 $header_args = [

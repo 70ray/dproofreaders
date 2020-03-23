@@ -15,8 +15,8 @@ $imagefile      = validate_page_image_filename('imagefile', @$_GET['imagefile'],
 $title = sprintf(_("Display Image: %s"),$imagefile);
 
 $js_files = [
-    "$code_url/tools/mentors/image_size.js",
-    "$code_url/tools/project_manager/pageJump.js",
+    "$code_url/scripts/image_size.js",
+    "$code_url/tools/project_manager/page_jump.js",
     ];
 
 $header_args = [
