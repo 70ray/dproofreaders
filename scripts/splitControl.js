@@ -2,7 +2,12 @@
 /* exported initSplit */
 
 function initSplit(paneContainer, verticalSplit, splitPercent, minSiz0, minSiz1) {
-    "use strict";
+    // paneContainer is the id of a div containing three divs: they are the
+    // chidren of paneContainer and are referred to in this function as pane1,
+    // dragBar and pane2. Their styles can be defined by css. pane1 and pane2
+    // generally have overflow:auto and the dragbar has a background colour.
+    // jquery will give them position:relative.
+    // More split views can be set up within the panes.
     // minSiz0, minSiz1 minimum allowed size of panes top/left and bottom/right
     var splitRatio = splitPercent / 100;
     var splitPos;     // position of split

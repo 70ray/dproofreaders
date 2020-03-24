@@ -978,15 +978,13 @@ table.search-column tr th {
   min-height: 10px;
 }
 .pane_1 {
-  position: absolute;
   overflow: auto;
 }
 .dragbar {
-  position: absolute;
   background-color: gray;
 }
 .pane_2 {
-  position: absolute;
+  overflow: auto;
 }
 .no-margin {
   margin: 0;
