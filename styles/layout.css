@@ -521,7 +521,6 @@ table.no-border th {
 /* PPV Report */
 p.inline_input {
   margin: 0;
-  overflow: hidden;
   padding: 0;
 }
 p.hanging_indent {
@@ -635,7 +634,6 @@ table.dirlist caption {
 #standard_interface {
   padding: 0;
   margin: 0;
-  overflow: hidden;
   background-color: #CDC0B0;
 }
 #standard_interface #imagedisplay {
@@ -979,10 +977,6 @@ table.search-column tr th {
 }
 .dragbar {
   background-color: darkgray;
-}
-.no-margin {
-  margin: 0;
-  overflow: hidden;
 }
 .full-text {
   width: 100%;
