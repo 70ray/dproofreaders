@@ -16,91 +16,12 @@ use voku\helper\UTF8;
  */
 function get_cutoff_string($cutoffOptions, $labelSuffix = "")
 {
-    $cutoffString = "";
+    $cutoff_links = [];
     foreach ($cutoffOptions as $cutoff) {
-        $cutoffString .= "<a href='#' onClick='return setCutoff($cutoff);'>$cutoff$labelSuffix</a> | ";
+        $cutoff_links[] = "<button type='button' class='lean_button cut_off_link' data-cutoff='$cutoff'>$cutoff$labelSuffix</button>";
     }
-    $cutoffString = preg_replace("/ \| $/", "", $cutoffString);
-    return $cutoffString;
+    return implode("|", $cutoff_links);
 }
-
-/**
- * Outputs the javascript used to show/hide parts of the word frequency tables
- *
- * @param array $cutoffOptions
- *   List of javascript cutoff options (eg: `[1,2,3,4,5]`)
- * @param int $instances
- *   Number of word frequency tables to support
- *   (required for hiding/showing items of the correct table)
- */
-function get_cutoff_script($cutoffOptions, $instances)
-{
-    $cutoffJSArray = "";
-    foreach ($cutoffOptions as $cutoff) {
-        $cutoffJSArray .= "$cutoff,";
-    }
-    $cutoffJSArray = preg_replace("/,$/", "", $cutoffJSArray);
-    return <<<EOS
-            function setCutoff(newCutoff) {
-                var cutoffArray = new Array($cutoffJSArray);
-                var instances = $instances;
-                for(cutoffIndex in cutoffArray.reverse()) {
-                    cutoff = cutoffArray[cutoffIndex];
-                    for(instance = instances; instance>=0; instance--) {
-                        var cutoffObject = document.getElementById(cutoff + "_" + instance);
-                        if(cutoffObject) {
-                            if(cutoff < newCutoff) {
-                                cutoffObject.style.display='none';
-                            } else {
-                                cutoffObject.style.display='';
-                            }
-                        }
-                    }
-                }
-                if(document.getElementById("freqCutoffValue")) document.getElementById("freqCutoffValue").value=newCutoff;
-                document.getElementById("current_cutoff").innerHTML=newCutoff;
-                return false;
-            }
-
-            // this function will check all checkboxes with id in form "cb_*"
-            // it will only check visible checkboxes
-            // however, it will uncheck *all* checkboxes
-            function checkAll(instance,totalCount,state) {
-                // IE sucks - the 'currentStyle' property doesn't actually
-                // tell you the display of an item, just that it inherits
-                // (kinda defeats the purpose of the currentStyle, right)
-                // so we need to calculate it based on the ancestor tbody
-                // but that can take a while so we'll assume they all
-                // display by default and when we encounter the first
-                // hidden one we'll assume all the rest of them are hidden
-                // note that FF's getComputedStyle works as expected
-                var currentDisplay = 'inline';
-
-                for(var index=0;index<=totalCount;index++) {
-                    var checkboxObject=document.getElementById("cb_" + instance + "_" + index);
-                    if(checkboxObject) {
-                        if(state==false) {
-                            if(checkboxObject.checked==true)
-                                checkboxObject.checked=false;
-                        } else {
-                            if(currentDisplay != 'none') {
-                                var parent = checkboxObject.parentNode;
-                                while(parent && parent.nodeName.toLowerCase() != 'tbody') {
-                                    parent=parent.parentNode;
-                                }
-                                if(parent.nodeName.toLowerCase() == 'tbody' && parent.style.display=='none') currentDisplay = 'none';
-                            }
-                            if(currentDisplay != 'none')
-                                checkboxObject.checked=true;
-                            else break;
-                        }
-                    }
-                }
-
-                return false;
-            }
-        EOS;
-} // end of get_cutoff_script
 
 /**
  * Given the list of cutoff options and the word count
@@ -156,9 +77,6 @@ function getInitialCutoff($idealCutoff, $cutoffOptions, $wordCount = null)
  *   [[CLASS]] - class of the td
  *   [[STYLE]] - style of the td
  *   ```
- * @param int $instance
- *   Number uniquely identifying this instance, must be less
- *   than the $instances passed into `get_cutoff_script()`
  * @param array $auxData
  *   Array with one or more of the following `[$word => $data]`
  *   Can contain the following special keys used for formatting
@@ -170,7 +88,7 @@ function getInitialCutoff($idealCutoff, $cutoffOptions, $wordCount = null)
  * @param array $checkbox
  *   Array containing checkbox form elements for each word
  */
-function printTableFrequencies($initialFreq, $cutoffOptions, $wordCount, $instance, $auxData = null, $checkbox = null)
+function printTableFrequencies($initialFreq, $cutoffOptions, $wordCount, $auxData = null, $checkbox = null)
 {
     // check that auxData is an array of arrays
     if (is_array($auxData) && !is_array(@$auxData[0])) {
@@ -220,7 +138,7 @@ function printTableFrequencies($initialFreq, $cutoffOptions, $wordCount, $instan
         if (!$printedTbody) {
 
             // hide any span sections past our initialFreq
-            echo "<tbody id='{$freqCutoff}_{$instance}'";
+            echo "<tbody data-freq-cutoff='$freqCutoff' class='table_body'";
             if ($freqCutoff < $initialFreq) {
                 echo " style='display: none;'";
             }
@@ -466,18 +384,18 @@ function build_checkbox_array($array, $instance = 0)
     $word_checkbox = [];
     foreach ($array as $word => $freq) {
         $encWord = encode_word($word);
-        $word_checkbox[$word] = "<input type='checkbox' id='cb_{$instance}_{$count}' name='cb_{$instance}_{$count}' value='$encWord'>";
+        $word_checkbox[$word] = "<input type='checkbox' class='cb_{$instance}' name='cb_{$instance}_{$count}' value='$encWord'>";
         $count++;
     }
     return $word_checkbox;
 }
 
-function echo_checkbox_selects($wordCount, $instance = 0)
+function echo_checkbox_selects($instance = 0)
 {
     echo "<p>";
-    echo "<a href='#' onClick='return checkAll(\"$instance\",$wordCount,true);'>" . _("Select all") . "</a>";
+    echo "<button type='button' class='lean_button check_all' data-instance='$instance'>", _("Select all"), "</button>";
     echo " | ";
-    echo "<a href='#' onClick='return checkAll(\"$instance\",$wordCount,false);'>" . _("Unselect all") . "</a>";
+    echo "<button type='button' class='lean_button un_check_all' data-instance='$instance'>", _("Unselect all"), "</button>";
     echo "</p>";
 }
 

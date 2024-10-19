@@ -1114,6 +1114,14 @@ span.button {
   font-size: 0.8em;
   padding: 1px 4px;
 }
+.lean_button {
+  text-decoration-line: underline;
+  font: initial;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #330099;
+}
 /* ------------------------------------------------------------------------ */
 /* Global */
 * {
