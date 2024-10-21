@@ -3,7 +3,7 @@ window.addEventListener("DOMContentLoaded", function () {
         const checkBoxes = document.getElementsByClassName(`cb_${this.dataset.instance}`);
         for (const checkBox of checkBoxes) {
             const tBody = checkBox.closest("tbody");
-            if (getComputedStyle(tBody).display !== "none") {
+            if (tBody.style.display !== "none") {
                 checkBox.checked = true;
             }
         }
@@ -27,10 +27,10 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 
     function setCutoff() {
-        const newCutoff = this.dataset.cutoff;
+        const newCutoff = Number(this.dataset.cutoff);
         const tableBodies = document.getElementsByClassName("table_body");
         for (const tableBody of tableBodies) {
-            if (Number(tableBody.dataset.freqCutoff) < Number(newCutoff)) {
+            if (Number(tableBody.dataset.freqCutoff) < newCutoff) {
                 tableBody.style.display = "none";
             } else {
                 tableBody.style.display = "";
