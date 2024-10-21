@@ -29,7 +29,7 @@ window.addEventListener("DOMContentLoaded", function () {
     function setCutoff() {
         const newCutoff = this.dataset.cutoff;
         const tableBodies = document.getElementsByClassName("table_body");
-        for (tableBody of tableBodies) {
+        for (const tableBody of tableBodies) {
             if (Number(tableBody.dataset.freqCutoff) < Number(newCutoff)) {
                 tableBody.style.display = "none";
             } else {
