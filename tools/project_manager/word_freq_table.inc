@@ -88,14 +88,14 @@ function getInitialCutoff($idealCutoff, $cutoffOptions, $wordCount = null)
  * @param array $checkbox
  *   Array containing checkbox form elements for each word
  */
-function printTableFrequencies($initialFreq, $cutoffOptions, $wordCount, $auxData = null, $checkbox = null)
+function printTableFrequencies($initialFreq, $cutoffOptions, $wordCount, $auxData = null, $checkbox = null, $instance = 0)
 {
     // check that auxData is an array of arrays
     if (is_array($auxData) && !is_array(@$auxData[0])) {
         $auxData = [$auxData];
     }
 
-    echo '<table class="basic striped">';
+    echo "<table class='basic striped' id='table_$instance'>";
 
     // output the table heading
     echo '<tr><th>' . _('Word') . '</th>';
@@ -384,7 +384,7 @@ function build_checkbox_array($array, $instance = 0)
     $word_checkbox = [];
     foreach ($array as $word => $freq) {
         $encWord = encode_word($word);
-        $word_checkbox[$word] = "<input type='checkbox' class='cb_{$instance}' name='cb_{$instance}_{$count}' value='$encWord'>";
+        $word_checkbox[$word] = "<input type='checkbox' class='checkbox' name='cb_{$instance}_{$count}' value='$encWord'>";
         $count++;
     }
     return $word_checkbox;

@@ -1,10 +1,13 @@
 window.addEventListener("DOMContentLoaded", function () {
     function checkAllVisible() {
-        const checkBoxes = document.getElementsByClassName(`cb_${this.dataset.instance}`);
-        for (const checkBox of checkBoxes) {
-            const tBody = checkBox.closest("tbody");
-            if (tBody.style.display !== "none") {
-                checkBox.checked = true;
+        const table = document.getElementById(`table_${this.dataset.instance}`);
+        const tableBodies = table.getElementsByClassName("table_body");
+        for (const tableBody of tableBodies) {
+            if (tableBody.style.display !== "none") {
+                const checkBoxes = tableBody.getElementsByClassName("checkbox");
+                for (const checkBox of checkBoxes) {
+                    checkBox.checked = true;
+                }
             }
         }
     }
@@ -15,7 +18,8 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 
     function unCheckAll() {
-        const checkBoxes = document.getElementsByClassName(`cb_${this.dataset.instance}`);
+        const table = document.getElementById(`table_${this.dataset.instance}`);
+        const checkBoxes = table.getElementsByClassName("checkbox");
         for (const checkBox of checkBoxes) {
             checkBox.checked = false;
         }

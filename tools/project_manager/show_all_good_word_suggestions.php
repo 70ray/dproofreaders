@@ -174,14 +174,14 @@ foreach ($projects as $projectid => $projectdata) {
     foreach ($suggestions_w_freq as $word => $freq) {
         $encWord = encode_word($word);
         $context_array[$word] = "<a href='show_good_word_suggestions_detail.php?projectid=$projectid&amp;word=$encWord&amp;timeCutoff=$timeCutoffActual' target='detailframe'>" . _("Context") . "</a>";
-        $word_checkbox[$word] = "<input type='checkbox' class='cb_{$projectid}' name='cb_{$projectid}_{$count}' value='$encWord'>";
+        $word_checkbox[$word] = "<input type='checkbox' class='checkbox' name='cb_{$projectid}_{$count}' value='$encWord'>";
         $count++;
     }
     $suggestions_w_occurrences['[[TITLE]]'] = _("Sugg");
     $suggestions_w_occurrences['[[STYLE]]'] = "text-align: right;";
     $context_array['[[TITLE]]'] = _("Show Context");
 
-    printTableFrequencies($initialFreq, $cutoffOptions, $suggestions_w_freq, [$suggestions_w_occurrences, $context_array], $word_checkbox);
+    printTableFrequencies($initialFreq, $cutoffOptions, $suggestions_w_freq, [$suggestions_w_occurrences, $context_array], $word_checkbox, $projectid);
 
     echo "<p><input type='submit' value='$submitLabel'></p>";
 }

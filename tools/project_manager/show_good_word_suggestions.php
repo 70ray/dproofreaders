@@ -196,7 +196,7 @@ if ($roundsWithData > 1) {
     echo_checkbox_selects('all');
     echo_checkbox_form_submit($submit_label);
 
-    printTableFrequencies($initialFreq, $cutoffOptions, $all_suggestions_w_freq, [$all_suggestions_w_occurrences, $context_array], $word_checkbox);
+    printTableFrequencies($initialFreq, $cutoffOptions, $all_suggestions_w_freq, [$all_suggestions_w_occurrences, $context_array], $word_checkbox, 'all');
 
     echo_checkbox_form_submit($submit_label);
 }
@@ -229,7 +229,7 @@ foreach ($rounds as $round) {
     echo_checkbox_selects($round);
     echo_checkbox_form_submit($submit_label);
 
-    printTableFrequencies($initialFreq, $cutoffOptions, $round_suggestions_w_freq[$round], [$round_suggestions_w_occurrences[$round], $context_array], $word_checkbox);
+    printTableFrequencies($initialFreq, $cutoffOptions, $round_suggestions_w_freq[$round], [$round_suggestions_w_occurrences[$round], $context_array], $word_checkbox, $round);
 
     echo_checkbox_form_submit($submit_label);
 }
