@@ -100,7 +100,7 @@ function printTableFrequencies(int $initialFreq, array $cutoffOptions, array $wo
     echo "<table class='basic striped' id='table_$instance'>";
 
     // output the table heading
-    echo '<tr><th>' . _('Word') . '</th>';
+    echo '<thead><tr><th>' . _('Word') . '</th>';
     if (isset($wordCount['[[TITLE]]'])) {
         echo '<th>' . $wordCount['[[TITLE]]'] . '</th>';
         unset($wordCount['[[TITLE]]']);
@@ -112,7 +112,7 @@ function printTableFrequencies(int $initialFreq, array $cutoffOptions, array $wo
             echo "<th>" . $auxData[$index]['[[TITLE]]'] . "</th>";
         }
     }
-    echo "</tr>\n";
+    echo "</tr></thead>\n";
 
     // now start processing the rows
     $freqCutoff = 100000;
@@ -140,7 +140,7 @@ function printTableFrequencies(int $initialFreq, array $cutoffOptions, array $wo
         if (!$printedTbody) {
 
             // hide any span sections past our initialFreq
-            echo "<tbody data-freq-cutoff='$freqCutoff' class='table_body'";
+            echo "<tbody data-freq-cutoff='$freqCutoff'";
             if ($freqCutoff < $initialFreq) {
                 echo " style='display: none;'";
             }

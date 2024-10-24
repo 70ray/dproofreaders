@@ -1,7 +1,7 @@
 window.addEventListener("DOMContentLoaded", function () {
     function checkAllVisible() {
         const table = document.getElementById(`table_${this.dataset.instance}`);
-        const tableBodies = table.getElementsByClassName("table_body");
+        const tableBodies = table.getElementsByTagName("tbody");
         for (const tableBody of tableBodies) {
             if (tableBody.style.display !== "none") {
                 const checkBoxes = tableBody.getElementsByClassName("checkbox");
@@ -32,7 +32,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
     function setCutoff() {
         const newCutoff = Number(this.dataset.cutoff);
-        const tableBodies = document.getElementsByClassName("table_body");
+        const tableBodies = document.getElementsByTagName("tbody");
         for (const tableBody of tableBodies) {
             if (Number(tableBody.dataset.freqCutoff) < newCutoff) {
                 tableBody.style.display = "none";
