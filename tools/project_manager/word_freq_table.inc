@@ -87,8 +87,10 @@ function getInitialCutoff($idealCutoff, $cutoffOptions, $wordCount = null)
  *   ```
  * @param array $checkbox
  *   Array containing checkbox form elements for each word
+ * @param string $instance
+ *  String identifying the table for cases where there is more than one
  */
-function printTableFrequencies($initialFreq, $cutoffOptions, $wordCount, $auxData = null, $checkbox = null, $instance = 0)
+function printTableFrequencies(int $initialFreq, array $cutoffOptions, array $wordCount, ?array $auxData = null, ?array $checkbox = null, string $instance = 'only')
 {
     // check that auxData is an array of arrays
     if (is_array($auxData) && !is_array(@$auxData[0])) {
@@ -390,7 +392,7 @@ function build_checkbox_array($array, $instance = 0)
     return $word_checkbox;
 }
 
-function echo_checkbox_selects($instance = 0)
+function echo_checkbox_selects(string $instance = 'only')
 {
     echo "<p>";
     echo "<button type='button' class='lean_button check_all' data-instance='$instance'>", _("Select all"), "</button>";
